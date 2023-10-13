@@ -1,6 +1,13 @@
-[ ] Create the sqlite database just to hold the formula-e predictions.
-[ ] It will need tables for the drivers, teams, entrants and races.
-[ ] Create a nim web application that just serves a simple hello world
-[ ] Hook it up to the database so that it can show the drivers, teams, entrants and races.
-[ ] Make it into an Elm application
+[x] Create the sqlite database just to hold the formula-e predictions.
+[x] It will need tables for the drivers, teams, entrants and races.
+[x] Create a nim web application that just serves a simple hello world
+[x] Hook it up to the database so that it can show the drivers, teams, entrants and races.
+[x] Allow the posting of predictions
+[ ] Restrict posting to races which have entry open.
+[ ] Allow admins to enter the race results
+[ ] Score predictions and present scores for the race
+[ ] Score predictions and present a leaderboard 
+[ ] Get some better types going, parse early, wrap late.
+[ ] Can I break this by entering in a user name with bobby tables.
+[ ] What about a user name with a script tag?
 

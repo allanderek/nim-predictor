@@ -105,6 +105,27 @@ proc index*(ctx: Context) {.async.} =
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
     db.close()
 
+proc predictionsForm(raceId: string, isResult: bool, current: seq[string], entrants: seq[seq[string]]) : VNode =
+  let
+    current_pole = current[0]
+  result = buildHtml(form(`method` = "post")):
+    label(`for` = "pole"): text "Pole"
+    select(name = "pole"):
+        for entrant in entrants:
+            let
+                entrant_id = entrant[0]
+                entrant_name = entrant[1]
+                entrant_team = entrant[2]
+
+            option(value = entrant_id, selected = current_pole == entrant_id):
+                text entrant_name
+                text " : "
+                text entrant_team
+    if isResult:
+      input(`type` = "hidden", name="isResult", value = "true")
+    tdiv:
+      input(`type` = "submit", value = "Save")
+
 proc showRace* (ctx: Context) {.async.} =
   let
       db = open(consts.dbPath, "", "", "")
@@ -115,41 +136,38 @@ proc showRace* (ctx: Context) {.async.} =
   # TODO, Obviously we have to check if the userId is empty
   if race.len > 0:
     let 
-        race_id = race[0]
+        raceId = race[0]
         race_name = race[1]
         entrants = getEntrants(db)
-        entry_closed = race[4] == "1"
+        entryClosed = race[4] == "1"
     if ctx.request.reqMethod == HttpPost:
       let
         pole = ctx.getPostParams("pole")
-      db.exec(sql"insert into predictions (user, race, pole) values (?, ?, ?)", user_id, race_id, pole)
+        isResult = ctx.getPostParams("isResult") == "true"
+      if isResult:
+        # TODO: We have to check if the user is an admin
+        db.exec(sql"insert into results (race, pole) values (?, ?)", raceId, pole)
+      elif not entryClosed:
+        db.exec(sql"insert into predictions (user, race, pole) values (?, ?, ?)", user_id, raceId, pole)
+      # TODO: We need to display a kind of message to say that the entry was not accepted because it was late.
     let vNode = buildHtml(html):
         head
         nav
         main:
             h2: text race_name
-            if not entry_closed:
+            if not entryClosed:
               h3: text "Entry"
-              form(`method` = "post"):
-                let 
-                  # TODO: This is non-robust to the case where the user hasn't yet set a prediction for this race.
-                  predictions = db.getRow(sql"select * from predictions where user = ? and race = ?", user_id, race_id)
-                  current_pole = predictions[2]
-                label(`for` = "pole"): text "Pole"
-                select(name = "pole"):
-                    for entrant in entrants:
-                        let
-                            entrant_id = entrant[0]
-                            entrant_name = entrant[1]
-                            entrant_team = entrant[2]
-
-                        option(value = entrant_id, selected = current_pole == entrant_id):
-                            text entrant_name
-                            text " : "
-                            text entrant_team
-                tdiv:
-                  input(`type` = "submit", value = "Save")
+              let 
+                # TODO: This is non-robust to the case where the user hasn't yet set a prediction for this race.
+                predictions = db.getRow(sql"select pole from predictions where user = ? and race = ?", user_id, raceId)
+              predictionsForm(raceId, false, predictions, entrants) 
             else:
+              h3: text "Enter results"
+                # TODO: We have to check if the user is an admin
+              let 
+                # TODO: This is non-robust to the case where there are no results set yet for this race
+                currentResults = db.getRow(sql"select pole from results where race = ?", raceId)
+              predictionsForm(raceId, true, currentResults, entrants) 
               h3: text "All predictions"
               let 
                   all_predictions = db.getAllRows(sql"select u.username, d.name from predictions p inner join users u on p.user = u.id inner join entrants e on e.id = p.pole inner join drivers d on e.driver = d.id where p.race = ?", race_id)

@@ -1,0 +1,6 @@
+[ ] Create the sqlite database just to hold the formula-e predictions.
+[ ] It will need tables for the drivers, teams, entrants and races.
+[ ] Create a nim web application that just serves a simple hello world
+[ ] Hook it up to the database so that it can show the drivers, teams, entrants and races.
+[ ] Make it into an Elm application
+

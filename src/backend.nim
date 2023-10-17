@@ -105,9 +105,16 @@ proc index*(ctx: Context) {.async.} =
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
     db.close()
 
-proc predictionsForm(raceId: string, isResult: bool, current: seq[string], entrants: seq[seq[string]]) : VNode =
-  let
-    current_pole = current[0]
+
+type
+  Prediction = tuple
+    pole : string
+
+proc rowToPrediction* (row: seq[string]) : Prediction =
+  result = (pole: row[0])
+
+
+proc predictionsForm(raceId: string, isResult: bool, current: Prediction, entrants: seq[seq[string]]) : VNode =
   result = buildHtml(form(`method` = "post")):
     label(`for` = "pole"): text "Pole"
     select(name = "pole"):
@@ -117,7 +124,7 @@ proc predictionsForm(raceId: string, isResult: bool, current: seq[string], entra
                 entrant_name = entrant[1]
                 entrant_team = entrant[2]
 
-            option(value = entrant_id, selected = current_pole == entrant_id):
+            option(value = entrant_id, selected = current.pole == entrant_id):
                 text entrant_name
                 text " : "
                 text entrant_team
@@ -159,24 +166,35 @@ proc showRace* (ctx: Context) {.async.} =
               h3: text "Entry"
               let 
                 # TODO: This is non-robust to the case where the user hasn't yet set a prediction for this race.
-                predictions = db.getRow(sql"select pole from predictions where user = ? and race = ?", user_id, raceId)
+                predictions = rowToPrediction(db.getRow(sql"select pole from predictions where user = ? and race = ?", user_id, raceId))
               predictionsForm(raceId, false, predictions, entrants) 
             else:
               h3: text "Enter results"
                 # TODO: We have to check if the user is an admin
               let 
                 # TODO: This is non-robust to the case where there are no results set yet for this race
-                currentResults = db.getRow(sql"select pole from results where race = ?", raceId)
+                currentResults = rowToPrediction(db.getRow(sql"select pole from results where race = ?", raceId))
               predictionsForm(raceId, true, currentResults, entrants) 
               h3: text "All predictions"
               let 
-                  all_predictions = db.getAllRows(sql"select u.username, d.name from predictions p inner join users u on p.user = u.id inner join entrants e on e.id = p.pole inner join drivers d on e.driver = d.id where p.race = ?", race_id)
+                  all_predictions = db.getAllRows(sql"select u.username, e.id, d.name from predictions p inner join users u on p.user = u.id inner join entrants e on e.id = p.pole inner join drivers d on e.driver = d.id where p.race = ?", race_id)
               table:
                 tbody:
                   for row in all_predictions:
+                    let
+                      predictor = row[0]
+                      row_pole = row[1]
+                      row_pole_name = row[2]
                     tr:
-                      for col in row:
-                        td: text col
+                      td: text predictor
+                      td: 
+                        text row_pole_name
+                        if currentResults.pole != "":
+                          text " : "
+                          if currentResults.pole == row_pole:
+                            text "10"
+                          else:
+                            text "0"
     if ctx.request.reqMethod == HttpPost:
       resp redirect(urlFor(ctx, "/race/" & race_id), Http302)
     else:
@@ -188,6 +206,7 @@ proc showRace* (ctx: Context) {.async.} =
         text "Race not found."
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close()
+
 
 proc loginHandler*(ctx: Context) {.async.} =
   let db = open(consts.dbPath, "", "", "")

@@ -10,4 +10,5 @@
 [ ] Get some better types going, parse early, wrap late.
 [ ] Can I break this by entering in a user name with bobby tables.
 [ ] What about a user name with a script tag?
+[ ] Do we need to collect email addresses of users? Probably.
 

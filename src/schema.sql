@@ -1,8 +1,13 @@
 DROP TABLE IF EXISTS users ;
 DROP TABLE IF EXISTS drivers ;
 DROP TABLE IF EXISTS entrants ;
-DROP TABLE IF EXISTS race ;
+DROP TABLE IF EXISTS races ;
 DROP TABLE IF EXISTS teams ;
+DROP TABLE IF EXISTS seasons;
+DROP TABLE IF EXISTS results ;
+DROP TABLE IF EXISTS predictions ;
+DROP TABLE IF EXISTS temp_drivers ;
+
 
 
 CREATE TABLE users (
@@ -14,44 +19,194 @@ CREATE TABLE users (
 );
 insert into users (id, fullname, username, password, admin) values (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
 
-CREATE TABLE drivers ( id integer primary key autoincrement, number integer, name text )  ;
-insert into drivers (number, name) values (27, "Jake Dennis");
-insert into drivers (number, name) values (17, "Norman Nato");
+CREATE TABLE drivers ( 
+    id integer primary key autoincrement, 
+    name text 
+);
+insert into drivers (name) values ("Stoffel Vandoorne");
+insert into drivers (name) values ("Jean-Éric Vergne");
+insert into drivers (name) values ("Sérgio Sette Câmara");
+insert into drivers (name) values ("Dan Ticktum");
+insert into drivers (name) values ("Robin Frijns");
+insert into drivers (name) values ("Kelvin van der Linde");
+insert into drivers (name) values ("Nico Müller");
+insert into drivers (name) values ("Jake Hughes");
+insert into drivers (name) values ("René Rast");
+insert into drivers (name) values ("Maximilian Günther");
+insert into drivers (name) values ("Edoardo Mortara");
+insert into drivers (name) values ("Oliver Rowland");
+insert into drivers (name) values ("Roberto Merhi");
+insert into drivers (name) values ("Lucas di Grassi");
+insert into drivers (name) values ("Mitch Evans");
+insert into drivers (name) values ("Sam Bird");
+insert into drivers (name) values ("António Félix da Costa");
+insert into drivers (name) values ("Pascal Wehrlein");
+insert into drivers (name) values ("Sébastien Buemi");
+insert into drivers (name) values ("Nick Cassidy");
+insert into drivers (name) values ("Norman Nato");
+insert into drivers (name) values ("Sacha Fenestraz");
+insert into drivers (name) values ("Jake Dennis");
+insert into drivers (name) values ("André Lotterer");
+insert into drivers (name) values ("David Beckmann");
 
+CREATE TABLE teams ( 
+    id integer primary key autoincrement, 
+    fullname text, 
+    shortname text
+);
+-- 2022/23
+insert into teams (fullname, shortname) values ("DS Penske", "Penske");
+insert into teams (fullname, shortname) values ("NIO 333 Racing", "NIO");
+insert into teams (fullname, shortname) values ("ABT CUPRA Formula E Team", "ABT Cupra");
+insert into teams (fullname, shortname) values ("NEOM McLaren Formula E Team", "McLaren");
+insert into teams (fullname, shortname) values ("Maserati MSG Racing", "Maserati");
+insert into teams (fullname, shortname) values ("Mahindra Racing", "Mahindra");
+insert into teams (fullname, shortname) values ("Jaguar TCS Racing", "Jaguar");
+insert into teams (fullname, shortname) values ("TAG Heuer Porsche Formula E Team", "Porsche");
+insert into teams (fullname, shortname) values ("Envision Racing", "Envision");
+insert into teams (fullname, shortname) values ("Nissan Formula E Team", "Nissan");
+insert into teams (fullname, shortname) values ("Avalanche Andretti Formula E", "Andretti");
+-- 2023/24
+insert into teams (fullname, shortname) values ("Andretti Global", "Andretti");
+insert into teams (fullname, shortname) values ("ERT Formula E Team", "ERT");
 
+create table seasons (
+    year text not null primary key
+);
 
-CREATE TABLE teams ( id integer primary key autoincrement, fullname text, shortname text, powertrain text) ;
-insert into teams (fullname, shortname, powertrain) values ("Andretti Global", "Andretti", "Porsche");
+insert into seasons (year) values ("2022-23");
+insert into seasons (year) values ("2023-24");
+
+CREATE TABLE races (
+    id integer primary key autoincrement, 
+    name text, 
+    country text, 
+    circuit text, 
+    date text,
+    season text not null,
+    foreign key (season) references seasons (year)
+);
+-- insert into races (name, country, circuit, date) values ('Edinburgh e-prix', 'Scotland', 'Meadows',  '2023-10-10T18:00:00Z');
+-- insert into races (name, country, circuit, date) values ('Mexico city e-prix', 'Mexico', 'Autódromo Hermanos Rodríguez',  '2024-01-13T18:00:00Z');
+
+insert into races (name, country, circuit, date, season) values ("Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2023-01-14T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Core Diriyah ePrix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-27T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Core Diriyah ePrix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-28T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Greenko Hyderabad ePrix", "India", "Hyderabad Street Circuit", "2023-02-11T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Cape Town ePrix", "South Africa", "Cape Town Street Circuit", "2023-02-25T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Julius Baer São Paulo ePrix", "Brazil", "São Paulo Street Circuit", "2023-03-25T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("SABIC Berlin ePrix", "Germany", "Tempelhof Airport Street Circuit", "2023-04-22T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("SABIC Berlin ePrix", "Germany", "Tempelhof Airport Street Circuit", "2023-04-23T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Monaco ePrix", "Monaco", "Circuit de Monaco", "2023-05-06T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Gulavit Jakarta ePrix", "Indonesia", "Jakarta International e-Prix Circuit", "2023-06-03T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Gulavit Jakarta ePrix", "Indonesia", "Jakarta International e-Prix Circuit", "2023-06-04T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Southwire Portland ePrix", "United States", "Portland International Raceway", "2023-06-24T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Hankook Rome ePrix", "Italy", "Circuito Cittadino dell'EUR", "2023-07-15T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Hankook Rome ePrix", "Italy", "Circuito Cittadino dell'EUR", "2023-07-16T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Hankook London ePrix", "United Kingdom", "ExCeL London", "2023-07-29T18:00:00Z", "2022-23");
+insert into races (name, country, circuit, date, season) values ("Hankook London ePrix", "United Kingdom", "ExCeL London", "2023-07-30T18:00:00Z", "2022-23");
 
 CREATE TABLE entrants ( 
     id integer primary key autoincrement,
+    number integer not null,
     driver integer not null, 
     team integer not null, 
+    race integer not null,
     foreign key (driver) references drivers (id), 
     foreign key (team) references teams (id),
-    unique (driver, team)
+    foreign key (race) references races (id),
+    unique (driver, team, race)
     );
--- I believe I could do this in a better way some thing to link the drivers and treams inserting via select.
-insert into entrants (driver, team) values (1, 1) ;
-insert into entrants (driver, team) values (2, 1) ;
 
-CREATE TABLE races (id integer primary key autoincrement, name text, country text, circuit text, date text) ;
-insert into races (name, country, circuit, date) values ('Edinburgh e-prix', 'Scotland', 'Meadows',  '2023-10-10T18:00:00Z');
-insert into races (name, country, circuit, date) values ('Mexico city e-prix', 'Mexico', 'Autódromo Hermanos Rodríguez',  '2024-01-13T18:00:00Z');
+create temporary table temp_drivers(
+     number integer not null,
+     driver_name text not null,
+     team_shortname text not null
+     );
+
+insert into temp_drivers (number, driver_name, team_shortname) values
+    (1, 'Stoffel Vandoorne', 'Penske'),
+    (25, 'Jean-Éric Vergne', 'Penske'),
+    (3, 'Sérgio Sette Câmara', 'NIO'),
+    (33, 'Dan Ticktum', 'NIO' ),
+    (4, "Robin Frijns",  "ABT Cupra"),
+    (4, "Kelvin van der Linde",  "ABT Cupra"),
+    (51, "Nico Müller",  "ABT Cupra"),
+    (5, "Jake Hughes", 'McLaren'),
+    (58, "René Rast", 'McLaren'),
+    (7, "Maximilian Günther", 'Maserati'),
+    (48, "Edoardo Mortara", 'Maserati'),
+    (8, "Oliver Rowland", 'Mahindra'),
+    (8, "Roberto Merhi", 'Mahindra'),
+    (11, "Lucas di Grassi", 'Mahindra'),
+    (9, "Mitch Evans", 'Jaguar'),
+    (10, "Sam Bird", 'Jaguar'),
+    (13, "António Félix da Costa", 'Porsche'),
+    (94, "Pascal Wehrlein", 'Porsche'),
+    (16, "Sébastien Buemi", 'Envision'),
+    (37, "Nick Cassidy", 'Envision'),
+    (17, "Norman Nato", 'Nissan'),
+    (23, "Sacha Fenestraz", 'Nissan'),
+    (27, "Jake Dennis", 'Andretti'),
+    (36, "André Lotterer", 'Andretti'),
+    (36, "David Beckmann", 'Andretti')
+    ;
+
+-- So this will just insert all the drivers as entrants to *all* the races. Obviously that's not quite what happened
+-- in 2022/23, but it's not worth it to go back and fix them.
+insert into entrants (number, driver, team, race) 
+    select temp_drivers.number, drivers.id, teams.id, races.id 
+    from temp_drivers
+    inner join drivers on temp_drivers.driver_name = drivers.name
+    inner join teams on temp_drivers.team_shortname = teams.shortname
+    cross join races
+    ;
+
+drop table temp_drivers ;
 
 CREATE TABLE predictions (
     user integer not null,
     race integer not null,
     pole integer not null,
+    fam  integer not null,
+    fl   integer not null,
+    hgc  integer not null,
+    first integer not null,
+    second integer not null,
+    third integer not null,
+    fdnf integer not null,
+    safety_car text check (safety_car in ("yes", "no")) not null,
     foreign key (user) references users(id),
     foreign key (race) references races(id),
     foreign key (pole) references entrants(id),
+    foreign key (fam) references entrants(id),
+    foreign key (fl) references entrants(id),
+    foreign key (hgc) references entrants(id),
+    foreign key (first) references entrants(id),
+    foreign key (second) references entrants(id),
+    foreign key (third) references entrants(id),
+    foreign key (fdnf) references entrants(id),
     primary key (user, race)
     );
 
 CREATE TABLE results (
     race integer primary key not null,
     pole integer not null,
+    fam  integer not null,
+    fl   integer not null,
+    hgc  integer not null,
+    first integer not null,
+    second integer not null,
+    third integer not null,
+    fdnf integer not null,
+    safety_car text check (safety_car in ("yes", "no")) not null,
     foreign key (race) references races(id),
     foreign key (pole) references entrants(id)
+    foreign key (fam) references entrants(id),
+    foreign key (fl) references entrants(id),
+    foreign key (hgc) references entrants(id),
+    foreign key (first) references entrants(id),
+    foreign key (second) references entrants(id),
+    foreign key (third) references entrants(id),
+    foreign key (fdnf) references entrants(id)
     );

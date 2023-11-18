@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS results ;
 DROP TABLE IF EXISTS predictions ;
 DROP TABLE IF EXISTS temp_drivers ;
 DROP TABLE IF EXISTS temp_entries ;
+DROP TABLE IF EXISTS temp_results ;
 
 
 
@@ -68,9 +69,6 @@ insert into teams (fullname, shortname) values ("TAG Heuer Porsche Formula E Tea
 insert into teams (fullname, shortname) values ("Envision Racing", "Envision");
 insert into teams (fullname, shortname) values ("Nissan Formula E Team", "Nissan");
 insert into teams (fullname, shortname) values ("Avalanche Andretti Formula E", "Andretti");
--- 2023/24
-insert into teams (fullname, shortname) values ("Andretti Global", "Andretti");
-insert into teams (fullname, shortname) values ("ERT Formula E Team", "ERT");
 
 create table seasons (
     year text not null primary key
@@ -227,10 +225,24 @@ create temporary table temp_entries (
     safety_car text not null
 );
 
-insert into temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values
-    ("Allan", 1, "Mitch Evans", "Sérgio Sette Câmara","Stoffel Vandoorne","Edoardo Mortara","Mitch Evans","Stoffel Vandoorne","Edoardo Mortara","Dan Ticktum","no")
-    ;
+-- Allan's predictions
 
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 1, 'Mitch Evans', 'Sérgio Sette Câmara', 'Stoffel Vandoorne', 'Edoardo Mortara', 'Mitch Evans', 'Stoffel Vandoorne', 'Edoardo Mortara', 'Dan Ticktum', 'no');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 2, 'Mitch Evans', 'Sacha Fenestraz', 'Dan Ticktum', 'Stoffel Vandoorne', 'Pascal Wehrlein', 'Mitch Evans', 'Dan Ticktum', 'Norman Nato', 'no');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 3, 'Mitch Evans', 'Nick Cassidy', 'Jake Dennis', 'Stoffel Vandoorne', 'Sam Bird', 'Pascal Wehrlein', 'René Rast', 'Sacha Fenestraz', 'no');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 4, 'Mitch Evans', 'Oliver Rowland', 'Pascal Wehrlein', 'Jake Hughes', 'Mitch Evans', 'Pascal Wehrlein', 'Jake Dennis', 'Maximilian Günther', 'no');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 5, 'Mitch Evans', 'Nico Müller', 'Jake Dennis', 'António Félix da Costa', 'Sam Bird', 'Pascal Wehrlein', 'Mitch Evans', 'Kelvin van der Linde', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 6, 'Jean-Éric Vergne', 'Norman Nato', 'Pascal Wehrlein', 'António Félix da Costa', 'Mitch Evans', 'Jean-Éric Vergne', 'Pascal Wehrlein', 'Maximilian Günther', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 7, 'Stoffel Vandoorne', 'René Rast', 'Jake Dennis', 'Jean-Éric Vergne', 'Mitch Evans', 'Pascal Wehrlein', 'Sam Bird', 'Dan Ticktum', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 8, 'António Félix da Costa', 'Norman Nato', 'Mitch Evans', 'Stoffel Vandoorne', 'Sam Bird', 'António Félix da Costa', 'Mitch Evans', 'Robin Frijns', 'no');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 9, 'Jean-Éric Vergne', 'René Rast', 'Jean-Éric Vergne', 'Jake Hughes', 'Mitch Evans', 'Jake Dennis', 'Sam Bird', 'Norman Nato', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 10, 'Nick Cassidy', 'Roberto Merhi', 'Mitch Evans', 'Sam Bird', 'Mitch Evans', 'Nick Cassidy', 'Sam Bird', 'Maximilian Günther', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 11, 'António Félix da Costa', 'Sérgio Sette Câmara', 'Nick Cassidy', 'Lucas di Grassi', 'Mitch Evans', 'Nick Cassidy', 'Sam Bird', 'David Beckmann', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 12, 'Jean-Éric Vergne', 'Roberto Merhi', 'Sam Bird', 'Maximilian Günther', 'Maximilian Günther', 'Mitch Evans', 'Sam Bird', 'Norman Nato', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 13, 'Mitch Evans', 'Sérgio Sette Câmara', 'Mitch Evans', 'Pascal Wehrlein', 'Mitch Evans', 'Edoardo Mortara', 'Jake Dennis', 'Sacha Fenestraz', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 14, 'Mitch Evans', 'Sérgio Sette Câmara', 'Mitch Evans', 'António Félix da Costa', 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'Dan Ticktum', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 15, 'Nick Cassidy', 'Nico Müller', 'Nick Cassidy', 'António Félix da Costa', 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'Dan Ticktum', 'yes');
+INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 16, 'Mitch Evans', 'Roberto Merhi', 'António Félix da Costa', 'Pascal Wehrlein', 'Mitch Evans', 'Nick Cassidy', 'René Rast', 'Maximilian Günther', 'yes');
 
 with 
     race_entrants 
@@ -256,20 +268,68 @@ insert into predictions (user, race, pole, fam, fl, hgc, first, second, third, f
 
 drop table temp_entries;
 
+-- Results.
 
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (1, 'Lucas di Grassi', 'Nick Cassidy', 'Jake Dennis', 'Oliver Rowland', 'Jake Dennis', 'Pascal Wehrlein', 'Lucas di Grassi', 'Robin Frijns', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (2, 'Sébastien Buemi', 'António Félix da Costa', 'René Rast', 'Jake Dennis', 'Pascal Wehrlein', 'Jake Dennis', 'Sam Bird', 'Nico Müller', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (3, 'Jake Hughes', 'Kelvin van der Linde', 'Sam Bird', 'António Félix da Costa', 'Pascal Wehrlein', 'Jake Dennis', 'René Rast', 'Nico Müller', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (4, 'Mitch Evans', 'Kelvin van der Linde', 'Nico Müller', 'André Lotterer', 'Jean-Éric Vergne', 'Nick Cassidy', 'António Félix da Costa', 'Kelvin van der Linde', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (5, 'Sacha Fenestraz', 'Sérgio Sette Câmara', 'Jean-Éric Vergne', 'António Félix da Costa', 'António Félix da Costa', 'Jean-Éric Vergne', 'Nick Cassidy', 'Pascal Wehrlein', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (6, 'Stoffel Vandoorne', 'Robin Frijns', 'Sam Bird', 'Pascal Wehrlein', 'Mitch Evans', 'Nick Cassidy', 'Sam Bird', 'Norman Nato', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (7, 'Sébastien Buemi', 'Dan Ticktum', 'Jake Dennis', 'Oliver Rowland', 'Mitch Evans', 'Sam Bird', 'Maximilian Günther', 'Dan Ticktum', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (8, 'Robin Frijns', 'Robin Frijns', 'Sébastien Buemi', 'Maximilian Günther', 'Nick Cassidy', 'Jake Dennis', 'Jean-Éric Vergne', 'Edoardo Mortara', 'no');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (9, 'Jake Hughes', 'Oliver Rowland', 'Jake Dennis', 'Jean-Éric Vergne', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'André Lotterer', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (10, 'Maximilian Günther', 'Sébastien Buemi', 'Sébastien Buemi', 'Jake Hughes', 'Pascal Wehrlein', 'Jake Dennis', 'Maximilian Günther', 'Mitch Evans', 'no');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (11, 'Maximilian Günther', 'Robin Frijns', 'Jake Dennis', 'Dan Ticktum', 'Maximilian Günther', 'Jake Dennis', 'Mitch Evans', 'David Beckmann', 'no');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (12, 'Jake Dennis', 'Robin Frijns', 'Mitch Evans', 'Mitch Evans', 'Nick Cassidy', 'Jake Dennis', 'António Félix da Costa', 'Roberto Merhi', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (13, 'Mitch Evans', 'Nico Müller', 'Mitch Evans', 'Sérgio Sette Câmara', 'Mitch Evans', 'Nick Cassidy', 'Maximilian Günther', 'André Lotterer', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (14, 'Jake Dennis', 'António Félix da Costa', 'Jean-Éric Vergne', 'Stoffel Vandoorne', 'Jake Dennis', 'Norman Nato', 'Sam Bird', 'Mitch Evans', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (15, 'Mitch Evans', 'Stoffel Vandoorne', 'André Lotterer', 'Lucas di Grassi', 'Mitch Evans', 'Jake Dennis', 'Sébastien Buemi', 'Robin Frijns', 'yes');
-INSERT INTO results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (16, 'Nick Cassidy', 'Stoffel Vandoorne', 'Jake Dennis', 'Robin Frijns', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', '', 'yes');
+create temporary table temp_results (
+    race integer not null,
+    pole text not null,
+    fam text not null,
+    fl text not null,
+    hgc text not null,
+    first text not null,
+    second text not null,
+    third text not null,
+    fdnf text not null,
+    safety_car text not null
+);
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (1, 'Lucas di Grassi', 'Nick Cassidy', 'Jake Dennis', 'Oliver Rowland', 'Jake Dennis', 'Pascal Wehrlein', 'Lucas di Grassi', 'Robin Frijns', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (2, 'Sébastien Buemi', 'António Félix da Costa', 'René Rast', 'Jake Dennis', 'Pascal Wehrlein', 'Jake Dennis', 'Sam Bird', 'Nico Müller', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (3, 'Jake Hughes', 'Kelvin van der Linde', 'Sam Bird', 'António Félix da Costa', 'Pascal Wehrlein', 'Jake Dennis', 'René Rast', 'Nico Müller', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (4, 'Mitch Evans', 'Kelvin van der Linde', 'Nico Müller', 'André Lotterer', 'Jean-Éric Vergne', 'Nick Cassidy', 'António Félix da Costa', 'Kelvin van der Linde', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (5, 'Sacha Fenestraz', 'Sérgio Sette Câmara', 'Jean-Éric Vergne', 'António Félix da Costa', 'António Félix da Costa', 'Jean-Éric Vergne', 'Nick Cassidy', 'Pascal Wehrlein', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (6, 'Stoffel Vandoorne', 'Robin Frijns', 'Sam Bird', 'Pascal Wehrlein', 'Mitch Evans', 'Nick Cassidy', 'Sam Bird', 'Norman Nato', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (7, 'Sébastien Buemi', 'Dan Ticktum', 'Jake Dennis', 'Oliver Rowland', 'Mitch Evans', 'Sam Bird', 'Maximilian Günther', 'Dan Ticktum', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (8, 'Robin Frijns', 'Robin Frijns', 'Sébastien Buemi', 'Maximilian Günther', 'Nick Cassidy', 'Jake Dennis', 'Jean-Éric Vergne', 'Edoardo Mortara', 'no');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (9, 'Jake Hughes', 'Oliver Rowland', 'Jake Dennis', 'Jean-Éric Vergne', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'André Lotterer', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (10, 'Maximilian Günther', 'Sébastien Buemi', 'Sébastien Buemi', 'Jake Hughes', 'Pascal Wehrlein', 'Jake Dennis', 'Maximilian Günther', 'Mitch Evans', 'no');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (11, 'Maximilian Günther', 'Robin Frijns', 'Jake Dennis', 'Dan Ticktum', 'Maximilian Günther', 'Jake Dennis', 'Mitch Evans', 'David Beckmann', 'no');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (12, 'Jake Dennis', 'Robin Frijns', 'Mitch Evans', 'Mitch Evans', 'Nick Cassidy', 'Jake Dennis', 'António Félix da Costa', 'Roberto Merhi', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (13, 'Mitch Evans', 'Nico Müller', 'Mitch Evans', 'Sérgio Sette Câmara', 'Mitch Evans', 'Nick Cassidy', 'Maximilian Günther', 'André Lotterer', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (14, 'Jake Dennis', 'António Félix da Costa', 'Jean-Éric Vergne', 'Stoffel Vandoorne', 'Jake Dennis', 'Norman Nato', 'Sam Bird', 'Mitch Evans', 'yes');
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (15, 'Mitch Evans', 'Stoffel Vandoorne', 'André Lotterer', 'Lucas di Grassi', 'Mitch Evans', 'Jake Dennis', 'Sébastien Buemi', 'Robin Frijns', 'yes');
+-- NOTE: Jean-Eric Vergne is wrong here, it should be null, but we cannot enter that because then the below insert won't work
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES (16, 'Nick Cassidy', 'Stoffel Vandoorne', 'Jake Dennis', 'Robin Frijns', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'Jean-Éric Vergne', 'yes');
+
+with 
+    race_entrants 
+    as (select 
+       entrants.id as id, 
+       drivers.name as driver_name,
+       entrants.race as race_id 
+       from entrants inner join drivers on entrants.driver = drivers.id
+       )
+insert into results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
+    select temp_results.race, pole_entrants.id, fam_entrants.id, fl_entrants.id, hgc_entrants.id, first_entrants.id, second_entrants.id, third_entrants.id, fdnf_entrants.id, temp_results.safety_car
+    from temp_results
+    inner join race_entrants as pole_entrants on temp_results.pole = pole_entrants.driver_name and pole_entrants.race_id = temp_results.race
+    inner join race_entrants as fam_entrants on temp_results.fam = fam_entrants.driver_name and fam_entrants.race_id = temp_results.race
+    inner join race_entrants as fl_entrants on temp_results.fl = fl_entrants.driver_name and fl_entrants.race_id = temp_results.race
+    inner join race_entrants as hgc_entrants on temp_results.hgc = hgc_entrants.driver_name and hgc_entrants.race_id = temp_results.race
+    inner join race_entrants as first_entrants on temp_results.first = first_entrants.driver_name and first_entrants.race_id = temp_results.race
+    inner join race_entrants as second_entrants on temp_results.second = second_entrants.driver_name and second_entrants.race_id = temp_results.race
+    inner join race_entrants as third_entrants on temp_results.third = third_entrants.driver_name and third_entrants.race_id = temp_results.race
+    inner join race_entrants as fdnf_entrants on temp_results.fdnf = fdnf_entrants.driver_name and fdnf_entrants.race_id = temp_results.race
+    ;
+
+-- There was no dnf's in the final race believe it or not.
+update results set fdnf = '' where race = 16;
+
+
+drop table temp_results;
+
+
+
+-- Do all the 2023/24 stuff AFTER we've done all the gumph above, otherwise you can end up with duplicate drivers etc.
+insert into teams (fullname, shortname) values ("Andretti Global", "Andretti");
+insert into teams (fullname, shortname) values ("ERT Formula E Team", "ERT");
+

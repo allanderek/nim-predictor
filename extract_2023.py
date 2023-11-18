@@ -10,7 +10,9 @@ if len(sys.argv) != 2:
 csv_file = sys.argv[1]
 
 # Define the SQL table structure
-table_name = "results"
+# table_name = "temp_entries"
+table_name = "temp_results"
+user = "Allan"
 
 # Initialize variables
 round_number = 0  # Start with the first round
@@ -92,8 +94,8 @@ try:
             if row[0].startswith("Round"):
                 # Extract the round number from the row
                 round_number = int(row[0].split(" ")[1])
-            # elif row[0].startswith("Prediction"): 
-            elif row[0].startswith("Actual Result"):
+            elif row[0].startswith("Prediction"): 
+            # elif row[0].startswith("Actual Result"):
                 # Extract prediction and actual result data
                 pole = driver_name(row[1])
                 first_attack_mode = driver_name(row[2])
@@ -106,6 +108,7 @@ try:
                 full_safety_car = (row[9]).lower()
 
                 # Generate SQL INSERT statement
+                # sql_insert = f"INSERT INTO {table_name} (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('{user}', {round_number}, '{pole}', '{first_attack_mode}', '{fastest_lap}', '{highest_grid_climber}', '{win}', '{second_place}', '{third_place}', '{first_dnf}', '{full_safety_car}');"
                 sql_insert = f"INSERT INTO {table_name} (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ({round_number}, '{pole}', '{first_attack_mode}', '{fastest_lap}', '{highest_grid_climber}', '{win}', '{second_place}', '{third_place}', '{first_dnf}', '{full_safety_car}');"
                 sql_inserts.append(sql_insert)
 

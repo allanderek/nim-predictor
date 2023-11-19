@@ -327,6 +327,29 @@ update results set fdnf = '' where race = 16;
 
 drop table temp_results;
 
+with
+    scored_predictions
+    as ( select
+            users.fullname as user,
+            users.id as user_id,
+            case when predictions.pole = results.pole then 10 else 0 end +
+            case when predictions.fam = results.fam then 10 else 0 end + 
+            case when predictions.fl = results.fl then 10 else 0 end +
+            case when predictions.hgc = results.hgc then 10 else 0 end +
+            case when predictions.first = results.first then 20 else 0 end +
+            case when predictions.second = results.second then 10 else 0 end +
+            case when predictions.third = results.third then 10 else 0 end +
+            case when predictions.fdnf = results.fdnf then 10 else 0 end +
+            case when predictions.safety_car = results.safety_car then 10 else 0 end
+            as total
+         from predictions
+         join results on predictions.race = results.race
+         join users on predictions.user = users.id
+        )
+    select user as 'User', sum(total) as 'Total score'
+    from scored_predictions
+    group by user_id
+    ;
 
 
 -- Do all the 2023/24 stuff AFTER we've done all the gumph above, otherwise you can end up with duplicate drivers etc.

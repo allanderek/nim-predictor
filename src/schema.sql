@@ -57,6 +57,7 @@ CREATE TABLE teams (
     fullname text, 
     shortname text
 );
+
 -- 2022/23
 insert into teams (fullname, shortname) values ("DS Penske", "Penske");
 insert into teams (fullname, shortname) values ("NIO 333 Racing", "NIO");
@@ -86,8 +87,10 @@ CREATE TABLE races (
     season text not null,
     foreign key (season) references seasons (year)
 );
--- insert into races (name, country, circuit, date) values ('Edinburgh e-prix', 'Scotland', 'Meadows',  '2023-10-10T18:00:00Z');
--- insert into races (name, country, circuit, date) values ('Mexico city e-prix', 'Mexico', 'Autódromo Hermanos Rodríguez',  '2024-01-13T18:00:00Z');
+
+-- Note no semi-colons here so that the nim code doesn't attempt to execute a comment as a command.
+-- insert into races (name, country, circuit, date) values ('Edinburgh e-prix', 'Scotland', 'Meadows',  '2023-10-10T18:00:00Z')
+-- insert into races (name, country, circuit, date) values ('Mexico city e-prix', 'Mexico', 'Autódromo Hermanos Rodríguez',  '2024-01-13T18:00:00Z')
 
 insert into races (name, country, circuit, date, season) values ("Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2023-01-14T18:00:00Z", "2022-23");
 insert into races (name, country, circuit, date, season) values ("Core Diriyah ePrix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-27T18:00:00Z", "2022-23");
@@ -326,30 +329,6 @@ update results set fdnf = '' where race = 16;
 
 
 drop table temp_results;
-
-with
-    scored_predictions
-    as ( select
-            users.fullname as user,
-            users.id as user_id,
-            case when predictions.pole = results.pole then 10 else 0 end +
-            case when predictions.fam = results.fam then 10 else 0 end + 
-            case when predictions.fl = results.fl then 10 else 0 end +
-            case when predictions.hgc = results.hgc then 10 else 0 end +
-            case when predictions.first = results.first then 20 else 0 end +
-            case when predictions.second = results.second then 10 else 0 end +
-            case when predictions.third = results.third then 10 else 0 end +
-            case when predictions.fdnf = results.fdnf then 10 else 0 end +
-            case when predictions.safety_car = results.safety_car then 10 else 0 end
-            as total
-         from predictions
-         join results on predictions.race = results.race
-         join users on predictions.user = users.id
-        )
-    select user as 'User', sum(total) as 'Total score'
-    from scored_predictions
-    group by user_id
-    ;
 
 
 -- Do all the 2023/24 stuff AFTER we've done all the gumph above, otherwise you can end up with duplicate drivers etc.

@@ -208,6 +208,60 @@ proc showRace* (ctx: Context) {.async.} =
   db.close()
 
 
+proc showLeaderboard*(ctx: Context) {.async.} =
+  let
+      db = open(consts.dbPath, "", "", "")
+      leaderboardSql = """
+with
+    scored_predictions
+    as ( select
+            users.fullname as user,
+            users.id as user_id,
+            case when predictions.pole = results.pole then 10 else 0 end +
+            case when predictions.fam = results.fam then 10 else 0 end + 
+            case when predictions.fl = results.fl then 10 else 0 end +
+            case when predictions.hgc = results.hgc then 10 else 0 end +
+            case when predictions.first = results.first then 20 else 0 end +
+            case when predictions.second = results.second then 10 else 0 end +
+            case when predictions.third = results.third then 10 else 0 end +
+            case when predictions.fdnf = results.fdnf then 10 else 0 end +
+            case when predictions.safety_car = results.safety_car then 10 else 0 end
+            as total
+         from predictions
+         inner join races on predictions.race = races.id 
+         join results on predictions.race = results.race
+         join users on predictions.user = users.id
+         where races.season = ?
+        )
+    select user as 'User', sum(total) as 'Total score'
+    from scored_predictions
+    group by user_id
+    ;
+      """
+      leaderboardRows = db.getAllRows(sql(leaderboardSql), ctx.getPathParams("season"))
+  let head = sharedHead(ctx, "Formula E")
+  let nav = sharedNav(ctx)
+  let vNode = buildHtml(html):
+      head
+      nav
+      text "This is the leaderboard"
+      table:
+        thead:
+          tr:
+            th:
+              text "User"
+            th:
+              text "Score"
+        tbody:
+          for row in leaderboardRows:
+            tr:
+              td: text row[0]
+              td: text row[1]
+  resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
+  db.close
+
+
+
 proc loginHandler*(ctx: Context) {.async.} =
   let db = open(consts.dbPath, "", "", "")
   if ctx.request.reqMethod == HttpPost:
@@ -285,6 +339,7 @@ let
   indexPatterns* = @[
     pattern("/", index, @[HttpGet], name = "index"),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
+    pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
   ]
   authPatterns* = @[
     pattern("/login", loginHandler, @[HttpGet, HttpPost], name = "login"),

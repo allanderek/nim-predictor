@@ -335,3 +335,67 @@ drop table temp_results;
 insert into teams (fullname, shortname) values ("Andretti Global", "Andretti");
 insert into teams (fullname, shortname) values ("ERT Formula E Team", "ERT");
 
+insert into drivers (name) values ("Jehan Daruvala");
+insert into drivers (name) values ("Nyck de Vries");
+
+insert into races (name, country, circuit, date, season) values 
+    ("Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2023-01-13T18:00:00Z", "2023-24"),
+    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-26T:18:00:00Z", "2023-24"),
+    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-27T:18:00:00Z", "2023-24"),
+    ("Hyderabad E-Prix", "India", "Hyderabad Street Circuit", "2024-02-10T:18:00:00Z", "2023-24"),
+    ("São Paulo E-Prix", "Brazil", "São Paulo Street Circuit", "2024-03-16T:18:00:00Z", "2023-24"),
+    ("Tokyo E-Prix", "Japan", "Tokyo Street Cicuit", "2024-03-30T:18:00:00Z", "2023-24"),
+    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-13T:18:00:00Z", "2023-24"),
+    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-14T:18:00:00Z", "2023-24"),
+    ("Monaco E-Prix", "Monaco", "Circuit de Monaco", "2024-04-27T:18:00:00Z", "2023-24"),
+    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-11T:18:00:00Z", "2023-24"),
+    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-12T:18:00:00Z", "2023-24"),
+    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-25T:18:00:00Z", "2023-24"),
+    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-26T:18:00:00Z", "2023-24"),
+    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-29T:18:00:00Z", "2023-24"),
+    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-30T:18:00:00Z", "2023-24"),
+    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-20T:18:00:00Z", "2023-24"),
+    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-21T:18:00:00Z", "2023-24")
+    ;
+
+create temporary table temp_drivers(
+     number integer not null,
+     driver_name text not null,
+     team_shortname text not null
+     );
+
+insert into temp_drivers (number, driver_name, team_shortname) values
+    (1, 'Jake Dennis', 'Andretti'),
+    (17, 'Norman Nato', 'Andretti'),
+    (2, 'Stoffel Vandoorne', 'Penske'),
+    (25, 'Jean-Éric Vergne', 'Penske'),
+    (3, 'Sérgio Sette Câmara', 'ERT'),
+    (33, 'Dan Ticktum', 'ERT' ),
+    (4, "Robin Frijns",  "Envision"),
+    (16, "Sébastien Buemi", 'Envision'),
+    (5, "Jake Hughes", 'McLaren'),
+    (8, "Sam Bird", 'McLaren'),
+    (7, "Maximilian Günther", 'Maserati'),
+    (18, "Jehan Daruvala", 'Maserati'),
+    (9, "Mitch Evans", 'Jaguar'),
+    (37, "Nick Cassidy", 'Jaguar'),
+    (11, "Lucas di Grassi", 'ABT Cupra'),
+    (51, "Nico Müller",  "ABT Cupra"),
+    (13, "António Félix da Costa", 'Porsche'),
+    (94, "Pascal Wehrlein", 'Porsche'),
+    (21, "Nyck de Vries", 'Mahindra'),
+    (48, "Edoardo Mortara", 'Mahindra'),
+    (22, "Oliver Rowland", 'Nissan'),
+    (23, "Sacha Fenestraz", 'Nissan')
+    ;
+
+insert into entrants (number, driver, team, race) 
+    select temp_drivers.number, drivers.id, teams.id, races.id 
+    from temp_drivers
+    inner join drivers on temp_drivers.driver_name = drivers.name
+    inner join teams on teams.fullname != 'Avalanche Andretti Formula E' and temp_drivers.team_shortname = teams.shortname
+    cross join races on season = '2023-24';
+    ;
+
+drop table temp_drivers;
+

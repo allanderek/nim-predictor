@@ -217,6 +217,7 @@ with
     as ( select
             users.fullname as user,
             users.id as user_id,
+            case when predictions.first = results.first then 1 else 0 end as race_wins,
             case when predictions.pole = results.pole then 10 else 0 end +
             case when predictions.fam = results.fam then 10 else 0 end + 
             case when predictions.fl = results.fl then 10 else 0 end +
@@ -233,9 +234,10 @@ with
          join users on predictions.user = users.id
          where races.season = ?
         )
-    select user as 'User', sum(total) as 'Total score'
+    select user as 'User', sum(total) as 'Total score', sum(race_wins) as 'Race wins'
     from scored_predictions
     group by user_id
+    order by sum(total) desc, sum(race_wins) desc
     ;
       """
       leaderboardRows = db.getAllRows(sql(leaderboardSql), ctx.getPathParams("season"))
@@ -252,11 +254,14 @@ with
               text "User"
             th:
               text "Score"
+            th:
+              text "Race wins"
         tbody:
           for row in leaderboardRows:
             tr:
               td: text row[0]
               td: text row[1]
+              td: text row[2]
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close
 

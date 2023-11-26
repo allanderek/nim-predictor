@@ -10,9 +10,9 @@ if len(sys.argv) != 2:
 csv_file = sys.argv[1]
 
 # Define the SQL table structure
-# table_name = "temp_entries"
-table_name = "temp_results"
-user = "Allan"
+table_name = "temp_entries"
+# table_name = "temp_results"
+user = "James"
 
 # Initialize variables
 round_number = 0  # Start with the first round
@@ -108,13 +108,15 @@ try:
                 full_safety_car = (row[9]).lower()
 
                 # Generate SQL INSERT statement
-                # sql_insert = f"INSERT INTO {table_name} (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('{user}', {round_number}, '{pole}', '{first_attack_mode}', '{fastest_lap}', '{highest_grid_climber}', '{win}', '{second_place}', '{third_place}', '{first_dnf}', '{full_safety_car}');"
-                sql_insert = f"INSERT INTO {table_name} (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ({round_number}, '{pole}', '{first_attack_mode}', '{fastest_lap}', '{highest_grid_climber}', '{win}', '{second_place}', '{third_place}', '{first_dnf}', '{full_safety_car}');"
+                sql_insert = f"    ('{user}', {round_number}, '{pole}', '{first_attack_mode}', '{fastest_lap}', '{highest_grid_climber}', '{win}', '{second_place}', '{third_place}', '{first_dnf}', '{full_safety_car}'),"
+                # sql_insert = f"    ({round_number}, '{pole}', '{first_attack_mode}', '{fastest_lap}', '{highest_grid_climber}', '{win}', '{second_place}', '{third_place}', '{first_dnf}', '{full_safety_car}'),"
                 sql_inserts.append(sql_insert)
 
     # Print the generated SQL INSERT statements
+    print (f"insert into {table_name} (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values")
     for sql_insert in sql_inserts:
         print(sql_insert)
+    print("    ;")
     for unrecognised_name in unrecognised_names:
         print(f'Unrecognised name: {unrecognised_name}')
 

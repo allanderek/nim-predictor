@@ -21,6 +21,9 @@ CREATE TABLE users (
     admin integer default 0    
 );
 insert into users (id, fullname, username, password, admin) values (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+insert into users (id, fullname, username, password, admin) values (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+insert into users (id, fullname, username, password, admin) values (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+insert into users (id, fullname, username, password, admin) values (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
 
 CREATE TABLE drivers ( 
     id integer primary key autoincrement, 
@@ -246,6 +249,67 @@ INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, 
 INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 14, 'Mitch Evans', 'Sérgio Sette Câmara', 'Mitch Evans', 'António Félix da Costa', 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'Dan Ticktum', 'yes');
 INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 15, 'Nick Cassidy', 'Nico Müller', 'Nick Cassidy', 'António Félix da Costa', 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'Dan Ticktum', 'yes');
 INSERT INTO temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES ('Allan', 16, 'Mitch Evans', 'Roberto Merhi', 'António Félix da Costa', 'Pascal Wehrlein', 'Mitch Evans', 'Nick Cassidy', 'René Rast', 'Maximilian Günther', 'yes');
+
+-- Dan's predictions
+
+insert into temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values
+    ('Dan', 1, 'Jean-Éric Vergne', 'Robin Frijns', 'Jean-Éric Vergne', 'René Rast', 'Jean-Éric Vergne', 'Stoffel Vandoorne', 'Jake Hughes', 'Sébastien Buemi', 'no'),
+    ('Dan', 2, 'Mitch Evans', 'Edoardo Mortara', 'Sébastien Buemi', 'Lucas di Grassi', 'Sébastien Buemi', 'Mitch Evans', 'Sam Bird', 'Kelvin van der Linde', 'yes'),
+    ('Dan', 3, 'Mitch Evans', 'André Lotterer', 'Pascal Wehrlein', 'Pascal Wehrlein', 'Jake Dennis', 'Mitch Evans', 'Pascal Wehrlein', 'Sacha Fenestraz', 'yes'),
+    ('Dan', 4, 'Sébastien Buemi', 'Norman Nato', 'Jake Dennis', 'Pascal Wehrlein', 'Mitch Evans', 'Jake Dennis', 'Sam Bird', 'Nico Müller', 'yes'),
+    ('Dan', 5, 'Nick Cassidy', 'Maximilian Günther', 'Nick Cassidy', 'Jake Dennis', 'Mitch Evans', 'Sam Bird', 'Nick Cassidy', 'Kelvin van der Linde', 'yes'),
+    ('Dan', 6, 'António Félix da Costa', 'Maximilian Günther', 'René Rast', 'Mitch Evans', 'Pascal Wehrlein', 'António Félix da Costa', 'Jake Dennis', 'Sacha Fenestraz', 'yes'),
+    ('Dan', 7, 'Nick Cassidy', 'Robin Frijns', 'Sam Bird', 'Pascal Wehrlein', 'António Félix da Costa', 'Sam Bird', 'Nick Cassidy', 'Nico Müller', 'yes'),
+    ('Dan', 8, 'Mitch Evans', 'Norman Nato', 'Jake Dennis', 'Edoardo Mortara', 'Mitch Evans', 'Sam Bird', 'Jake Dennis', 'Oliver Rowland', 'yes'),
+    ('Dan', 9, 'Maximilian Günther', 'Sacha Fenestraz', 'Jake Dennis', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'Stoffel Vandoorne', 'Nico Müller', 'yes'),
+    ('Dan', 10, 'Maximilian Günther', 'Nick Cassidy', 'Edoardo Mortara', 'Lucas di Grassi', 'Mitch Evans', 'Stoffel Vandoorne', 'Maximilian Günther', 'Roberto Merhi', 'yes'),
+    ('Dan', 11, 'Maximilian Günther', 'David Beckmann', 'Nick Cassidy', 'Jake Hughes', 'Jake Dennis', 'Maximilian Günther', 'Nick Cassidy', 'David Beckmann', 'no'),
+    ('Dan', 12, 'René Rast', 'René Rast', 'René Rast', 'Nick Cassidy', 'Maximilian Günther', 'René Rast', 'Sam Bird', 'Roberto Merhi', 'yes'),
+    ('Dan', 13, 'Mitch Evans', 'Pascal Wehrlein', 'Mitch Evans', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'Nico Müller', 'yes'),
+    ('Dan', 14, 'Mitch Evans', 'Edoardo Mortara', 'Mitch Evans', 'Edoardo Mortara', 'Mitch Evans', 'Nick Cassidy', 'Sébastien Buemi', 'Roberto Merhi', 'yes'),
+    ('Dan', 15, 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'Lucas di Grassi', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'Roberto Merhi', 'yes'),
+    ('Dan', 16, 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'Jake Hughes', 'Mitch Evans', 'Nick Cassidy', 'Sam Bird', 'André Lotterer', 'yes')
+    ;
+-- Charlies's predictions
+
+insert into temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values
+    ('Charlie', 1, 'Stoffel Vandoorne', 'Norman Nato', 'Stoffel Vandoorne', 'Lucas di Grassi', 'António Félix da Costa', 'Stoffel Vandoorne', 'Robin Frijns', 'Dan Ticktum', 'no'),
+    ('Charlie', 2, 'Jake Dennis', 'Sam Bird', 'Lucas di Grassi', 'Jean-Éric Vergne', 'Jake Dennis', 'Lucas di Grassi', 'Pascal Wehrlein', 'Mitch Evans', 'yes'),
+    ('Charlie', 3, 'Sébastien Buemi', 'Kelvin van der Linde', 'Pascal Wehrlein', 'Stoffel Vandoorne', 'Pascal Wehrlein', 'Jake Dennis', 'Sam Bird', 'António Félix da Costa', 'yes'),
+    ('Charlie', 4, 'Sébastien Buemi', 'António Félix da Costa', 'Sam Bird', 'António Félix da Costa', 'Pascal Wehrlein', 'Sébastien Buemi', 'Jake Dennis', 'Nico Müller', 'yes'),
+    ('Charlie', 5, 'Mitch Evans', 'Kelvin van der Linde', 'Sam Bird', 'André Lotterer', 'Pascal Wehrlein', 'Nick Cassidy', 'René Rast', 'Nico Müller', 'yes'),
+    ('Charlie', 6, 'Jean-Éric Vergne', 'Sérgio Sette Câmara', 'Jean-Éric Vergne', 'Sam Bird', 'Pascal Wehrlein', 'Jake Dennis', 'Nick Cassidy', 'Nico Müller', 'yes'),
+    ('Charlie', 7, 'Stoffel Vandoorne', 'Robin Frijns', 'Sam Bird', 'Sam Bird', 'Mitch Evans', 'Nick Cassidy', 'Jean-Éric Vergne', 'Nico Müller', 'yes'),
+    ('Charlie', 8, 'Jean-Éric Vergne', 'Pascal Wehrlein', 'Mitch Evans', 'António Félix da Costa', 'Nick Cassidy', 'Stoffel Vandoorne', 'Mitch Evans', 'Robin Frijns', 'yes'),
+    ('Charlie', 9, 'Nick Cassidy', 'André Lotterer', 'Sam Bird', 'António Félix da Costa', 'Pascal Wehrlein', 'Nick Cassidy', 'Jean-Éric Vergne', 'Nico Müller', 'yes'),
+    ('Charlie', 10, 'Jake Hughes', 'Robin Frijns', 'Jake Dennis', 'Jean-Éric Vergne', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'David Beckmann', 'yes'),
+    ('Charlie', 11, 'Mitch Evans', 'Roberto Merhi', 'Stoffel Vandoorne', 'António Félix da Costa', 'Sam Bird', 'Jake Dennis', 'Nick Cassidy', 'Sébastien Buemi', 'yes'),
+    ('Charlie', 12, 'Maximilian Günther', 'Robin Frijns', 'Jake Dennis', 'René Rast', 'Maximilian Günther', 'Jake Dennis', 'Mitch Evans', 'André Lotterer', 'yes'),
+    ('Charlie', 13, 'Jake Dennis', 'Robin Frijns', 'Mitch Evans', 'Sam Bird', 'Nick Cassidy', 'Jake Dennis', 'Mitch Evans', 'Roberto Merhi', 'yes'),
+    ('Charlie', 14, 'Nick Cassidy', 'Maximilian Günther', 'Jake Hughes', 'Sérgio Sette Câmara', 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'André Lotterer', 'yes'),
+    ('Charlie', 15, 'Jake Dennis', 'António Félix da Costa', 'Jean-Éric Vergne', 'Stoffel Vandoorne', 'Jake Dennis', 'Mitch Evans', 'Nick Cassidy', 'Nico Müller', 'yes'),
+    ('Charlie', 16, 'Mitch Evans', 'Robin Frijns', 'Sébastien Buemi', 'Sérgio Sette Câmara', 'Mitch Evans', 'Sam Bird', 'Nick Cassidy', 'Dan Ticktum', 'yes')
+    ;
+
+-- James' predictions
+insert into temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values
+    ('James', 1, 'Jean-Éric Vergne', 'Mitch Evans', 'António Félix da Costa', 'Lucas di Grassi', 'Jean-Éric Vergne', 'Pascal Wehrlein', 'Jake Hughes', 'Nico Müller', 'yes'),
+    ('James', 2, 'Sam Bird', 'Sacha Fenestraz', 'Jake Hughes', 'Jean-Éric Vergne', 'Stoffel Vandoorne', 'Sam Bird', 'Sébastien Buemi', 'Kelvin van der Linde', 'yes'),
+    ('James', 3, 'Jake Dennis', 'Sacha Fenestraz', 'René Rast', 'António Félix da Costa', 'Jake Dennis', 'Mitch Evans', 'Sam Bird', 'Nick Cassidy', 'no'),
+    ('James', 4, 'Sam Bird', 'Nick Cassidy', 'René Rast', 'António Félix da Costa', 'Edoardo Mortara', 'Sam Bird', 'Pascal Wehrlein', 'Oliver Rowland', 'yes'),
+    ('James', 5, 'Edoardo Mortara', 'Sacha Fenestraz', 'Jake Hughes', 'Sam Bird', 'Mitch Evans', 'Edoardo Mortara', 'Nick Cassidy', 'Norman Nato', 'yes'),
+    ('James', 6, 'António Félix da Costa', 'Sacha Fenestraz', 'Nick Cassidy', 'Mitch Evans', 'Pascal Wehrlein', 'António Félix da Costa', 'René Rast', 'Norman Nato', 'yes'),
+    ('James', 7, 'Stoffel Vandoorne', 'Maximilian Günther', 'Stoffel Vandoorne', 'Jake Dennis', 'Stoffel Vandoorne', 'António Félix da Costa', 'Maximilian Günther', 'Nico Müller', 'yes'),
+    ('James', 8, 'Nick Cassidy', 'Lucas di Grassi', 'Sam Bird', 'Pascal Wehrlein', 'Mitch Evans', 'António Félix da Costa', 'Pascal Wehrlein', 'Maximilian Günther', 'no'),
+    ('James', 9, 'Mitch Evans', 'Mitch Evans', 'Mitch Evans', 'Pascal Wehrlein', 'Stoffel Vandoorne', 'Mitch Evans', 'Maximilian Günther', 'André Lotterer', 'yes'),
+    ('James', 10, 'Jean-Éric Vergne', 'Sébastien Buemi', 'Mitch Evans', 'Jean-Éric Vergne', 'Mitch Evans', 'Edoardo Mortara', 'Jake Dennis', 'Roberto Merhi', 'yes'),
+    ('James', 11, 'Jean-Éric Vergne', 'René Rast', 'Nick Cassidy', 'Pascal Wehrlein', 'Nick Cassidy', 'Jake Dennis', 'Mitch Evans', 'David Beckmann', 'no'),
+    ('James', 12, 'Maximilian Günther', 'Pascal Wehrlein', 'René Rast', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'Nick Cassidy', 'Sérgio Sette Câmara', 'no'),
+    ('James', 13, 'Mitch Evans', 'Pascal Wehrlein', 'Jake Dennis', 'Nick Cassidy', 'Mitch Evans', 'Pascal Wehrlein', 'Jake Dennis', 'Nico Müller', 'yes'),
+    ('James', 14, 'Mitch Evans', 'Mitch Evans', 'Nick Cassidy', 'Jean-Éric Vergne', 'Mitch Evans', 'Nick Cassidy', 'Jake Dennis', 'Sérgio Sette Câmara', 'yes'),
+    ('James', 15, 'Sébastien Buemi', 'Sacha Fenestraz', 'Mitch Evans', 'Edoardo Mortara', 'Nick Cassidy', 'Mitch Evans', 'Jake Dennis', 'Robin Frijns', 'yes'),
+    ('James', 16, 'Nick Cassidy', 'Sacha Fenestraz', 'Jake Hughes', 'Jean-Éric Vergne', 'Sam Bird', 'Jake Dennis', 'Mitch Evans', 'Stoffel Vandoorne', 'yes')
+    ;
 
 with 
     race_entrants 

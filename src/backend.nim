@@ -61,20 +61,27 @@ proc races*(rows: seq[seq[string]]): VNode =
               for row in rows:
                 tr:
                   for col_index, col in row:
-                    td:
-                        a(href = "/race/" & row[0]):
-                          text col  
+                    if col_index != 0:
+                      td:
+                          a(href = "/race/" & row[0]):
+                            text col  
         
-proc getEntrants*(db: DbConn): seq[seq[string]] =
-    let entrant_sql = """select e.id, d.name, t.shortname from entrants e inner join drivers d on e.driver = d.id inner join teams t on e.team = t.id"""
-    result = db.getAllRows(sql(entrant_sql))
+proc getEntrants*(db: DbConn, race_id: string): seq[seq[string]] =
+    let entrant_sql = """
+    select e.id, d.name, t.shortname 
+    from entrants e 
+    inner join drivers d on e.driver = d.id 
+    inner join teams t on e.team = t.id
+    where race = ?
+    """
+    result = db.getAllRows(sql(entrant_sql), race_id)
 
 proc index*(ctx: Context) {.async.} =
     let db = open(consts.dbPath, "", "", "")
 
     let driver_rows = db.getAllRows(sql("""SELECT * FROM drivers"""))
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
-    let race_sql = """select id - 16 as round, name, country, circuit, date from races where season = '2023-24'"""
+    let race_sql = """select id, id - 16 as round, name, country, circuit, date from races where season = '2023-24'"""
     let race_rows = db.getAllRows(sql(race_sql))
     let head = sharedHead(ctx, "Formula E")
     let nav = sharedNav(ctx)
@@ -120,7 +127,8 @@ proc predictionsForm(raceId: string, isResult: bool, current: Prediction, entran
 proc showRace* (ctx: Context) {.async.} =
   let
       db = open(consts.dbPath, "", "", "")
-      race = db.getRow(sql"SELECT id, name, country, circuit, unixepoch() > unixepoch(date) as 'Closed' FROM races WHERE id = ?", ctx.getPathParams("race"))
+      race_id = ctx.getPathParams("race")
+      race = db.getRow(sql"SELECT id, name, country, circuit, unixepoch() > unixepoch(date) as 'Closed' FROM races WHERE id = ?", race_id)
   let head = sharedHead(ctx, "Formula E")
   let nav = sharedNav(ctx)
   let user_id = ctx.session.getOrDefault("userId")
@@ -129,7 +137,7 @@ proc showRace* (ctx: Context) {.async.} =
     let 
         raceId = race[0]
         race_name = race[1]
-        entrants = getEntrants(db)
+        entrants = getEntrants(db, race_id)
         entryClosed = race[4] == "1"
     if ctx.request.reqMethod == HttpPost:
       let

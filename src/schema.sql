@@ -403,23 +403,23 @@ insert into drivers (name) values ("Jehan Daruvala");
 insert into drivers (name) values ("Nyck de Vries");
 
 insert into races (name, country, circuit, date, season) values 
-    ("Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2023-01-13T18:00:00Z", "2023-24"),
-    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-26T:18:00:00Z", "2023-24"),
-    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-27T:18:00:00Z", "2023-24"),
-    ("Hyderabad E-Prix", "India", "Hyderabad Street Circuit", "2024-02-10T:18:00:00Z", "2023-24"),
-    ("São Paulo E-Prix", "Brazil", "São Paulo Street Circuit", "2024-03-16T:18:00:00Z", "2023-24"),
-    ("Tokyo E-Prix", "Japan", "Tokyo Street Cicuit", "2024-03-30T:18:00:00Z", "2023-24"),
-    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-13T:18:00:00Z", "2023-24"),
-    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-14T:18:00:00Z", "2023-24"),
-    ("Monaco E-Prix", "Monaco", "Circuit de Monaco", "2024-04-27T:18:00:00Z", "2023-24"),
-    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-11T:18:00:00Z", "2023-24"),
-    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-12T:18:00:00Z", "2023-24"),
-    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-25T:18:00:00Z", "2023-24"),
-    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-26T:18:00:00Z", "2023-24"),
-    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-29T:18:00:00Z", "2023-24"),
-    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-30T:18:00:00Z", "2023-24"),
-    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-20T:18:00:00Z", "2023-24"),
-    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-21T:18:00:00Z", "2023-24")
+    ("Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2024-01-13T18:00:00Z", "2023-24"),
+    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-26T18:00:00Z", "2023-24"),
+    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-27T18:00:00Z", "2023-24"),
+    ("Hyderabad E-Prix", "India", "Hyderabad Street Circuit", "2024-02-10T18:00:00Z", "2023-24"),
+    ("São Paulo E-Prix", "Brazil", "São Paulo Street Circuit", "2024-03-16T18:00:00Z", "2023-24"),
+    ("Tokyo E-Prix", "Japan", "Tokyo Street Cicuit", "2024-03-30T18:00:00Z", "2023-24"),
+    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-13T18:00:00Z", "2023-24"),
+    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-14T18:00:00Z", "2023-24"),
+    ("Monaco E-Prix", "Monaco", "Circuit de Monaco", "2024-04-27T18:00:00Z", "2023-24"),
+    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-11T18:00:00Z", "2023-24"),
+    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-12T18:00:00Z", "2023-24"),
+    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-25T18:00:00Z", "2023-24"),
+    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-26T18:00:00Z", "2023-24"),
+    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-29T18:00:00Z", "2023-24"),
+    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-30T18:00:00Z", "2023-24"),
+    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-20T18:00:00Z", "2023-24"),
+    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-21T18:00:00Z", "2023-24")
     ;
 
 create temporary table temp_drivers(

@@ -100,25 +100,61 @@ proc index*(ctx: Context) {.async.} =
 type
   Prediction = tuple
     pole : string
+    fam : string
+    fl : string
+    hgc : string
+    first : string
+    second : string
+    third : string
+    fdnf : string
+    safety_car : bool
 
 proc rowToPrediction* (row: seq[string]) : Prediction =
-  result = (pole: row[0])
+  result = (
+    pole: row[0],
+    fam: row[1],
+    fl: row[2],
+    hgc: row[3],
+    first: row[4],
+    second: row[5],
+    third: row[6],
+    fdnf: row[7],
+    safety_car: row[8] == "yes"
+  )
 
-
-proc predictionsForm(raceId: string, isResult: bool, current: Prediction, entrants: seq[seq[string]]) : VNode =
-  result = buildHtml(form(`method` = "post")):
-    label(`for` = "pole"): text "Pole"
-    select(name = "pole"):
+proc entrant_input* (name: string, label: string, entrants: seq[seq[string]], current:string): VNode =
+  result = buildHtml(tdiv):
+    label(`for` = name): text label
+    select(name = name):
+        option( value = "", selected = current == ""):
+          text "Please select"
         for entrant in entrants:
             let
                 entrant_id = entrant[0]
                 entrant_name = entrant[1]
                 entrant_team = entrant[2]
 
-            option(value = entrant_id, selected = current.pole == entrant_id):
+            option(value = entrant_id, selected = entrant_id == current):
                 text entrant_name
                 text " : "
                 text entrant_team
+
+
+proc predictionsForm(raceId: string, isResult: bool, current: Prediction, entrants: seq[seq[string]]) : VNode =
+  result = buildHtml(form(`method` = "post")):
+    entrant_input("pole", "Pole", entrants, current.pole)
+    entrant_input("fam", "FAM", entrants, current.fam)
+    entrant_input("fl", "Fastest lap", entrants, current.fl)
+    entrant_input("hgc", "HGC", entrants, current.hgc)
+    entrant_input("first", "Winner", entrants, current.first)
+    entrant_input("second", "second", entrants, current.second)
+    entrant_input("third", "third", entrants, current.third)
+    entrant_input("fdnf", "First DNF/Last", entrants, current.fdnf)
+    tdiv:
+      label(`for` = "safety_car"): text "Safety car"
+      select(name = "safety_car"):
+        option(value = "yes", selected = current.safety_car): text "Yes"
+        option(value = "no", selected = not current.safety_car): text "No"
     if isResult:
       input(`type` = "hidden", name="isResult", value = "true")
     tdiv:
@@ -142,12 +178,20 @@ proc showRace* (ctx: Context) {.async.} =
     if ctx.request.reqMethod == HttpPost:
       let
         pole = ctx.getPostParams("pole")
+        fam = ctx.getPostParams("fam")
+        fl = ctx.getPostParams("fl")
+        hgc = ctx.getPostParams("hgc")
+        first = ctx.getPostParams("first")
+        second = ctx.getPostParams("second")
+        third = ctx.getPostParams("third")
+        fdnf = ctx.getPostParams("fdnf")
+        safety_car = ctx.getPostParams("safety_car")
         isResult = ctx.getPostParams("isResult") == "true"
       if isResult:
         # TODO: We have to check if the user is an admin
-        db.exec(sql"insert into results (race, pole) values (?, ?)", raceId, pole)
+        db.exec(sql"insert into results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
       elif not entryClosed:
-        db.exec(sql"insert into predictions (user, race, pole) values (?, ?, ?)", user_id, raceId, pole)
+        db.exec(sql"insert into predictions (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user_id, raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
       # TODO: We need to display a kind of message to say that the entry was not accepted because it was late.
     let vNode = buildHtml(html):
         head
@@ -158,14 +202,14 @@ proc showRace* (ctx: Context) {.async.} =
               h3: text "Entry"
               let 
                 # TODO: This is non-robust to the case where the user hasn't yet set a prediction for this race.
-                predictions = rowToPrediction(db.getRow(sql"select pole from predictions where user = ? and race = ?", user_id, raceId))
+                predictions = rowToPrediction(db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car from predictions where user = ? and race = ?", user_id, raceId))
               predictionsForm(raceId, false, predictions, entrants) 
             else:
               h3: text "Enter results"
                 # TODO: We have to check if the user is an admin
               let 
                 # TODO: This is non-robust to the case where there are no results set yet for this race
-                currentResults = rowToPrediction(db.getRow(sql"select pole from results where race = ?", raceId))
+                currentResults = rowToPrediction(db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car  from results where race = ?", raceId))
               predictionsForm(raceId, true, currentResults, entrants) 
               h3: text "All predictions"
               let 

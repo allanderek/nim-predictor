@@ -139,6 +139,11 @@ proc entrant_input* (name: string, label: string, entrants: seq[seq[string]], cu
                 text " : "
                 text entrant_team
 
+proc bool_to_yes_no(b: bool) : string =
+  if b:
+    return "yes"
+  else:
+    return "no"
 
 proc predictionsForm(raceId: string, isResult: bool, current: Prediction, entrants: seq[seq[string]]) : VNode =
   result = buildHtml(form(`method` = "post")):
@@ -159,6 +164,16 @@ proc predictionsForm(raceId: string, isResult: bool, current: Prediction, entran
       input(`type` = "hidden", name="isResult", value = "true")
     tdiv:
       input(`type` = "submit", value = "Save")
+
+proc showPredictionPart(prediction: string, prediction_name: string, answer: string, points: string): VNode =
+  result = buildHtml(td):
+    text prediction_name
+    if answer != "":
+      text " : "
+      if answer == prediction:
+        text points
+      else:
+        text "0"
 
 proc showRace* (ctx: Context) {.async.} =
   let
@@ -213,24 +228,94 @@ proc showRace* (ctx: Context) {.async.} =
               predictionsForm(raceId, true, currentResults, entrants) 
               h3: text "All predictions"
               let 
-                  all_predictions = db.getAllRows(sql"select u.username, e.id, d.name from predictions p inner join users u on p.user = u.id inner join entrants e on e.id = p.pole inner join drivers d on e.driver = d.id where p.race = ?", race_id)
+                  all_predictions_sql = sql"""
+with
+    race_entrants as
+    ( select entrants.id, drivers.name
+      from entrants
+      inner join drivers on entrants.driver = drivers.id
+      where race = ?
+    )
+    select 
+        users.username, 
+        pole_entrants.id, pole_entrants.name,
+        fam_entrants.id, fam_entrants.name,
+        fl_entrants.id, fl_entrants.name,
+        hgc_entrants.id, hgc_entrants.name,
+        first_entrants.id, first_entrants.name,
+        second_entrants.id, second_entrants.name,
+        third_entrants.id, third_entrants.name,
+        fdnf_entrants.id, fdnf_entrants.name,
+        predictions.safety_car
+    from predictions
+    inner join users on predictions.user = users.id 
+    inner join race_entrants as pole_entrants on pole_entrants.id == predictions.pole
+    inner join race_entrants as fam_entrants on fam_entrants.id == predictions.fam
+    inner join race_entrants as fl_entrants on fl_entrants.id == predictions.fl
+    inner join race_entrants as hgc_entrants on hgc_entrants.id == predictions.hgc
+    inner join race_entrants as first_entrants on first_entrants.id == predictions.first
+    inner join race_entrants as second_entrants on second_entrants.id == predictions.second
+    inner join race_entrants as third_entrants on third_entrants.id == predictions.third
+    inner join race_entrants as fdnf_entrants on fdnf_entrants.id == predictions.fdnf
+    where predictions.race = ?
+    ;
+                  """
+                  all_predictions = db.getAllRows(all_predictions_sql, race_id, race_id) 
               table:
+                thead:
+                  tr:
+                    th: text "User"
+                    th: text "Pole"
+                    th: text "FAM"
+                    th: text "FL"
+                    th: text "HGC"
+                    th: text "First"
+                    th: text "Second"
+                    th: text "Third"
+                    th: text "FDNF"
+                    th: text "Safety car"
                 tbody:
                   for row in all_predictions:
-                    let
-                      predictor = row[0]
-                      row_pole = row[1]
-                      row_pole_name = row[2]
                     tr:
+                      let
+                        predictor = row[0]
                       td: text predictor
-                      td: 
-                        text row_pole_name
-                        if currentResults.pole != "":
-                          text " : "
-                          if currentResults.pole == row_pole:
-                            text "10"
-                          else:
-                            text "0"
+                      let 
+                        row_pole = row[1]
+                        row_pole_name = row[2]
+                      showPredictionPart(row_pole, row_pole_name, currentResults.pole, "10")
+                      let
+                        row_fam = row[3]
+                        row_fam_name = row[4]
+                      showPredictionPart(row_fam, row_fam_name, currentResults.fam, "10")
+                      let
+                        row_fl = row[5]
+                        row_fl_name = row[6]
+                      showPredictionPart(row_fl, row_fl_name, currentResults.fl, "10")
+                      let
+                        row_hgc = row[7]
+                        row_hgc_name = row[8]
+                      showPredictionPart(row_hgc, row_hgc_name, currentResults.hgc, "10")
+                      let
+                        row_first = row[9]
+                        row_first_name = row[10]
+                      showPredictionPart(row_first, row_first_name, currentResults.first, "20")
+                      let
+                        row_second = row[11]
+                        row_second_name = row[12]
+                      showPredictionPart(row_second, row_second_name, currentResults.second, "10")
+                      let
+                        row_third = row[13]
+                        row_third_name = row[14]
+                      showPredictionPart(row_third, row_third_name, currentResults.third, "10")
+                      let
+                        row_fdnf = row[15]
+                        row_fdnf_name = row[16]
+                      showPredictionPart(row_fdnf, row_fdnf_name, currentResults.fdnf, "10")
+                      let
+                        row_safety_car = row[17]
+                      showPredictionPart(row_safety_car, row_safety_car, boolto_yes_no(currentResults.safety_car), "10")
+
     if ctx.request.reqMethod == HttpPost:
       resp redirect(urlFor(ctx, "/race/" & race_id), Http302)
     else:

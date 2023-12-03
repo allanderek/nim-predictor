@@ -4,6 +4,7 @@ import karax / [karaxdsl, vdom]
 import prologue/security/hasher
 import prologue/middlewares/signedcookiesession
 import prologue/middlewares/staticfile
+from std/strutils import parseInt
 
 import ./consts
 import ./initdb
@@ -17,12 +18,11 @@ import
 
 proc drivers*(rows: seq[seq[string]]): VNode =
     result = buildHtml(section):
-        h2: text "List all items"
+        h2: text "List all drivers"
         table:
             thead:
                 tr:
                     th: text "ID"
-                    th: text "Number"
                     th: text "Name"
             tbody:
                 for row in rows:
@@ -39,26 +39,12 @@ proc teams* (rows: seq[seq[string]]): VNode =
                     th: text "ID"
                     th: text "Full name"
                     th: text "Short name"
-                    th: text "Powertrain"
             tbody:
                 for row in rows:
                     tr:
                         for col in row:
                             td: text col
 
-proc entrants*(rows: seq[seq[string]]): VNode =
-    result = buildHtml(section):
-        h2: text "List all the teams"
-        table:
-            thead:
-                tr:
-                    th: text "Driver"
-                    th: text "Team"
-            tbody:
-                for row in rows:
-                    tr:
-                        for col in row:
-                            td: text col
 
 proc races*(rows: seq[seq[string]]): VNode =
   result = buildHtml(section):
@@ -66,7 +52,7 @@ proc races*(rows: seq[seq[string]]): VNode =
       table:
           thead:
               tr:
-                  th: text "ID"
+                  th: text "Round"
                   th: text "Name"
                   th: text "Country"
                   th: text "Circuit"
@@ -74,10 +60,10 @@ proc races*(rows: seq[seq[string]]): VNode =
           tbody:
               for row in rows:
                 tr:
-                  for col in row:
-                    td: 
-                      a(href = "/race/" & row[0]):
-                        text col  
+                  for col_index, col in row:
+                    td:
+                        a(href = "/race/" & row[0]):
+                          text col  
         
 proc getEntrants*(db: DbConn): seq[seq[string]] =
     let entrant_sql = """select e.id, d.name, t.shortname from entrants e inner join drivers d on e.driver = d.id inner join teams t on e.team = t.id"""
@@ -88,8 +74,7 @@ proc index*(ctx: Context) {.async.} =
 
     let driver_rows = db.getAllRows(sql("""SELECT * FROM drivers"""))
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
-    let entrant_rows = getEntrants(db)
-    let race_sql = """select * from races"""
+    let race_sql = """select id - 16 as round, name, country, circuit, date from races where season = '2023-24'"""
     let race_rows = db.getAllRows(sql(race_sql))
     let head = sharedHead(ctx, "Formula E")
     let nav = sharedNav(ctx)
@@ -99,7 +84,6 @@ proc index*(ctx: Context) {.async.} =
         main:
             section: drivers(rows=driver_rows)
             section: teams(rows=team_rows)
-            section: entrants(rows=entrant_rows)
             section: races(rows=race_rows)
 
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)

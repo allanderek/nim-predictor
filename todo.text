@@ -14,10 +14,14 @@
 
 
 Next steps:
-* Do the leaderboard for 2023, nearer the time you can ask James to give you access to the other spreadsheets to input everyone else's predictions and we should have a good leaderboard for 2023.
-* Put in any drivers needed for 2024, and input all the races.
-* Use the stuff above to just put all the drivers as entrants for all the races. You can later update it, if there are changes.
-
+* Round should be on the race.
+* Show all predictions on the race page, if it has started, and scored if there is a result.
+* Need someway to reload the page when the race starts, or at least prevent entry
+* Need someway to prevent some one entering a guess with the same drivers in first/second/third.
+* Could try doing this in Elm with a json backend.
+* users should be possibly admin, in which case they can change the result.
+* Show the rounds of the previous years on the leaderboard for that year.
+* Check what happens when you show a race that is past the deadline but has no results.
 
 Obviously, you have to make sure all this is actually working as a website. Do a dummy race first. But just as you did before.
 

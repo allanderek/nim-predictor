@@ -246,7 +246,17 @@ with
         second_entrants.id, second_entrants.name,
         third_entrants.id, third_entrants.name,
         fdnf_entrants.id, fdnf_entrants.name,
-        predictions.safety_car
+        predictions.safety_car,
+        case when predictions.pole = results.pole then 10 else 0 end +
+        case when predictions.fam = results.fam then 10 else 0 end + 
+        case when predictions.fl = results.fl then 10 else 0 end +
+        case when predictions.hgc = results.hgc then 10 else 0 end +
+        case when predictions.first = results.first then 20 else 0 end +
+        case when predictions.second = results.second then 10 else 0 end +
+        case when predictions.third = results.third then 10 else 0 end +
+        case when predictions.fdnf = results.fdnf then 10 else 0 end +
+        case when predictions.safety_car = results.safety_car then 10 else 0 end
+        as total
     from predictions
     inner join users on predictions.user = users.id 
     inner join race_entrants as pole_entrants on pole_entrants.id == predictions.pole
@@ -257,7 +267,9 @@ with
     inner join race_entrants as second_entrants on second_entrants.id == predictions.second
     inner join race_entrants as third_entrants on third_entrants.id == predictions.third
     inner join race_entrants as fdnf_entrants on fdnf_entrants.id == predictions.fdnf
+    join results on predictions.race = results.race
     where predictions.race = ?
+    order by total desc
     ;
                   """
                   all_predictions = db.getAllRows(all_predictions_sql, race_id, race_id) 
@@ -274,6 +286,7 @@ with
                     th: text "Third"
                     th: text "FDNF"
                     th: text "Safety car"
+                    th: text "Total"
                 tbody:
                   for row in all_predictions:
                     tr:
@@ -315,6 +328,7 @@ with
                       let
                         row_safety_car = row[17]
                       showPredictionPart(row_safety_car, row_safety_car, boolto_yes_no(currentResults.safety_car), "10")
+                      td: text row[18]
 
     if ctx.request.reqMethod == HttpPost:
       resp redirect(urlFor(ctx, "/race/" & race_id), Http302)
@@ -332,6 +346,7 @@ with
 proc showLeaderboard*(ctx: Context) {.async.} =
   let
       db = open(consts.dbPath, "", "", "")
+      season = ctx.getPathParams("season")
       leaderboardSql = """
 with
     scored_predictions
@@ -361,28 +376,31 @@ with
     order by sum(total) desc, sum(race_wins) desc
     ;
       """
-      leaderboardRows = db.getAllRows(sql(leaderboardSql), ctx.getPathParams("season"))
+      leaderboardRows = db.getAllRows(sql(leaderboardSql), season)
   let head = sharedHead(ctx, "Formula E")
   let nav = sharedNav(ctx)
   let vNode = buildHtml(html):
       head
       nav
-      text "This is the leaderboard"
-      table:
-        thead:
-          tr:
-            th:
-              text "User"
-            th:
-              text "Score"
-            th:
-              text "Race wins"
-        tbody:
-          for row in leaderboardRows:
+      section:
+        table:
+          thead:
             tr:
-              td: text row[0]
-              td: text row[1]
-              td: text row[2]
+              th:
+                text "User"
+              th:
+                text "Score"
+              th:
+                text "Race wins"
+          tbody:
+            for row in leaderboardRows:
+              tr:
+                td: text row[0]
+                td: text row[1]
+                td: text row[2]
+      let race_sql = """select id as round, name, country, circuit, date from races where season = ?"""
+      let race_rows = db.getAllRows(sql(race_sql), season)
+      section: races(rows=race_rows)
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close
 

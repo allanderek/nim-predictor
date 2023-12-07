@@ -2,5 +2,6 @@ blog
 predictions.db
 .devenv.flake.nix
 .devenv
+.direnv
 src/.env
 src/backend

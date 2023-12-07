@@ -81,7 +81,7 @@ proc index*(ctx: Context) {.async.} =
 
     let driver_rows = db.getAllRows(sql("""SELECT * FROM drivers"""))
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
-    let race_sql = """select id, id - 16 as round, name, country, circuit, date from races where season = '2023-24'"""
+    let race_sql = """select id, round, name, country, circuit, date from races where season = '2023-24'"""
     let race_rows = db.getAllRows(sql(race_sql))
     let head = sharedHead(ctx, "Formula E")
     let nav = sharedNav(ctx)
@@ -180,9 +180,12 @@ proc showRace* (ctx: Context) {.async.} =
       db = open(consts.dbPath, "", "", "")
       race_id = ctx.getPathParams("race")
       race = db.getRow(sql"SELECT id, name, country, circuit, unixepoch() > unixepoch(date) as 'Closed' FROM races WHERE id = ?", race_id)
-  let head = sharedHead(ctx, "Formula E")
-  let nav = sharedNav(ctx)
-  let user_id = ctx.session.getOrDefault("userId")
+      head = sharedHead(ctx, "Formula E")
+      nav = sharedNav(ctx)
+      user_id = ctx.session.getOrDefault("userId")
+      user = db.getRow(sql"select admin from users where id = ?", user_id)
+      is_admin = user.len > 0 and user[0] == "1"
+
   # TODO, Obviously we have to check if the userId is empty
   if race.len > 0:
     let 
@@ -202,12 +205,13 @@ proc showRace* (ctx: Context) {.async.} =
         fdnf = ctx.getPostParams("fdnf")
         safety_car = ctx.getPostParams("safety_car")
         isResult = ctx.getPostParams("isResult") == "true"
-      if isResult:
+      if isResult and is_admin:
         # TODO: We have to check if the user is an admin
         db.exec(sql"insert into results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
       elif not entryClosed:
         db.exec(sql"insert into predictions (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user_id, raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
       # TODO: We need to display a kind of message to say that the entry was not accepted because it was late.
+      # TODO: We also have to display an error in the case that it is an attempt to post a result by a non admin user.
     let vNode = buildHtml(html):
         head
         nav
@@ -217,15 +221,17 @@ proc showRace* (ctx: Context) {.async.} =
               h3: text "Entry"
               let 
                 # TODO: This is non-robust to the case where the user hasn't yet set a prediction for this race.
+                # It seems like it works fine.
                 predictions = rowToPrediction(db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car from predictions where user = ? and race = ?", user_id, raceId))
               predictionsForm(raceId, false, predictions, entrants) 
             else:
-              h3: text "Enter results"
-                # TODO: We have to check if the user is an admin
-              let 
-                # TODO: This is non-robust to the case where there are no results set yet for this race
-                currentResults = rowToPrediction(db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car  from results where race = ?", raceId))
-              predictionsForm(raceId, true, currentResults, entrants) 
+              let
+                  # TODO: This is non-robust to the case where there are no results set yet for this race
+                  # Actually seems to be pretty robust to that.
+                  currentResults = rowToPrediction(db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car  from results where race = ?", raceId))
+              if is_admin:
+                h3: text "Enter results"
+                predictionsForm(raceId, true, currentResults, entrants) 
               h3: text "All predictions"
               let 
                   all_predictions_sql = sql"""
@@ -398,7 +404,7 @@ with
                 td: text row[0]
                 td: text row[1]
                 td: text row[2]
-      let race_sql = """select id as round, name, country, circuit, date from races where season = ?"""
+      let race_sql = """select id, round, name, country, circuit, date from races where season = ?"""
       let race_rows = db.getAllRows(sql(race_sql), season)
       section: races(rows=race_rows)
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
@@ -417,16 +423,14 @@ proc loginHandler*(ctx: Context) {.async.} =
     let
       username = ctx.getPostParams("username")
       password = SecretKey(ctx.getPostParams("password"))
-      row = db.getRow(sql"SELECT * FROM users WHERE username = ?", username)
+      row = db.getRow(sql"SELECT id, fullname, password  FROM users WHERE username = ?", username)
 
-    if row.len == 0:
-      error = "Incorrect username"
-    elif row.len < 3:
+    if row.len < 3:
       error = "Incorrect username"
     else:
       id = row[0]
       fullname = row[1]
-      encoded = row[3]
+      encoded = row[2]
 
       if not pbkdf2_sha256verify(password, encoded):
         error = "Incorrect password"

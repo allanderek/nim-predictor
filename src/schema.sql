@@ -83,6 +83,7 @@ insert into seasons (year) values ("2023-24");
 
 CREATE TABLE races (
     id integer primary key autoincrement, 
+    round integer,
     name text, 
     country text, 
     circuit text, 
@@ -91,26 +92,26 @@ CREATE TABLE races (
     foreign key (season) references seasons (year)
 );
 
--- Note no semi-colons here so that the nim code doesn't attempt to execute a comment as a command.
--- insert into races (name, country, circuit, date) values ('Edinburgh e-prix', 'Scotland', 'Meadows',  '2023-10-10T18:00:00Z')
--- insert into races (name, country, circuit, date) values ('Mexico city e-prix', 'Mexico', 'Autódromo Hermanos Rodríguez',  '2024-01-13T18:00:00Z')
 
-insert into races (name, country, circuit, date, season) values ("Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2023-01-14T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Core Diriyah ePrix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-27T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Core Diriyah ePrix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-28T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Greenko Hyderabad ePrix", "India", "Hyderabad Street Circuit", "2023-02-11T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Cape Town ePrix", "South Africa", "Cape Town Street Circuit", "2023-02-25T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Julius Baer São Paulo ePrix", "Brazil", "São Paulo Street Circuit", "2023-03-25T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("SABIC Berlin ePrix", "Germany", "Tempelhof Airport Street Circuit", "2023-04-22T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("SABIC Berlin ePrix", "Germany", "Tempelhof Airport Street Circuit", "2023-04-23T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Monaco ePrix", "Monaco", "Circuit de Monaco", "2023-05-06T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Gulavit Jakarta ePrix", "Indonesia", "Jakarta International e-Prix Circuit", "2023-06-03T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Gulavit Jakarta ePrix", "Indonesia", "Jakarta International e-Prix Circuit", "2023-06-04T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Southwire Portland ePrix", "United States", "Portland International Raceway", "2023-06-24T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Hankook Rome ePrix", "Italy", "Circuito Cittadino dell'EUR", "2023-07-15T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Hankook Rome ePrix", "Italy", "Circuito Cittadino dell'EUR", "2023-07-16T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Hankook London ePrix", "United Kingdom", "ExCeL London", "2023-07-29T18:00:00Z", "2022-23");
-insert into races (name, country, circuit, date, season) values ("Hankook London ePrix", "United Kingdom", "ExCeL London", "2023-07-30T18:00:00Z", "2022-23");
+insert into races (round, name, country, circuit, date, season) 
+    values 
+    (1, "Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2023-01-14T18:00:00Z", "2022-23"),
+    (2, "Core Diriyah ePrix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-27T18:00:00Z", "2022-23"),
+    (3, "Core Diriyah ePrix", "Saudi Arabia", "Riyadh Street Circuit", "2023-01-28T18:00:00Z", "2022-23"),
+    (4, "Greenko Hyderabad ePrix", "India", "Hyderabad Street Circuit", "2023-02-11T18:00:00Z", "2022-23"),
+    (5, "Cape Town ePrix", "South Africa", "Cape Town Street Circuit", "2023-02-25T18:00:00Z", "2022-23"),
+    (6, "Julius Baer São Paulo ePrix", "Brazil", "São Paulo Street Circuit", "2023-03-25T18:00:00Z", "2022-23"),
+    (7, "SABIC Berlin ePrix", "Germany", "Tempelhof Airport Street Circuit", "2023-04-22T18:00:00Z", "2022-23"),
+    (8, "SABIC Berlin ePrix", "Germany", "Tempelhof Airport Street Circuit", "2023-04-23T18:00:00Z", "2022-23"),
+    (9, "Monaco ePrix", "Monaco", "Circuit de Monaco", "2023-05-06T18:00:00Z", "2022-23"),
+    (10, "Gulavit Jakarta ePrix", "Indonesia", "Jakarta International e-Prix Circuit", "2023-06-03T18:00:00Z", "2022-23"),
+    (11, "Gulavit Jakarta ePrix", "Indonesia", "Jakarta International e-Prix Circuit", "2023-06-04T18:00:00Z", "2022-23"),
+    (12, "Southwire Portland ePrix", "United States", "Portland International Raceway", "2023-06-24T18:00:00Z", "2022-23"),
+    (13, "Hankook Rome ePrix", "Italy", "Circuito Cittadino dell'EUR", "2023-07-15T18:00:00Z", "2022-23"),
+    (14, "Hankook Rome ePrix", "Italy", "Circuito Cittadino dell'EUR", "2023-07-16T18:00:00Z", "2022-23"),
+    (15, "Hankook London ePrix", "United Kingdom", "ExCeL London", "2023-07-29T18:00:00Z", "2022-23"),
+    (16, "Hankook London ePrix", "United Kingdom", "ExCeL London", "2023-07-30T18:00:00Z", "2022-23")
+    ;
 
 CREATE TABLE entrants ( 
     id integer primary key autoincrement,
@@ -402,24 +403,24 @@ insert into teams (fullname, shortname) values ("ERT Formula E Team", "ERT");
 insert into drivers (name) values ("Jehan Daruvala");
 insert into drivers (name) values ("Nyck de Vries");
 
-insert into races (name, country, circuit, date, season) values 
-    ("Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2024-01-13T18:00:00Z", "2023-24"),
-    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-26T18:00:00Z", "2023-24"),
-    ("Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-27T18:00:00Z", "2023-24"),
-    ("Hyderabad E-Prix", "India", "Hyderabad Street Circuit", "2024-02-10T18:00:00Z", "2023-24"),
-    ("São Paulo E-Prix", "Brazil", "São Paulo Street Circuit", "2024-03-16T18:00:00Z", "2023-24"),
-    ("Tokyo E-Prix", "Japan", "Tokyo Street Cicuit", "2024-03-30T18:00:00Z", "2023-24"),
-    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-13T18:00:00Z", "2023-24"),
-    ("Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-14T18:00:00Z", "2023-24"),
-    ("Monaco E-Prix", "Monaco", "Circuit de Monaco", "2024-04-27T18:00:00Z", "2023-24"),
-    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-11T18:00:00Z", "2023-24"),
-    ("Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-12T18:00:00Z", "2023-24"),
-    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-25T18:00:00Z", "2023-24"),
-    ("Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-26T18:00:00Z", "2023-24"),
-    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-29T18:00:00Z", "2023-24"),
-    ("Portland E-Prix", "United States", "Portland International Raceway", "2024-06-30T18:00:00Z", "2023-24"),
-    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-20T18:00:00Z", "2023-24"),
-    ("London E-Prix", "United Kingdom", "ExCeL London", "2024-07-21T18:00:00Z", "2023-24")
+insert into races (round, name, country, circuit, date, season) values 
+    (1, "Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2024-01-13T18:00:00Z", "2023-24"),
+    (2, "Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-26T18:00:00Z", "2023-24"),
+    (3, "Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-27T18:00:00Z", "2023-24"),
+    (4, "Hyderabad E-Prix", "India", "Hyderabad Street Circuit", "2024-02-10T18:00:00Z", "2023-24"),
+    (5, "São Paulo E-Prix", "Brazil", "São Paulo Street Circuit", "2024-03-16T18:00:00Z", "2023-24"),
+    (6, "Tokyo E-Prix", "Japan", "Tokyo Street Cicuit", "2024-03-30T18:00:00Z", "2023-24"),
+    (7, "Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-13T18:00:00Z", "2023-24"),
+    (8, "Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-14T18:00:00Z", "2023-24"),
+    (9, "Monaco E-Prix", "Monaco", "Circuit de Monaco", "2024-04-27T18:00:00Z", "2023-24"),
+    (10, "Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-11T18:00:00Z", "2023-24"),
+    (11, "Berlin E-Prix", "Germany", "Tempelhof Airport Street Circuit", "2024-05-12T18:00:00Z", "2023-24"),
+    (12, "Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-25T18:00:00Z", "2023-24"),
+    (13, "Shanghai E-Prix", "China", "Shanghai International Circuit", "2024-05-26T18:00:00Z", "2023-24"),
+    (14, "Portland E-Prix", "United States", "Portland International Raceway", "2024-06-29T18:00:00Z", "2023-24"),
+    (15, "Portland E-Prix", "United States", "Portland International Raceway", "2024-06-30T18:00:00Z", "2023-24"),
+    (16, "London E-Prix", "United Kingdom", "ExCeL London", "2024-07-20T18:00:00Z", "2023-24"),
+    (17, "London E-Prix", "United Kingdom", "ExCeL London", "2024-07-21T18:00:00Z", "2023-24")
     ;
 
 create temporary table temp_drivers(

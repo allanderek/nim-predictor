@@ -207,9 +207,18 @@ proc showRace* (ctx: Context) {.async.} =
         isResult = ctx.getPostParams("isResult") == "true"
       if isResult and is_admin:
         # TODO: We have to check if the user is an admin
-        db.exec(sql"insert into results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
+        db.exec(sql"""
+        insert into results 
+          (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          on conflict(race)
+          do update set pole = excluded.pole, fam=excluded.fam, fl=excluded.fl, hgc=excluded.hgc, first=excluded.first, second=excluded.second, third = excluded.third, fdnf=excluded.fdnf, safety_car=excluded.safety_car
+        """, raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
       elif not entryClosed:
-        db.exec(sql"insert into predictions (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", user_id, raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
+        db.exec(sql"""
+        insert into predictions (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        on conflict(user,race)
+        do update set pole = excluded.pole, fam=excluded.fam, fl=excluded.fl, hgc=excluded.hgc, first=excluded.first, second=excluded.second, third = excluded.third, fdnf=excluded.fdnf, safety_car=excluded.safety_car
+        """, user_id, raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
       # TODO: We need to display a kind of message to say that the entry was not accepted because it was late.
       # TODO: We also have to display an error in the case that it is an attempt to post a result by a non admin user.
     let vNode = buildHtml(html):
@@ -410,7 +419,24 @@ with
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close
 
-
+proc showProfile*(ctx: Context) {.async.} =
+  let
+    db = open(consts.dbPath, "", "", "")
+    user_id = ctx.session.getOrDefault("userId")
+  if ctx.request.reqMethod == HttpPost:
+    # TODO: Check that the repeat is the same?
+    let new_password = ctx.getPostParams("password")
+    ## TODO: Ah, lol, you need to hash it.
+    db.exec(sql"update users set password = ? where id = ?", new_password, user_id) 
+  let
+    user_row = db.getRow(sql"select fullname from users where id = ?", user_id)
+    vNode = buildHtml(html):
+      sharedHead(ctx, "Formula E")
+      sharedNav(ctx)
+      section:
+        h1: text user_row[0]
+  resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
+  db.close
 
 proc loginHandler*(ctx: Context) {.async.} =
   let db = open(consts.dbPath, "", "", "")
@@ -488,6 +514,7 @@ let
     pattern("/", index, @[HttpGet], name = "index"),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
     pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
+    pattern("/profile", showProfile, @[HttpGet, HttpPost], name = "profile"),
   ]
   authPatterns* = @[
     pattern("/login", loginHandler, @[HttpGet, HttpPost], name = "login"),

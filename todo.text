@@ -14,10 +14,10 @@
 
 
 Next steps:
+* The first thing is actual errors in showRace, for things such as making a prediction too late etc. Check out the login errors for an example of how to do this here.  
 * Need someway to reload the page when the race starts, or at least prevent entry
 * Need someway to prevent some one entering a guess with the same drivers in first/second/third.
 * Could try doing this in Elm with a json backend.
-* Show the rounds of the previous years on the leaderboard for that year.
 * Check what happens when you show a race that is past the deadline but has no results.
 
 Obviously, you have to make sure all this is actually working as a website. Do a dummy race first. But just as you did before.

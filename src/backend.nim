@@ -425,9 +425,16 @@ proc showProfile*(ctx: Context) {.async.} =
     user_id = ctx.session.getOrDefault("userId")
   if ctx.request.reqMethod == HttpPost:
     # TODO: Check that the repeat is the same?
-    let new_password = ctx.getPostParams("password")
-    ## TODO: Ah, lol, you need to hash it.
-    db.exec(sql"update users set password = ? where id = ?", new_password, user_id) 
+    let 
+      new_fullname = ctx.getPostParams("fullname")
+      new_password = ctx.getPostParams("password")
+    if new_password.len > 0:
+      let
+        encoded = pbkdf2_sha256encode(SecretKey(new_password), "Prologue")
+      db.exec(sql"update users set password = ? where id = ?", encoded, user_id) 
+    if new_fullname.len > 0:
+      ctx.session["userFullname"] = new_fullname
+      db.exec(sql"update users set fullname = ? where id = ?", new_fullname, user_id)
   let
     user_row = db.getRow(sql"select fullname from users where id = ?", user_id)
     vNode = buildHtml(html):
@@ -435,6 +442,12 @@ proc showProfile*(ctx: Context) {.async.} =
       sharedNav(ctx)
       section:
         h1: text user_row[0]
+        form(`method` = "post"):
+          label(`for` = "fullname"): text "Full name"
+          input(name = "fullname", id = "fullname")
+          label(`for` = "password"): text "Password"
+          input(`type` = "password", name = "password", id = "password")
+          input(`type` = "submit", value = "Save")
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close
 

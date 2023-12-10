@@ -24,7 +24,7 @@ proc sharedNav*(ctx: Context): VNode =
           li: a(href = "/auth/register"): text "Register"
           li: a(href = "/auth/login"): text "Log In"
         else:
-          li: span: text fullname
+          li: a(href = "/profile"): text fullname
           li: a(href = "/auth/logout"): text "Log Out"
 
   return vNode

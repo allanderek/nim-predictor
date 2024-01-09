@@ -5,6 +5,7 @@ import prologue/security/hasher
 import prologue/middlewares/signedcookiesession
 import prologue/middlewares/staticfile
 from std/strutils import parseInt
+import std/[os, parseopt]
 
 import ./consts
 import ./initdb
@@ -89,9 +90,9 @@ proc index*(ctx: Context) {.async.} =
         head
         nav
         main:
+            section: races(rows=race_rows)
             section: drivers(rows=driver_rows)
             section: teams(rows=team_rows)
-            section: races(rows=race_rows)
 
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
     db.close()
@@ -206,13 +207,13 @@ proc showRace* (ctx: Context) {.async.} =
         safety_car = ctx.getPostParams("safety_car")
         isResult = ctx.getPostParams("isResult") == "true"
       if isResult and is_admin:
-        # TODO: We have to check if the user is an admin
         db.exec(sql"""
         insert into results 
           (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           on conflict(race)
           do update set pole = excluded.pole, fam=excluded.fam, fl=excluded.fl, hgc=excluded.hgc, first=excluded.first, second=excluded.second, third = excluded.third, fdnf=excluded.fdnf, safety_car=excluded.safety_car
         """, raceId, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
+        # TODO: We have to check if it is isResult but the user is not an admin
       elif not entryClosed:
         db.exec(sql"""
         insert into predictions (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -535,10 +536,22 @@ let
     pattern("/logout", logoutHandler, @[HttpGet, HttpPost]),
   ]
 
+
+var env_file = "config.debug.env"
+var optparser = initOptParser(quoteShellCommand(commandLineParams()))
+for kind, key, val in optparser.getopt():
+  case kind
+  of cmdArgument: discard
+  of cmdLongOption, cmdShortOption:
+    case key
+    of "config", "c":
+      env_file = val
+  of cmdEnd: assert(false) # cannot happen
+
 let 
-    env = loadPrologueEnv("src/.env")
+    env = loadPrologueEnv(env_file)
     settings = newSettings(appName = env.get("appName"),
-      debug = env.getOrDefault("debug", true),
+      debug = env.getOrDefault("debug", false),
       port = Port(env.getOrDefault("port", 3003)),
       secretKey = env.getOrDefault("secretKey", "")
     )

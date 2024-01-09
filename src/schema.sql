@@ -21,9 +21,9 @@ CREATE TABLE users (
     admin integer default 0    
 );
 insert into users (id, fullname, username, password, admin) values (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
-insert into users (id, fullname, username, password, admin) values (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
-insert into users (id, fullname, username, password, admin) values (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
-insert into users (id, fullname, username, password, admin) values (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+insert into users (id, fullname, username, password, admin) values (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$8kdAzWvj4i78PF0TTiaouMsa/jPK08pk4TtL1xXJdjOUH1PEnKB6r0p1PQ18DyKWriZR13hbsuqm7A8J8mauiA==', 1);
+insert into users (id, fullname, username, password, admin) values (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$Rw+otrxmI2uoEmrspm+0ftsK3h1Xu/6V9B4EHOioSLif4jepM+pxre3cavdVoVsXb6z74zENM//URTwis508BQ==', 1);
+insert into users (id, fullname, username, password, admin) values (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$dteSREtZlbugOwmed76fXUva70mFjKBzZ40HkLc3psZKcHP/8McibNqwXGtBw6BZMnuwNuJ/9mUUBP9LGCsI4w==', 1);
 
 CREATE TABLE drivers ( 
     id integer primary key autoincrement, 
@@ -58,21 +58,22 @@ insert into drivers (name) values ("David Beckmann");
 CREATE TABLE teams ( 
     id integer primary key autoincrement, 
     fullname text, 
-    shortname text
+    shortname text,
+    color text
 );
 
 -- 2022/23
-insert into teams (fullname, shortname) values ("DS Penske", "Penske");
-insert into teams (fullname, shortname) values ("NIO 333 Racing", "NIO");
-insert into teams (fullname, shortname) values ("ABT CUPRA Formula E Team", "ABT Cupra");
-insert into teams (fullname, shortname) values ("NEOM McLaren Formula E Team", "McLaren");
-insert into teams (fullname, shortname) values ("Maserati MSG Racing", "Maserati");
-insert into teams (fullname, shortname) values ("Mahindra Racing", "Mahindra");
-insert into teams (fullname, shortname) values ("Jaguar TCS Racing", "Jaguar");
-insert into teams (fullname, shortname) values ("TAG Heuer Porsche Formula E Team", "Porsche");
-insert into teams (fullname, shortname) values ("Envision Racing", "Envision");
-insert into teams (fullname, shortname) values ("Nissan Formula E Team", "Nissan");
-insert into teams (fullname, shortname) values ("Avalanche Andretti Formula E", "Andretti");
+insert into teams (fullname, shortname, color) values ("DS Penske", "Penske", "#cba65f");
+insert into teams (fullname, shortname, color) values ("NIO 333 Racing", "NIO", "#3c3c3c");
+insert into teams (fullname, shortname, color) values ("ABT CUPRA Formula E Team", "ABT Cupra", "#527c8d");
+insert into teams (fullname, shortname, color) values ("NEOM McLaren Formula E Team", "McLaren", "#ff8000");
+insert into teams (fullname, shortname, color) values ("Maserati MSG Racing", "Maserati", "#001489");
+insert into teams (fullname, shortname, color) values ("Mahindra Racing", "Mahindra", "#dd052b");
+insert into teams (fullname, shortname, color) values ("Jaguar TCS Racing", "Jaguar", "#000000");
+insert into teams (fullname, shortname, color) values ("TAG Heuer Porsche Formula E Team", "Porsche", "#d5001c");
+insert into teams (fullname, shortname, color) values ("Envision Racing", "Envision", "#00be26");
+insert into teams (fullname, shortname, color) values ("Nissan Formula E Team", "Nissan", "#c3002f");
+insert into teams (fullname, shortname, color) values ("Avalanche Andretti Formula E", "Andretti", "#ed3124");
 
 create table seasons (
     year text not null primary key
@@ -397,19 +398,19 @@ drop table temp_results;
 
 
 -- Do all the 2023/24 stuff AFTER we've done all the gumph above, otherwise you can end up with duplicate drivers etc.
-insert into teams (fullname, shortname) values ("Andretti Global", "Andretti");
-insert into teams (fullname, shortname) values ("ERT Formula E Team", "ERT");
+insert into teams (fullname, shortname, color) values ("Andretti Global", "Andretti", "#ed3124");
+insert into teams (fullname, shortname, color) values ("ERT Formula E Team", "ERT", "#3c3c3c");
 
 insert into drivers (name) values ("Jehan Daruvala");
 insert into drivers (name) values ("Nyck de Vries");
 
 insert into races (round, name, country, circuit, date, season) values 
-    (1, "Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2024-01-13T18:00:00Z", "2023-24"),
-    (2, "Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-26T18:00:00Z", "2023-24"),
-    (3, "Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-27T18:00:00Z", "2023-24"),
-    (4, "Hyderabad E-Prix", "India", "Hyderabad Street Circuit", "2024-02-10T18:00:00Z", "2023-24"),
-    (5, "São Paulo E-Prix", "Brazil", "São Paulo Street Circuit", "2024-03-16T18:00:00Z", "2023-24"),
-    (6, "Tokyo E-Prix", "Japan", "Tokyo Street Cicuit", "2024-03-30T18:00:00Z", "2023-24"),
+    (1, "Hancook Mexico city e-prix", "Mexico", "Autódromo Hermanos Rodríguez", "2024-01-13T15:40:00Z", "2023-24"),
+    (2, "Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-26T17:00:00Z", "2023-24"),
+    (3, "Diriyah E-Prix", "Saudi Arabia", "Riyadh Street Circuit", "2024-01-27T17:00:00Z", "2023-24"),
+    (4, "Hyderabad E-Prix", "India", "Hyderabad Street Circuit", "2024-02-10T09:00:00Z", "2023-24"),
+    (5, "São Paulo E-Prix", "Brazil", "São Paulo Street Circuit", "2024-03-16T14:00:00Z", "2023-24"),
+    (6, "Tokyo E-Prix", "Japan", "Tokyo Street Cicuit", "2024-03-30T17:00:00Z", "2023-24"),
     (7, "Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-13T18:00:00Z", "2023-24"),
     (8, "Misano Adriatico E-Prix", "Italy", "Misano World Circuit Marco Simoncelli", "2024-04-14T18:00:00Z", "2023-24"),
     (9, "Monaco E-Prix", "Monaco", "Circuit de Monaco", "2024-04-27T18:00:00Z", "2023-24"),

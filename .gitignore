@@ -1,7 +1,7 @@
 blog
 predictions.db
+formulaone.db
 .devenv.flake.nix
 .devenv
 .direnv
-src/.env
 src/backend

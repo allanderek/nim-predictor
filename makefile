@@ -6,6 +6,6 @@ run:
 	nim compile -r src/backend.nim --config=config.debug.env
 
 deploy:
-	nim compile -r src/backend.nim --config=config.prod.env
+	nim compile -d:release -r src/backend.nim --config=config.prod.env
 
 

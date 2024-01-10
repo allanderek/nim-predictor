@@ -8,4 +8,5 @@ proc sharedHead*(ctx: Context, title: string): VNode =
     title: text title 
     # link(rel = "stylesheet", href = "/static/mvp.css")
     link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/gh/kimeiga/bahunya/dist/bahunya.min.css")
+    link(rel = "stylesheet", href = "/static/styles.css")
   return vNode

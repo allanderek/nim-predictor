@@ -283,7 +283,7 @@ with
     inner join race_entrants as second_entrants on second_entrants.id == predictions.second
     inner join race_entrants as third_entrants on third_entrants.id == predictions.third
     inner join race_entrants as fdnf_entrants on fdnf_entrants.id == predictions.fdnf
-    join results on predictions.race = results.race
+    left join results on predictions.race = results.race
     where predictions.race = ?
     order by total desc
     ;

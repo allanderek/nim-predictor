@@ -7,7 +7,6 @@ import prologue/middlewares/staticfile
 from std/strutils import parseInt
 import std/[os, parseopt]
 
-import ./consts
 import ./initdb
 import
   templates/login,
@@ -16,6 +15,27 @@ import
   templates/share/head,
   templates/share/nav
 
+var env_file = "config.debug.env"
+var optparser = initOptParser(quoteShellCommand(commandLineParams()))
+for kind, key, val in optparser.getopt():
+  case kind
+  of cmdArgument: discard
+  of cmdLongOption, cmdShortOption:
+    case key
+    of "config", "c":
+      env_file = val
+  of cmdEnd: assert(false) # cannot happen
+
+let 
+    env = loadPrologueEnv(env_file)
+    settings = newSettings(appName = env.get("appName"),
+      debug = env.getOrDefault("debug", false),
+      port = Port(env.getOrDefault("port", 3003)),
+      secretKey = env.getOrDefault("secretKey", ""),
+    )
+
+var databasePath = env.getOrDefault("dbPath", "temp.db")
+initdb.initDb(databasePath)
 
 proc drivers*(rows: seq[seq[string]]): VNode =
     result = buildHtml(section):
@@ -77,8 +97,8 @@ proc getEntrants*(db: DbConn, race_id: string): seq[seq[string]] =
     """
     result = db.getAllRows(sql(entrant_sql), race_id)
 
-proc index*(ctx: Context) {.async.} =
-    let db = open(consts.dbPath, "", "", "")
+proc index*(ctx: Context) {.async gcsafe.} =
+    let db = open(databasePath, "", "", "")
 
     let driver_rows = db.getAllRows(sql("""SELECT * FROM drivers"""))
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
@@ -176,9 +196,9 @@ proc showPredictionPart(prediction: string, prediction_name: string, answer: str
       else:
         text "0"
 
-proc showRace* (ctx: Context) {.async.} =
+proc showRace* (ctx: Context) {.async gcsafe.} =
   let
-      db = open(consts.dbPath, "", "", "")
+      db = open(databasePath, "", "", "")
       race_id = ctx.getPathParams("race")
       race = db.getRow(sql"SELECT id, name, country, circuit, unixepoch() > unixepoch(date) as 'Closed' FROM races WHERE id = ?", race_id)
       head = sharedHead(ctx, "Formula E")
@@ -359,9 +379,9 @@ with
   db.close()
 
 
-proc showLeaderboard*(ctx: Context) {.async.} =
+proc showLeaderboard*(ctx: Context) {.async gcsafe.} =
   let
-      db = open(consts.dbPath, "", "", "")
+      db = open(databasePath, "", "", "")
       season = ctx.getPathParams("season")
       leaderboardSql = """
 with
@@ -420,9 +440,9 @@ with
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close
 
-proc showProfile*(ctx: Context) {.async.} =
+proc showProfile*(ctx: Context) {.async gcsafe.} =
   let
-    db = open(consts.dbPath, "", "", "")
+    db = open(databasePath, "", "", "")
     user_id = ctx.session.getOrDefault("userId")
   if ctx.request.reqMethod == HttpPost:
     # TODO: Check that the repeat is the same?
@@ -452,8 +472,8 @@ proc showProfile*(ctx: Context) {.async.} =
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close
 
-proc loginHandler*(ctx: Context) {.async.} =
-  let db = open(consts.dbPath, "", "", "")
+proc loginHandler*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
   if ctx.request.reqMethod == HttpPost:
     var
       error: string
@@ -493,8 +513,8 @@ proc logoutHandler*(ctx: Context) {.async.} =
   resp redirect(urlFor(ctx, "index"), Http302)
 
 # /register
-proc registerHandler*(ctx: Context) {.async.} =
-  let db = open(consts.dbPath, "", "", "")
+proc registerHandler*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
   if ctx.request.reqMethod == HttpPost:
     var error: string
     let
@@ -537,26 +557,6 @@ let
   ]
 
 
-var env_file = "config.debug.env"
-var optparser = initOptParser(quoteShellCommand(commandLineParams()))
-for kind, key, val in optparser.getopt():
-  case kind
-  of cmdArgument: discard
-  of cmdLongOption, cmdShortOption:
-    case key
-    of "config", "c":
-      env_file = val
-  of cmdEnd: assert(false) # cannot happen
-
-let 
-    env = loadPrologueEnv(env_file)
-    settings = newSettings(appName = env.get("appName"),
-      debug = env.getOrDefault("debug", false),
-      port = Port(env.getOrDefault("port", 3003)),
-      secretKey = env.getOrDefault("secretKey", "")
-    )
-
-initdb.initDb()
 var app = newApp( settings = settings )
 
 app.use(staticFileMiddleware(env.get("staticDir")), sessionMiddleware(settings, path = "/"))

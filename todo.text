@@ -15,10 +15,17 @@
 
 Next steps:
 * The first thing is actual errors in showRace, for things such as making a prediction too late etc. Check out the login errors for an example of how to do this here.  
+* In particular we need a good error message when not logged-in (and it shouldn't log the prediction as an anonymous one).
+* The single race scoreboard should use the 'Full name' rather than 'username' just as the full leaderboard does.
+* The race page should show the round number, and starting data/time, it was difficult to know which Diryah race we were on.
 * Need someway to reload the page when the race starts, or at least prevent entry
-* Need someway to prevent some one entering a guess with the same drivers in first/second/third.
+* Need someway to prevent someone entering a guess with the same drivers in first/second/third.
 * Could try doing this in Elm with a json backend.
 * Check what happens when you show a race that is past the deadline but has no results.
+* Maybe have a rules page, I think what James and I have agreed:
+  1. You cannot have the same driver in any of 1,2,3 positions.
+  2. But you may have the same driver anywhere else, it's technically possible for a driver to be pole and HGC (if all drivers stay in the same position then the HGC is 0, and the winner of the race is the highest of those). I don't think it's possible to win the race and be FDNF (but probably is technically possible to be 2nd or 3rd, due to lapping everyone else and DNF'ing on the final lap). Nonetheless we've decided that if you want to predict in that fashion, that's okay. 
+  3. FDNF is basically just 'last', since if there are no DNFs then we take the 'last' position to be the FDNF. However, it's important to note that DNS is **not** a DNF. So it's "last of those drivers that started the race". In practice, this is typically FDNF.
 
 Obviously, you have to make sure all this is actually working as a website. Do a dummy race first. But just as you did before.
 

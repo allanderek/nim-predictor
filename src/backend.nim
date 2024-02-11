@@ -33,8 +33,7 @@ let
       port = Port(env.getOrDefault("port", 3003)),
       secretKey = env.getOrDefault("secretKey", ""),
     )
-
-var databasePath = env.getOrDefault("dbPath", "temp.db")
+    databasePath = env.getOrDefault("dbPath", "temp.db")
 initdb.initDb(databasePath)
 
 proc drivers*(rows: seq[seq[string]]): VNode =

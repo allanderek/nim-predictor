@@ -1,10 +1,13 @@
 module Main exposing (main)
 
+import Route
+import Return
 import Browser
 import Browser.Navigation
 import Html
 import Url exposing (Url)
 import Html
+import Route exposing (Route)
 
 
 type alias ProgramFlags =
@@ -16,9 +19,6 @@ type alias Model =
     , route : Route
     }
 
-
-type Route
-    = Home
 
 
 type Msg
@@ -44,17 +44,15 @@ main =
 
 
 init : ProgramFlags -> Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
-init _ _ key =
+init _ url key =
     let
         initialModel : Model
         initialModel =
             { navigationKey = key
-            , route = Home
+            , route = Route.parse url
             }
     in
-    ( initialModel
-    , Cmd.none
-    )
+    Return.noCmd initialModel
 
 
 view : Model -> Browser.Document Msg
@@ -67,4 +65,17 @@ view _ =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
-    ( model, Cmd.none )
+    case message of
+        UrlChange url ->
+            { model | route = Route.parse url }
+                |> Return.noCmd
+
+        UrlRequest urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    Browser.Navigation.pushUrl model.navigationKey (Url.toString url)
+                        |> Return.cmdWith model
+
+                Browser.External url ->
+                    Browser.Navigation.load url
+                        |> Return.cmdWith model

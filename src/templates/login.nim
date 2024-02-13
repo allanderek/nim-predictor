@@ -26,7 +26,7 @@ proc loginSection*(ctx: Context, title: string, error: string = ""): VNode =
 
 
 proc loginPage*(ctx: Context, title: string, error: string = ""): string =
-  let head = sharedHead(ctx, title)
+  let head = sharedHead(ctx, title, false)
   let nav = sharedNav(ctx)
   let login = loginSection(ctx, title, error)
   let vNode = buildHtml(html):

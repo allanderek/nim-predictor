@@ -8,4 +8,5 @@ run:
 deploy:
 	nim compile -d:release -r src/backend.nim --config=config.prod.env
 
-
+frontend: src/frontend/Main.elm
+	elm make src/frontend/Main.elm --output=static/main.js

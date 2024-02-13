@@ -7,3 +7,5 @@ formulaone.db
 .devenv
 .direnv
 src/backend
+elm-stuff
+static/main.js

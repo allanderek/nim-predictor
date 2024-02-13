@@ -103,7 +103,7 @@ proc index*(ctx: Context) {.async gcsafe.} =
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
     let race_sql = """select id, round, name, country, circuit, date from races where season = '2023-24'"""
     let race_rows = db.getAllRows(sql(race_sql))
-    let head = sharedHead(ctx, "Formula E")
+    let head = sharedHead(ctx, "Formula E", false)
     let nav = sharedNav(ctx)
     let vNode = buildHtml(html):
         head
@@ -116,6 +116,18 @@ proc index*(ctx: Context) {.async gcsafe.} =
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
     db.close()
 
+
+proc showFormulaOneIndex*(ctx: Context) {.async gcsafe.} =
+    let db = open(databasePath, "", "", "")
+
+    let head = sharedHead(ctx, "Formula One", true)
+    let vNode = buildHtml(html):
+        head
+        body:
+          script: verbatim """var app = Elm.Main.init({ "flags": {} }); """
+
+    resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
+    db.close()
 
 type
   Prediction = tuple
@@ -200,7 +212,7 @@ proc showRace* (ctx: Context) {.async gcsafe.} =
       db = open(databasePath, "", "", "")
       race_id = ctx.getPathParams("race")
       race = db.getRow(sql"SELECT id, name, country, circuit, unixepoch() > unixepoch(date) as 'Closed' FROM races WHERE id = ?", race_id)
-      head = sharedHead(ctx, "Formula E")
+      head = sharedHead(ctx, "Formula E", false)
       nav = sharedNav(ctx)
       user_id = ctx.session.getOrDefault("userId")
       user = db.getRow(sql"select admin from users where id = ?", user_id)
@@ -412,7 +424,7 @@ with
     ;
       """
       leaderboardRows = db.getAllRows(sql(leaderboardSql), season)
-  let head = sharedHead(ctx, "Formula E")
+  let head = sharedHead(ctx, "Formula E", false)
   let nav = sharedNav(ctx)
   let vNode = buildHtml(html):
       head
@@ -458,7 +470,7 @@ proc showProfile*(ctx: Context) {.async gcsafe.} =
   let
     user_row = db.getRow(sql"select fullname from users where id = ?", user_id)
     vNode = buildHtml(html):
-      sharedHead(ctx, "Formula E")
+      sharedHead(ctx, "Formula E", false)
       sharedNav(ctx)
       section:
         h1: text user_row[0]
@@ -545,6 +557,7 @@ proc registerHandler*(ctx: Context) {.async gcsafe.} =
 let
   indexPatterns* = @[
     pattern("/", index, @[HttpGet], name = "index"),
+    pattern("/formulaone", showFormulaOneIndex, @[HttpGet], name = "formula-one" ),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
     pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
     pattern("/profile", showProfile, @[HttpGet, HttpPost], name = "profile"),

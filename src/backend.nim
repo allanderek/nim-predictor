@@ -561,7 +561,7 @@ proc registerHandler*(ctx: Context) {.async gcsafe.} =
 proc formulaOneEvents*(ctx: Context) {.async gcsafe.} =
   let db = open(databasePath, "", "", "")
   let event_sql = """
-      select round, name, season
+      select id, round, name, season
       from formula_one_events
       where season = "2024"
       """
@@ -569,13 +569,12 @@ proc formulaOneEvents*(ctx: Context) {.async gcsafe.} =
   let jsonArray = newJArray()
 
   for row in dbRows:
-    if row.len >= 2: # Ensure there are at least two elements
+    if row.len >= 4: # Ensure there are at least two elements
       var jsonObj = newJObject()
-      # Convert the first element to an integer and assign to `round`
-      jsonObj["round"] = %parseInt(row[0])
-      # Assign the second element directly as `name`
-      jsonObj["name"] = %row[1]
-      jsonObj["season"] = %row[2] 
+      jsonObj["id"] = %parseInt(row[0])
+      jsonObj["round"] = %parseInt(row[1])
+      jsonObj["name"] = %row[2]
+      jsonObj["season"] = %row[3] 
       jsonArray.add(jsonObj)
   resp jsonResponse(jsonArray)
   db.close()

@@ -1,9 +1,10 @@
 module Route exposing
-    ( Route
+    ( Route(..)
     , parse
     , unparse
     )
 
+import Types.Event
 import Url
 import Url.Builder
 import Url.Parser as Parser exposing ((</>))
@@ -11,6 +12,8 @@ import Url.Parser as Parser exposing ((</>))
 
 type Route
     = Home
+    | EventPage Types.Event.Id
+    | NotFound
 
 
 parse : Url.Url -> Route
@@ -18,11 +21,13 @@ parse url =
     let
         routeParser =
             Parser.oneOf
-                [ Parser.top |> Parser.map Home ]
+                [ Parser.s "formulaone" |> Parser.map Home
+                , Parser.map EventPage (Parser.s "formulaone" </> Parser.s "event" </> Parser.int)
+                ]
     in
     url
         |> Parser.parse routeParser
-        |> Maybe.withDefault Home
+        |> Maybe.withDefault NotFound
 
 
 unparse : Route -> String
@@ -33,5 +38,11 @@ unparse route =
             case route of
                 Home ->
                     []
+
+                EventPage id ->
+                    [ "event", String.fromInt id ]
+
+                NotFound ->
+                    [ "notfound" ]
     in
-    Url.Builder.absolute parts []
+    Url.Builder.absolute ("formulaone" :: parts) []

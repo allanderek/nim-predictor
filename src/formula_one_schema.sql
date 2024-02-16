@@ -39,6 +39,7 @@ create table formula_one_seasons (
 
 create table formula_one_events (
     id integer primary key autoincrement,
+    round integer not null,
     name text,
     season text not null,
     foreign key (season) references formula_one_seasons (year)
@@ -78,31 +79,31 @@ create table formula_one_prediction_lines (
 );
 
 insert into formula_one_seasons (year) values ("2024");
-insert into formula_one_events (name, season) values
-    ("Bahrain Grand Prix", "2024"),
-    ("Saudi Arabian Grand Prix", "2024"),
-    ("Australian Grand Prix", "2024"),
-    ("Japanese Grand Prix", "2024"),
-    ("Chinese Grand Prix", "2024"),
-    ("Miami Grand Prix", "2024"),
-    ("Emilia Romagna Grand Prix", "2024"),
-    ("Monaco Grand Prix", "2024"),
-    ("Canadian Grand Prix", "2024"),
-    ("Spanish Grand Prix", "2024"),
-    ("Austrian Grand Prix", "2024"),
-    ("British Grand Prix", "2024"),
-    ("Hungarian Grand Prix", "2024"),
-    ("Belgian Grand Prix", "2024"),
-    ("Dutch Grand Prix", "2024"),
-    ("Italian Grand Prix", "2024"),
-    ("Azerbaijan Grand Prix", "2024"),
-    ("Singapore Grand Prix", "2024"),
-    ("United States Grand Prix", "2024"),
-    ("Mexico City Grand Prix", "2024"),
-    ("São Paulo Grand Prix", "2024"),
-    ("Las Vegas Grand PriX", "2024"),
-    ("Qatar Grand Prix", "2024"),
-    ("Abu Dhabi Grand Prix", "2024")
+insert into formula_one_events (round, name, season) values
+    (1, "Bahrain Grand Prix", "2024"),
+    (2, "Saudi Arabian Grand Prix", "2024"),
+    (3, "Australian Grand Prix", "2024"),
+    (4, "Japanese Grand Prix", "2024"),
+    (5, "Chinese Grand Prix", "2024"),
+    (6, "Miami Grand Prix", "2024"),
+    (7, "Emilia Romagna Grand Prix", "2024"),
+    (8, "Monaco Grand Prix", "2024"),
+    (9, "Canadian Grand Prix", "2024"),
+    (10, "Spanish Grand Prix", "2024"),
+    (11, "Austrian Grand Prix", "2024"),
+    (12, "British Grand Prix", "2024"),
+    (13, "Hungarian Grand Prix", "2024"),
+    (14, "Belgian Grand Prix", "2024"),
+    (15, "Dutch Grand Prix", "2024"),
+    (16, "Italian Grand Prix", "2024"),
+    (17, "Azerbaijan Grand Prix", "2024"),
+    (18, "Singapore Grand Prix", "2024"),
+    (19, "United States Grand Prix", "2024"),
+    (20, "Mexico City Grand Prix", "2024"),
+    (21, "São Paulo Grand Prix", "2024"),
+    (22, "Las Vegas Grand PriX", "2024"),
+    (23, "Qatar Grand Prix", "2024"),
+    (24, "Abu Dhabi Grand Prix", "2024")
     ;
 
 drop table if exists temp_sessions ;

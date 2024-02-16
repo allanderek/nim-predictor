@@ -4,8 +4,8 @@ import Browser
 import Browser.Navigation
 import Model exposing (Model)
 import Msg exposing (Msg)
-import Return
 import Route
+import Types.Requests
 import Update
 import Url exposing (Url)
 import View
@@ -39,6 +39,8 @@ init _ url key =
         initialModel =
             { navigationKey = key
             , route = Route.parse url
+            , events = []
+            , getEventsStatus = Types.Requests.Ready
             }
     in
-    Return.noCmd initialModel
+    Update.getEvents initialModel

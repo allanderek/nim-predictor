@@ -4,8 +4,10 @@ import karax / [karaxdsl, vdom]
 import prologue/security/hasher
 import prologue/middlewares/signedcookiesession
 import prologue/middlewares/staticfile
+import std/sequtils
 from std/strutils import parseInt
 import std/[os, parseopt]
+import std/json
 
 import ./initdb
 import
@@ -554,6 +556,31 @@ proc registerHandler*(ctx: Context) {.async gcsafe.} =
 
   db.close()
 
+
+
+proc formulaOneEvents*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
+  let event_sql = """
+      select round, name, season
+      from formula_one_events
+      where season = "2024"
+      """
+  let dbRows = db.getAllRows(sql(event_sql))
+  let jsonArray = newJArray()
+
+  for row in dbRows:
+    if row.len >= 2: # Ensure there are at least two elements
+      var jsonObj = newJObject()
+      # Convert the first element to an integer and assign to `round`
+      jsonObj["round"] = %parseInt(row[0])
+      # Assign the second element directly as `name`
+      jsonObj["name"] = %row[1]
+      jsonObj["season"] = %row[2] 
+      jsonArray.add(jsonObj)
+  resp jsonResponse(jsonArray)
+  db.close()
+
+
 let
   indexPatterns* = @[
     pattern("/", index, @[HttpGet], name = "index"),
@@ -567,6 +594,9 @@ let
     pattern("/register", registerHandler, @[HttpGet, HttpPost]),
     pattern("/logout", logoutHandler, @[HttpGet, HttpPost]),
   ]
+  formulaOneApiPatterns* = @[
+    pattern("/events", formulaOneEvents, @[HttpGet]),
+  ]
 
 
 var app = newApp( settings = settings )
@@ -574,4 +604,5 @@ var app = newApp( settings = settings )
 app.use(staticFileMiddleware(env.get("staticDir")), sessionMiddleware(settings, path = "/"))
 app.addRoute(indexPatterns, "")
 app.addRoute(authPatterns, "/auth")
+app.addRoute(formulaOneApiPatterns, "/api/formulaone")
 app.run()

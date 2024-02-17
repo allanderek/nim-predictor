@@ -10,6 +10,7 @@ import Msg exposing (Msg)
 import Route
 import Types.Event exposing (Event)
 import Types.Requests
+import Types.Session exposing (Session)
 
 
 view : Model -> Browser.Document Msg
@@ -77,7 +78,19 @@ viewEventPage model eventId =
             [ Html.text "Event not found" ]
 
         Just event ->
+            let
+                sessions : List (Html Msg)
+                sessions =
+                    List.filter (\session -> session.event == eventId) model.sessions
+                        |> List.map (showSession model)
+            in
             [ Html.h2
                 []
                 [ Html.text event.name ]
+            , Html.node "main" [] sessions
             ]
+
+
+showSession : Model -> Session -> Html Msg
+showSession model session =
+    Html.text session.name

@@ -579,11 +579,33 @@ proc formulaOneEvents*(ctx: Context) {.async gcsafe.} =
   resp jsonResponse(jsonArray)
   db.close()
 
+proc formulaOneSessions*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
+  # TODO: This SQL needs to only get those sessions associated with events in the current season.
+  let event_sql = """
+      select id, event, name, start_time, half_points
+      from formula_one_sessions
+      """
+  let dbRows = db.getAllRows(sql(event_sql))
+  let jsonArray = newJArray()
+
+  for row in dbRows:
+    if row.len >= 5: # Ensure there are at least two elements
+      var jsonObj = newJObject()
+      jsonObj["id"] = %parseInt(row[0])
+      jsonObj["event"] = %parseInt(row[1])
+      jsonObj["name"] = %row[2]
+      jsonObj["start_time"] = %row[3] 
+      jsonObj["half_points"] = %(row[4] != "0")
+      jsonArray.add(jsonObj)
+  resp jsonResponse(jsonArray)
+  db.close()
 
 let
   indexPatterns* = @[
     pattern("/", index, @[HttpGet], name = "index"),
     pattern("/formulaone", showFormulaOneIndex, @[HttpGet], name = "formula-one" ),
+    pattern("/formulaone/event/{event}", showFormulaOneIndex, @[HttpGet], name = "formula-one-event" ),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
     pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
     pattern("/profile", showProfile, @[HttpGet, HttpPost], name = "profile"),
@@ -595,6 +617,7 @@ let
   ]
   formulaOneApiPatterns* = @[
     pattern("/events", formulaOneEvents, @[HttpGet]),
+    pattern("/sessions", formulaOneSessions, @[HttpGet]),
   ]
 
 

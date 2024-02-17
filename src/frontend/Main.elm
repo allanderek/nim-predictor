@@ -4,6 +4,7 @@ import Browser
 import Browser.Navigation
 import Model exposing (Model)
 import Msg exposing (Msg)
+import Return
 import Route
 import Types.Requests
 import Update
@@ -41,6 +42,9 @@ init _ url key =
             , route = Route.parse url
             , events = []
             , getEventsStatus = Types.Requests.Ready
+            , sessions = []
+            , getSessionsStatus = Types.Requests.Ready
             }
     in
     Update.getEvents initialModel
+        |> Return.andThen Update.getSessions

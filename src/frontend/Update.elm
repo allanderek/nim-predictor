@@ -1,5 +1,6 @@
 module Update exposing
     ( getEvents
+    , getSessions
     , update
     )
 
@@ -13,6 +14,7 @@ import Return
 import Route
 import Types.Event exposing (Event)
 import Types.Requests
+import Types.Session exposing (Session)
 import Url
 
 
@@ -38,6 +40,32 @@ getEvents model =
     in
     { model
         | getEventsStatus = Types.Requests.InFlight
+    }
+        |> Return.withCmd command
+
+
+getSessions : Model -> ( Model, Cmd Msg )
+getSessions model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult (List Session) -> Msg
+                toMessage =
+                    Msg.GetSessionsResponse
+
+                decoder : Decoder (List Session)
+                decoder =
+                    Types.Session.decoder
+                        |> Json.Decode.list
+            in
+            Http.get
+                { url = "/api/formulaone/sessions"
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model
+        | getSessionsStatus = Types.Requests.InFlight
     }
         |> Return.withCmd command
 
@@ -70,4 +98,16 @@ update message model =
                         { model
                             | getEventsStatus = Types.Requests.Succeeded
                             , events = events
+                        }
+
+        Msg.GetSessionsResponse result ->
+            case result of
+                Err _ ->
+                    Return.noCmd { model | getSessionsStatus = Types.Requests.Failed }
+
+                Ok sessions ->
+                    Return.noCmd
+                        { model
+                            | getSessionsStatus = Types.Requests.Succeeded
+                            , sessions = sessions
                         }

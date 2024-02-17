@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation
+import Dict
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Return
@@ -44,7 +45,10 @@ init _ url key =
             , getEventsStatus = Types.Requests.Ready
             , sessions = []
             , getSessionsStatus = Types.Requests.Ready
+            , entrants = Dict.empty
+            , getEntrantsStatus = Dict.empty
             }
     in
-    Update.getEvents initialModel
+    Update.initForRoute initialModel
+        |> Return.andThen Update.getEvents
         |> Return.andThen Update.getSessions

@@ -1,8 +1,8 @@
 module Return exposing
     ( andThen
-    , cmdWith
     , noCmd
     , withCmd
+    , withModel
     )
 
 
@@ -16,8 +16,8 @@ withCmd command model =
     ( model, command )
 
 
-cmdWith : model -> Cmd msg -> ( model, Cmd msg )
-cmdWith model command =
+withModel : model -> Cmd msg -> ( model, Cmd msg )
+withModel model command =
     ( model, command )
 
 

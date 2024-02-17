@@ -13,7 +13,7 @@ type alias Id =
 
 
 type alias Event =
-    { id : Int
+    { id : Id
     , round : Int
     , name : String
     , season : String

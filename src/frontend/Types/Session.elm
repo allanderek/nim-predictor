@@ -14,7 +14,7 @@ type alias Id =
 
 
 type alias Session =
-    { id : Int
+    { id : Id
     , event : Types.Event.Id
     , name : String
     , startTime : String

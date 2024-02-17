@@ -601,6 +601,35 @@ proc formulaOneSessions*(ctx: Context) {.async gcsafe.} =
   resp jsonResponse(jsonArray)
   db.close()
 
+proc formulaOneEntrants*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
+  # TODO: This SQL needs to only get those sessions associated with events in the current season.
+  let event_id = ctx.getPathParams("event")
+  let entrant_sql = """
+  select entrants.id, sessions.id as session_id, entrants.number, drivers.name, teams.shortname
+               from formula_one_entrants as entrants
+               inner join drivers on entrants.driver = drivers.id
+               inner join teams on entrants.team = teams.id
+               inner join formula_one_sessions as sessions on entrants.session = sessions.id
+               inner join formula_one_events as events on sessions.event = events.id
+               where events.id = ?
+               ;
+      """
+  let dbRows = db.getAllRows(sql(entrant_sql), event_id)
+  let jsonArray = newJArray()
+
+  for row in dbRows:
+    if row.len >= 5: # Ensure there are at least two elements
+      var jsonObj = newJObject()
+      jsonObj["id"] = %parseInt(row[0])
+      jsonObj["session"] = %parseInt(row[1])
+      jsonObj["number"] = %parseInt(row[2])
+      jsonObj["driver"] = %row[3] 
+      jsonObj["team"] = %row[4]
+      jsonArray.add(jsonObj)
+  resp jsonResponse(jsonArray)
+  db.close()
+
 let
   indexPatterns* = @[
     pattern("/", index, @[HttpGet], name = "index"),
@@ -618,6 +647,7 @@ let
   formulaOneApiPatterns* = @[
     pattern("/events", formulaOneEvents, @[HttpGet]),
     pattern("/sessions", formulaOneSessions, @[HttpGet]),
+    pattern("/entrants/{event}", formulaOneEntrants, @[HttpGet]),
   ]
 
 

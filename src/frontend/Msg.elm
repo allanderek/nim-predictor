@@ -6,6 +6,7 @@ module Msg exposing
 import Browser
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
+import Types.PredictionDict
 import Types.Requests
 import Types.Session exposing (Session)
 import Url exposing (Url)
@@ -17,9 +18,9 @@ type Msg
     | GetEventsResponse (Types.Requests.HttpResult (List Event))
     | GetSessionsResponse (Types.Requests.HttpResult (List Session))
     | GetEntrantsResponse Types.Event.Id (Types.Requests.HttpResult (List Entrant))
-    | SubmitPredictions Types.Session.Id
-    | SubmitPredictionsResponse Types.Session.Id (Types.Requests.HttpResult ())
-    | MovePrediction UpDown Types.Session.Id Int
+    | SubmitPredictions Types.PredictionDict.Context Types.Session.Id
+    | SubmitPredictionsResponse Types.PredictionDict.Context Types.Session.Id (Types.Requests.HttpResult ())
+    | MovePrediction Types.PredictionDict.Context Types.Session.Id Int UpDown
 
 
 type UpDown

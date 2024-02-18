@@ -10,21 +10,24 @@ import Route exposing (Route)
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
+import Types.PredictionDict exposing (PredictionDict)
 import Types.Requests
 import Types.Session exposing (Session)
+import Types.User exposing (User)
 
 
 type alias Model =
     { navigationKey : Browser.Navigation.Key
     , route : Route
+    , user : Maybe User
     , getEventsStatus : Types.Requests.Status
     , events : List Event
     , getSessionsStatus : Types.Requests.Status
     , sessions : List Session
     , entrants : Dict Types.Session.Id (List Entrant)
     , getEntrantsStatus : Dict Types.Event.Id Types.Requests.Status
-    , submitPredictionsStatus : Dict Types.Session.Id Types.Requests.Status
-    , inputPredictions : Dict Types.Session.Id (List Prediction)
+    , submitPredictionsStatus : PredictionDict Types.Requests.Status
+    , inputPredictions : PredictionDict (List Prediction)
     }
 
 
@@ -32,6 +35,15 @@ init : { navigationKey : Browser.Navigation.Key, route : Route } -> Model
 init config =
     { navigationKey = config.navigationKey
     , route = config.route
+
+    -- TODO: Obviously wrong
+    , user =
+        Just
+            { id = "1"
+            , username = "allanderek"
+            , fullname = "Allan"
+            , isAdmin = True
+            }
     , events = []
     , getEventsStatus = Types.Requests.Ready
     , sessions = []
@@ -43,12 +55,12 @@ init config =
     }
 
 
-getInputPredictions : Model -> Types.Session.Id -> List Prediction
-getInputPredictions model sessionId =
+getInputPredictions : Model -> Types.PredictionDict.Context -> Types.Session.Id -> List Prediction
+getInputPredictions model context sessionId =
     let
         mInput : Maybe (List Prediction)
         mInput =
-            Dict.get sessionId model.inputPredictions
+            Types.PredictionDict.get context sessionId model.inputPredictions
     in
     case mInput of
         Just predictions ->

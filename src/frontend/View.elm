@@ -13,6 +13,7 @@ import Msg exposing (Msg)
 import Route
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
+import Types.PredictionDict
 import Types.Requests
 import Types.Session exposing (Session)
 
@@ -115,11 +116,33 @@ showSession model session =
                 , Html.td [] [ Html.text entrant.driver ]
                 , Html.td [] [ Html.text entrant.team ]
                 ]
+
+        -- TODO: Of course there are conditions on each of these, such that you should only see at most one.
+        -- 1. Enter predictions if logged-in and the session hasn't yet started.
+        -- 2. Enter results if logged-in, as an admin-user, and the session has started.
+        input : Html Msg
+        input =
+            case model.user of
+                Nothing ->
+                    Helpers.Html.nothing
+
+                Just user ->
+                    Html.div
+                        []
+                        [ Components.InputPredictions.view model
+                            { context = Types.PredictionDict.UserPrediction user.id
+                            , session = session
+                            }
+                        , Components.InputPredictions.view model
+                            { context = Types.PredictionDict.SessionResult 
+                            , session = session
+                            }
+                        ]
     in
     Html.section
         []
         [ Html.h2
             []
             [ Html.text session.name ]
-        , Components.InputPredictions.view model { session = session }
+        , input
         ]

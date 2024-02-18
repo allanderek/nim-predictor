@@ -629,11 +629,9 @@ proc formulaOneEntrants*(ctx: Context) {.async gcsafe.} =
   resp jsonResponse(jsonArray)
   db.close()
 
-proc submitFormulaOnePredictions*(ctx: Context) {.async gcsafe.}=
+proc submitFormulaOnePredictionsLines*(ctx: Context, user_id: string, session: string) {.async gcsafe.}=
   let db = open(databasePath, "", "", "")
-  let user_id = ctx.session.getOrDefault("userId")
   # TODO: Obviously I need to check that we are not past the time.
-  let session = ctx.getPathParams("session")
   let predictions = parseJson(ctx.request.body())
   if predictions.kind == JArray:
     for prediction in predictions:
@@ -652,6 +650,23 @@ proc submitFormulaOnePredictions*(ctx: Context) {.async gcsafe.}=
   resp jsonResponse(predictions)
   db.close()
 
+proc submitFormulaOnePredictions*(ctx: Context) {.async gcsafe.}=
+  let user_id = ctx.session.getOrDefault("userId")
+  let session = ctx.getPathParams("session")
+  # TODO: First we have to get the user and check that they are a valid user. Second we should check that the session
+  # has not yet started.
+  if user_id != "":
+    result = submitFormulaOnePredictionsLines(ctx, user_id, session)
+  # TODO: Have to do something if the user_id is not empty
+
+proc submitFormulaOneResults*(ctx: Context) {.async gcsafe.}=
+  # let user_id = ctx.session.getOrDefault("userId")
+  let session = ctx.getPathParams("session")
+  # The user we store the predictions against is the empty user as that is how results are stored.
+  let user_to_store = ""
+  # TODO: First we have to get the user and check that they are an admin user. Second we should check that the
+  # the session has indeed started, although that's not strictly necessary.
+  result = submitFormulaOnePredictionsLines(ctx, user_to_store, session)
 
 let
   indexPatterns* = @[
@@ -672,6 +687,7 @@ let
     pattern("/sessions", formulaOneSessions, @[HttpGet]),
     pattern("/entrants/{event}", formulaOneEntrants, @[HttpGet]),
     pattern("/submit-predictions/{session}", submitFormulaOnePredictions, @[HttpPost]),
+    pattern("/submit-results/{session}", submitFormulaOneResults, @[HttpPost]),
   ]
 
 

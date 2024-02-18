@@ -19,6 +19,7 @@ import Route
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
+import Types.PredictionDict
 import Types.Requests
 import Types.Session exposing (Session)
 import Url
@@ -191,13 +192,13 @@ update message model =
                             , getEntrantsStatus = Dict.remove eventId model.getEntrantsStatus
                         }
 
-        Msg.SubmitPredictions sessionId ->
+        Msg.SubmitPredictions predictionContext sessionId ->
             let
                 newModel : Model
                 newModel =
                     { model
                         | submitPredictionsStatus =
-                            Dict.insert sessionId Types.Requests.InFlight model.submitPredictionsStatus
+                            Types.PredictionDict.insert predictionContext sessionId Types.Requests.InFlight model.submitPredictionsStatus
                     }
 
                 command : Cmd Msg
@@ -205,7 +206,7 @@ update message model =
                     let
                         toMessage : Types.Requests.HttpResult () -> Msg
                         toMessage =
-                            Msg.SubmitPredictionsResponse sessionId
+                            Msg.SubmitPredictionsResponse predictionContext sessionId
 
                         decoder : Decoder ()
                         decoder =
@@ -213,21 +214,44 @@ update message model =
 
                         predictions : List Prediction
                         predictions =
-                            Model.getInputPredictions model sessionId
+                            Model.getInputPredictions model predictionContext sessionId
 
                         body : Encode.Value
                         body =
                             Encode.list Types.Prediction.encode predictions
+
+                        url : String
+                        url =
+                            let
+                                sessionParam : String
+                                sessionParam =
+                                    String.fromInt sessionId
+
+                                submitSuffix : String
+                                submitSuffix =
+                                    case predictionContext of
+                                        Types.PredictionDict.UserPrediction _ ->
+                                            "predictions"
+
+                                        Types.PredictionDict.SessionResult ->
+                                            "results"
+                            in
+                            String.concat
+                                [ "/api/formulaone/submit-"
+                                , submitSuffix
+                                , "/"
+                                , sessionParam
+                                ]
                     in
                     Http.post
-                        { url = String.append "/api/formulaone/submit-predictions/" (String.fromInt sessionId)
+                        { url = url
                         , body = Http.jsonBody body
                         , expect = Http.expectJson toMessage decoder
                         }
             in
             Return.withModel newModel command
 
-        Msg.SubmitPredictionsResponse sessionId result ->
+        Msg.SubmitPredictionsResponse predictionContext sessionId result ->
             let
                 status : Types.Requests.Status
                 status =
@@ -240,14 +264,15 @@ update message model =
             in
             Return.noCmd
                 { model
-                    | submitPredictionsStatus = Dict.insert sessionId status model.submitPredictionsStatus
+                    | submitPredictionsStatus =
+                        Types.PredictionDict.insert predictionContext sessionId status model.submitPredictionsStatus
                 }
 
-        Msg.MovePrediction upDown sessionId index ->
+        Msg.MovePrediction predictionContext sessionId index upDown ->
             let
                 currentPredictions : List Prediction
                 currentPredictions =
-                    Model.getInputPredictions model sessionId
+                    Model.getInputPredictions model predictionContext sessionId
 
                 movingFun : Int -> List Prediction -> List Prediction
                 movingFun =
@@ -268,4 +293,7 @@ update message model =
                         |> List.indexedMap rePosition
             in
             Return.noCmd
-                { model | inputPredictions = Dict.insert sessionId newPredictions model.inputPredictions }
+                { model
+                    | inputPredictions =
+                        Types.PredictionDict.insert predictionContext sessionId newPredictions model.inputPredictions
+                }

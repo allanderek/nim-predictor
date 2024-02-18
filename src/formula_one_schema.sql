@@ -74,7 +74,8 @@ create table formula_one_prediction_lines (
     fastest_lap integer,
     position integer check (position >= 1 and position <= 20),
     entrant integer not null,
-    foreign key (entrant) references formula_one_entrants (id)
+    foreign key (entrant) references formula_one_entrants (id),
+    foreign key (session) references formula_one_sessions (id),
     unique(user, session, position)
 );
 

@@ -1,8 +1,9 @@
 module View exposing (view)
 
-import Dict
-import Types.Entrant exposing (Entrant)
 import Browser
+import Components.InputPredictions
+import Components.WorkingIndicator
+import Dict
 import Helpers.Html
 import Html exposing (Html)
 import Html.Attributes as Attributes
@@ -10,6 +11,7 @@ import List.Extra
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Route
+import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Requests
 import Types.Session exposing (Session)
@@ -41,7 +43,11 @@ viewHome model =
                     Helpers.Html.nothing
 
                 Types.Requests.InFlight ->
-                    Html.text "Working"
+                    Html.div
+                        []
+                        [ Components.WorkingIndicator.view
+                        , Html.text "Getting the events."
+                        ]
 
                 Types.Requests.Succeeded ->
                     Helpers.Html.nothing
@@ -109,14 +115,11 @@ showSession model session =
                 , Html.td [] [ Html.text entrant.driver ]
                 , Html.td [] [ Html.text entrant.team ]
                 ]
-
     in
     Html.section
         []
         [ Html.h2
             []
             [ Html.text session.name ]
-        , Html.table 
-            [] 
-            [ Html.tbody [] (List.map showEntrant entrants) ]
+        , Components.InputPredictions.view model { session = session }
         ]

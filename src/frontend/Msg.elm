@@ -1,4 +1,7 @@
-module Msg exposing (Msg(..))
+module Msg exposing
+    ( Msg(..)
+    , UpDown(..)
+    )
 
 import Browser
 import Types.Entrant exposing (Entrant)
@@ -14,3 +17,11 @@ type Msg
     | GetEventsResponse (Types.Requests.HttpResult (List Event))
     | GetSessionsResponse (Types.Requests.HttpResult (List Session))
     | GetEntrantsResponse Types.Event.Id (Types.Requests.HttpResult (List Entrant))
+    | SubmitPredictions Types.Session.Id
+    | SubmitPredictionsResponse Types.Session.Id (Types.Requests.HttpResult ())
+    | MovePrediction UpDown Types.Session.Id Int
+
+
+type UpDown
+    = Up
+    | Down

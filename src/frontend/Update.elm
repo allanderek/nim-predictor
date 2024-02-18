@@ -8,14 +8,17 @@ module Update exposing
 import Browser
 import Browser.Navigation
 import Dict exposing (Dict)
+import Helpers.List
 import Http
 import Json.Decode exposing (Decoder)
+import Json.Encode as Encode
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Return
 import Route
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
+import Types.Prediction exposing (Prediction)
 import Types.Requests
 import Types.Session exposing (Session)
 import Url
@@ -187,3 +190,82 @@ update message model =
                             | entrants = Dict.union newEntrantsDict model.entrants
                             , getEntrantsStatus = Dict.remove eventId model.getEntrantsStatus
                         }
+
+        Msg.SubmitPredictions sessionId ->
+            let
+                newModel : Model
+                newModel =
+                    { model
+                        | submitPredictionsStatus =
+                            Dict.insert sessionId Types.Requests.InFlight model.submitPredictionsStatus
+                    }
+
+                command : Cmd Msg
+                command =
+                    let
+                        toMessage : Types.Requests.HttpResult () -> Msg
+                        toMessage =
+                            Msg.SubmitPredictionsResponse sessionId
+
+                        decoder : Decoder ()
+                        decoder =
+                            Json.Decode.succeed ()
+
+                        predictions : List Prediction
+                        predictions =
+                            Model.getInputPredictions model sessionId
+
+                        body : Encode.Value
+                        body =
+                            Encode.list Types.Prediction.encode predictions
+                    in
+                    Http.post
+                        { url = String.append "/api/formulaone/submit-predictions/" (String.fromInt sessionId)
+                        , body = Http.jsonBody body
+                        , expect = Http.expectJson toMessage decoder
+                        }
+            in
+            Return.withModel newModel command
+
+        Msg.SubmitPredictionsResponse sessionId result ->
+            let
+                status : Types.Requests.Status
+                status =
+                    case result of
+                        Err _ ->
+                            Types.Requests.Failed
+
+                        Ok () ->
+                            Types.Requests.Succeeded
+            in
+            Return.noCmd
+                { model
+                    | submitPredictionsStatus = Dict.insert sessionId status model.submitPredictionsStatus
+                }
+
+        Msg.MovePrediction upDown sessionId index ->
+            let
+                currentPredictions : List Prediction
+                currentPredictions =
+                    Model.getInputPredictions model sessionId
+
+                movingFun : Int -> List Prediction -> List Prediction
+                movingFun =
+                    case upDown of
+                        Msg.Up ->
+                            Helpers.List.moveItemUp
+
+                        Msg.Down ->
+                            Helpers.List.moveItemDown
+
+                rePosition : Int -> Prediction -> Prediction
+                rePosition zeroIndexed prediction =
+                    { prediction | position = zeroIndexed + 1 }
+
+                newPredictions : List Prediction
+                newPredictions =
+                    movingFun index currentPredictions
+                        |> List.indexedMap rePosition
+            in
+            Return.noCmd
+                { model | inputPredictions = Dict.insert sessionId newPredictions model.inputPredictions }

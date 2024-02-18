@@ -35,3 +35,7 @@ Formula-one:
 * Enter in the data for the events of the 2024 calendar, do a similar thing that we did for formula-e to get the (predicted) entrants for each session.
 
 * Both dev and production serve the main.js from /static, which means as you are developing production will be serving the updated version, which is not what you want. Same is true of styles.css
+
+* Predictions for a session may become stale, in that the entrants have changed and hence the predictions are no longer valid. I think in that case, we just need to make sure that at least all of the valid entrants are included, and possibly mark those that are invalid, or simply remove them.
+
+* I think the scheme will have to have entrants that are in-active. Otherwise predictions which have been entered will prevent the inactive entrant from being deleted. 

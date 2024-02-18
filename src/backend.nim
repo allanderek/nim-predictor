@@ -4,7 +4,6 @@ import karax / [karaxdsl, vdom]
 import prologue/security/hasher
 import prologue/middlewares/signedcookiesession
 import prologue/middlewares/staticfile
-import std/sequtils
 from std/strutils import parseInt
 import std/[os, parseopt]
 import std/json
@@ -630,6 +629,30 @@ proc formulaOneEntrants*(ctx: Context) {.async gcsafe.} =
   resp jsonResponse(jsonArray)
   db.close()
 
+proc submitFormulaOnePredictions*(ctx: Context) {.async gcsafe.}=
+  let db = open(databasePath, "", "", "")
+  let user_id = ctx.session.getOrDefault("userId")
+  # TODO: Obviously I need to check that we are not past the time.
+  let session = ctx.getPathParams("session")
+  let predictions = parseJson(ctx.request.body())
+  if predictions.kind == JArray:
+    for prediction in predictions:
+      let position = prediction["position"].getInt()
+      let entrant = prediction["entrant"].getInt()
+      let fastestLap = prediction["fastest_lap"].getBool()
+      let upsert_sql = """
+        insert into formula_one_prediction_lines(user, session, position, entrant, fastest_lap) values 
+        (?, ?, ?, ?, ?)
+        on conflict(user,session,position) 
+        do update 
+        set entrant=excluded.entrant, fastest_lap=excluded.fastest_lap
+        ;
+      """
+      db.exec(sql(upsert_sql), user_id, session, position, entrant, fastest_lap)
+  resp jsonResponse(predictions)
+  db.close()
+
+
 let
   indexPatterns* = @[
     pattern("/", index, @[HttpGet], name = "index"),
@@ -648,6 +671,7 @@ let
     pattern("/events", formulaOneEvents, @[HttpGet]),
     pattern("/sessions", formulaOneSessions, @[HttpGet]),
     pattern("/entrants/{event}", formulaOneEntrants, @[HttpGet]),
+    pattern("/submit-predictions/{session}", submitFormulaOnePredictions, @[HttpPost]),
   ]
 
 

@@ -39,15 +39,10 @@ init _ url key =
     let
         initialModel : Model
         initialModel =
-            { navigationKey = key
-            , route = Route.parse url
-            , events = []
-            , getEventsStatus = Types.Requests.Ready
-            , sessions = []
-            , getSessionsStatus = Types.Requests.Ready
-            , entrants = Dict.empty
-            , getEntrantsStatus = Dict.empty
-            }
+            Model.init
+                { navigationKey = key
+                , route = Route.parse url
+                }
     in
     Update.initForRoute initialModel
         |> Return.andThen Update.getEvents

@@ -93,7 +93,7 @@ proc getEntrants*(db: DbConn, race_id: string): seq[seq[string]] =
     from entrants e 
     inner join drivers d on e.driver = d.id 
     inner join teams t on e.team = t.id
-    where race = ?
+    where race = ? and e.participating = 1
     """
     result = db.getAllRows(sql(entrant_sql), race_id)
 
@@ -102,7 +102,7 @@ proc index*(ctx: Context) {.async gcsafe.} =
 
     let driver_rows = db.getAllRows(sql("""SELECT * FROM drivers"""))
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
-    let race_sql = """select id, round, name, country, circuit, date from races where season = '2023-24'"""
+    let race_sql = """select id, round, name, country, circuit, date from races where season = '2023-24' and cancelled = 0"""
     let race_rows = db.getAllRows(sql(race_sql))
     let head = sharedHead(ctx, "Formula E", false)
     let nav = sharedNav(ctx)
@@ -416,7 +416,7 @@ with
          inner join races on predictions.race = races.id 
          join results on predictions.race = results.race
          join users on predictions.user = users.id
-         where races.season = ?
+         where races.season = ? and races.cancelled = 0
         )
     select user as 'User', sum(total) as 'Total score', sum(race_wins) as 'Race wins'
     from scored_predictions
@@ -605,13 +605,13 @@ proc formulaOneEntrants*(ctx: Context) {.async gcsafe.} =
   # TODO: This SQL needs to only get those sessions associated with events in the current season.
   let event_id = ctx.getPathParams("event")
   let entrant_sql = """
-  select entrants.id, sessions.id as session_id, entrants.number, drivers.name, teams.shortname
+  select entrants.id, sessions.id as session_id, entrants.number, drivers.name, formula_one_teams.shortname
                from formula_one_entrants as entrants
                inner join drivers on entrants.driver = drivers.id
-               inner join teams on entrants.team = teams.id
+               inner join formula_one_teams on entrants.team = formula_one_teams.id
                inner join formula_one_sessions as sessions on entrants.session = sessions.id
                inner join formula_one_events as events on sessions.event = events.id
-               where events.id = ?
+               where events.id = ? and entrants.participating = 1
                ;
       """
   let dbRows = db.getAllRows(sql(entrant_sql), event_id)

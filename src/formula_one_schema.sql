@@ -1,40 +1,53 @@
-drop table if exists users ;
-drop table if exists drivers ;
-drop table if exists teams ;
+-- drop table if exists users ;
+-- drop table if exists drivers ;
+drop table if exists formula_one_teams ;
 drop table if exists formula_one_seasons ;
 drop table if exists formula_one_events ;
 drop table if exists formula_one_sessions ;
 drop table if exists formula_one_entrants ;
 drop table if exists formula_one_prediction_lines ;
+drop table if exists constructors ;
 
-create table users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullname TEXT NOT NULL,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    admin integer default 0    
-);
-insert into users (id, fullname, username, password, admin) values (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
-insert into users (id, fullname, username, password, admin) values (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
-insert into users (id, fullname, username, password, admin) values (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
-insert into users (id, fullname, username, password, admin) values (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+-- create table users (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     fullname TEXT NOT NULL,
+--     username TEXT UNIQUE NOT NULL,
+--     password TEXT NOT NULL,
+--     admin integer default 0    
+-- );
+-- insert into users (id, fullname, username, password, admin) values (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+-- insert into users (id, fullname, username, password, admin) values (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+-- insert into users (id, fullname, username, password, admin) values (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+-- insert into users (id, fullname, username, password, admin) values (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
+--
+-- create table drivers ( 
+--     id integer primary key autoincrement, 
+--     name text 
+-- );
 
-CREATE TABLE drivers ( 
-    id integer primary key autoincrement, 
-    name text 
-);
 
-CREATE TABLE teams ( 
-    id integer primary key autoincrement, 
-    fullname text, 
-    shortname text
-);
+
 
 
 -- STUFF different from schema.sql
+create table constructors (
+    id integer primary key autoincrement,
+    name text
+);
 
 create table formula_one_seasons (
     year text not null primary key
+);
+
+create table formula_one_teams ( 
+    id integer primary key autoincrement, 
+    fullname text, 
+    shortname text,
+    constructor text not null,
+    season text not null,
+    color text,
+    foreign key (season) references formula_one_seasons (year),
+    foreign key (constructor) references constructors 
 );
 
 create table formula_one_events (
@@ -61,8 +74,9 @@ create table formula_one_entrants (
     driver integer not null, 
     team integer not null, 
     session integer not null,
+    participating integer default 1,
     foreign key (driver) references drivers (id), 
-    foreign key (team) references teams (id),
+    foreign key (team) references formula_one_teams (id),
     foreign key (session) references formula_one_sessions (id),
     unique (driver, team, session)
     );
@@ -131,6 +145,39 @@ insert into formula_one_sessions (name, start_time, event)
     inner join formula_one_events on temp_sessions.event_name = formula_one_events.name and formula_one_events.season = "2024"
     ;
 
+drop table if exists temp_teams ;
+create temporary table temp_teams(
+     shortname text not null,
+     fullname text not null,
+     constructor text not null
+     );
+
+insert into temp_teams (shortname, fullname, constructor) values
+    ('Alpine', 'BWT Alpine F1 Team', 'Renault'),
+    ('Aston Martin', 'Aston Martin Aramco F1 Team', 'Aston Martin'),
+    ('Ferrari', 'Scuderia Ferrari', 'Ferrari'),
+    ('Haas', 'MoneyGram Haas F1 Team', 'Haas'),
+    ('Stake', 'Stake F1 Team Kick Sauber', 'Sauber'),
+    ('McLaren', 'McLaren F1 Team', 'McLaren'),
+    ('Mercedes', 'Mercedes-AMG Petronas F1 Team', 'Mercedes'),
+    ('Visa', 'Visa Cash App RB F1 Team', 'Torro Rosso'),
+    ('Red Bull', 'Oracle Red Bull Racing', 'Red Bull'),
+    ('Williams', 'Williams Racing', 'Williams')
+    ;
+
+insert into constructors (name)
+    select temp_teams.constructor
+    from temp_teams
+    ;
+
+insert into formula_one_teams (fullname, shortname, constructor, season)
+    select temp_teams.fullname, temp_teams.shortname, constructors.id, "2024"
+    from temp_teams
+    inner join constructors on temp_teams.constructor = constructors.name
+    ;
+drop table temp_teams;
+
+
 drop table if exists temp_drivers ;
 create temporary table temp_drivers(
      number integer not null,
@@ -161,29 +208,15 @@ insert into temp_drivers (number, driver_name, team_shortname) values
     (23, 'Alexander Albon', 'Williams')
     ;
 
-insert into teams (shortname, fullname) values
-    ('Alpine', 'BWT Alpine F1 Team'),
-    ('Aston Martin', 'Aston Martin Aramco F1 Team'),
-    ('Ferrari', 'Scuderia Ferrari'),
-    ('Haas', 'MoneyGram Haas F1 Team'),
-    ('Stake', 'Stake F1 Team Kick Sauber'),
-    ('McLaren', 'McLaren F1 Team'),
-    ('Mercedes', 'Mercedes-AMG Petronas F1 Team'),
-    ('Visa', 'Visa Cash App RB F1 Team'),
-    ('Red Bull', 'Oracle Red Bull Racing'),
-    ('Williams', 'Williams Racing')
-    ;
-
-
 insert into drivers (name)
     select temp_drivers.driver_name
     from temp_drivers
     ;
 
 insert into formula_one_entrants (number, driver, team, session) 
-    select temp_drivers.number, drivers.id, teams.id, formula_one_sessions.id 
+    select temp_drivers.number, drivers.id, formula_one_teams.id, formula_one_sessions.id 
     from temp_drivers
     inner join drivers on temp_drivers.driver_name = drivers.name
-    inner join teams on temp_drivers.team_shortname = teams.shortname
+    inner join formula_one_teams on temp_drivers.team_shortname = formula_one_teams.shortname
     cross join formula_one_sessions 
     ;

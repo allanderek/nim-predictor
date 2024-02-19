@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS predictions ;
 DROP TABLE IF EXISTS temp_drivers ;
 DROP TABLE IF EXISTS temp_entries ;
 DROP TABLE IF EXISTS temp_results ;
+DROP TABLE IF EXISTS formula_e_constructors ;
 
 
 
@@ -55,25 +56,11 @@ insert into drivers (name) values ("Jake Dennis");
 insert into drivers (name) values ("André Lotterer");
 insert into drivers (name) values ("David Beckmann");
 
-CREATE TABLE teams ( 
-    id integer primary key autoincrement, 
-    fullname text, 
-    shortname text,
-    color text
-);
 
--- 2022/23
-insert into teams (fullname, shortname, color) values ("DS Penske", "Penske", "#cba65f");
-insert into teams (fullname, shortname, color) values ("NIO 333 Racing", "NIO", "#3c3c3c");
-insert into teams (fullname, shortname, color) values ("ABT CUPRA Formula E Team", "ABT Cupra", "#527c8d");
-insert into teams (fullname, shortname, color) values ("NEOM McLaren Formula E Team", "McLaren", "#ff8000");
-insert into teams (fullname, shortname, color) values ("Maserati MSG Racing", "Maserati", "#001489");
-insert into teams (fullname, shortname, color) values ("Mahindra Racing", "Mahindra", "#dd052b");
-insert into teams (fullname, shortname, color) values ("Jaguar TCS Racing", "Jaguar", "#000000");
-insert into teams (fullname, shortname, color) values ("TAG Heuer Porsche Formula E Team", "Porsche", "#d5001c");
-insert into teams (fullname, shortname, color) values ("Envision Racing", "Envision", "#00be26");
-insert into teams (fullname, shortname, color) values ("Nissan Formula E Team", "Nissan", "#c3002f");
-insert into teams (fullname, shortname, color) values ("Avalanche Andretti Formula E", "Andretti", "#ed3124");
+create table formula_e_constructors (
+    id integer primary key autoincrement,
+    name text
+);
 
 create table seasons (
     year text not null primary key
@@ -81,6 +68,67 @@ create table seasons (
 
 insert into seasons (year) values ("2022-23");
 insert into seasons (year) values ("2023-24");
+
+CREATE TABLE teams ( 
+    id integer primary key autoincrement, 
+    constructor text not null,
+    season text not null,
+    fullname text, 
+    shortname text,
+    color text,
+    foreign key (season) references seasons (year),
+    foreign key (constructor) references formula_e_constructors 
+);
+
+insert into formula_e_constructors (name) values
+    ( "Penske" ),
+    ( "NIO" ),
+    ( "ABT" ),
+    ( "McLaren"),
+    ( "Maserati"),
+    ( "Mahindra"),
+    ( "Jaguar" ),
+    ( "Porsche" ),
+    ( "Envision" ),
+    ( "Nissan" ),
+    ( "Andretti" ),
+    ( "ERT" )
+    ;
+
+with temp_teams (fullname, shortname, color, constructor, season) as (
+    values
+    -- 2022/23
+    ("DS Penske", "Penske", "#cba65f", "Penske", "2022-23"),
+    ("NIO 333 Racing", "NIO", "#3c3c3c", "NIO", "2022-23"),
+    ("ABT CUPRA Formula E Team", "ABT Cupra", "#527c8d", "ABT", "2022-23"),
+    ("NEOM McLaren Formula E Team", "McLaren", "#ff8000", "McLaren", "2022-23"),
+    ("Maserati MSG Racing", "Maserati", "#001489", "Maserati", "2022-23"),
+    ("Mahindra Racing", "Mahindra", "#dd052b", "Mahindra", "2022-23"),
+    ("Jaguar TCS Racing", "Jaguar", "#000000", "Jaguar", "2022-23"),
+    ("TAG Heuer Porsche Formula E Team", "Porsche", "#d5001c", "Porsche", "2022-23"),
+    ("Envision Racing", "Envision", "#00be26", "Envision", "2022-23"),
+    ("Nissan Formula E Team", "Nissan", "#c3002f", "Nissan", "2022-23"),
+    ("Avalanche Andretti Formula E", "Andretti", "#ed3124", "Andretti", "2022-23"),
+
+    -- 2023/24
+    ("DS Penske", "Penske", "#cba65f", "Penske", "2023-24"),
+    ("NIO 333 Racing", "NIO", "#3c3c3c", "NIO", "2023-24"),
+    ("ABT CUPRA Formula E Team", "ABT Cupra", "#527c8d", "ABT", "2023-24"),
+    ("NEOM McLaren Formula E Team", "McLaren", "#ff8000", "McLaren", "2023-24"),
+    ("Maserati MSG Racing", "Maserati", "#001489", "Maserati", "2023-24"),
+    ("Mahindra Racing", "Mahindra", "#dd052b", "Mahindra", "2023-24"),
+    ("Jaguar TCS Racing", "Jaguar", "#000000", "Jaguar", "2023-24"),
+    ("TAG Heuer Porsche Formula E Team", "Porsche", "#d5001c", "Porsche", "2023-24"),
+    ("Envision Racing", "Envision", "#00be26", "Envision", "2023-24"),
+    ("Nissan Formula E Team", "Nissan", "#c3002f", "Nissan", "2023-24"),
+    ("Andretti Global", "Andretti", "#ed3124", "Andretti", "2023-24"),
+    ("ERT Formula E Team", "ERT", "#3c3c3c", "ERT", "2023-24")
+)
+insert into teams (fullname, shortname, color, constructor, season)
+    select temp_teams.fullname, temp_teams.shortname, temp_teams.color, formula_e_constructors.id, temp_teams.season
+    from temp_teams
+    inner join formula_e_constructors on temp_teams.constructor = formula_e_constructors.name
+;
 
 CREATE TABLE races (
     id integer primary key autoincrement, 
@@ -90,6 +138,7 @@ CREATE TABLE races (
     circuit text, 
     date text,
     season text not null,
+    cancelled integer default 0,
     foreign key (season) references seasons (year)
 );
 
@@ -114,12 +163,14 @@ insert into races (round, name, country, circuit, date, season)
     (16, "Hankook London ePrix", "United Kingdom", "ExCeL London", "2023-07-30T18:00:00Z", "2022-23")
     ;
 
+
 CREATE TABLE entrants ( 
     id integer primary key autoincrement,
     number integer not null,
     driver integer not null, 
     team integer not null, 
     race integer not null,
+    participating integer default 1,
     foreign key (driver) references drivers (id), 
     foreign key (team) references teams (id),
     foreign key (race) references races (id),
@@ -168,6 +219,7 @@ insert into entrants (number, driver, team, race)
     inner join drivers on temp_drivers.driver_name = drivers.name
     inner join teams on temp_drivers.team_shortname = teams.shortname
     cross join races
+    where teams.season = "2022-23"
     ;
 
 drop table temp_drivers ;
@@ -397,9 +449,6 @@ update results set fdnf = '' where race = 16;
 drop table temp_results;
 
 
--- Do all the 2023/24 stuff AFTER we've done all the gumph above, otherwise you can end up with duplicate drivers etc.
-insert into teams (fullname, shortname, color) values ("Andretti Global", "Andretti", "#ed3124");
-insert into teams (fullname, shortname, color) values ("ERT Formula E Team", "ERT", "#3c3c3c");
 
 insert into drivers (name) values ("Jehan Daruvala");
 insert into drivers (name) values ("Nyck de Vries");
@@ -423,6 +472,8 @@ insert into races (round, name, country, circuit, date, season) values
     (16, "London E-Prix", "United Kingdom", "ExCeL London", "2024-07-20T18:00:00Z", "2023-24"),
     (17, "London E-Prix", "United Kingdom", "ExCeL London", "2024-07-21T18:00:00Z", "2023-24")
     ;
+
+update races set cancelled = 1 where round = 4 and season = "2023-24";
 
 create temporary table temp_drivers(
      number integer not null,
@@ -459,8 +510,8 @@ insert into entrants (number, driver, team, race)
     select temp_drivers.number, drivers.id, teams.id, races.id 
     from temp_drivers
     inner join drivers on temp_drivers.driver_name = drivers.name
-    inner join teams on teams.fullname != 'Avalanche Andretti Formula E' and temp_drivers.team_shortname = teams.shortname
-    cross join races on season = '2023-24';
+    inner join teams on teams.season = "2023-24" and temp_drivers.team_shortname = teams.shortname
+    cross join races on races.season = '2023-24';
     ;
 
 drop table temp_drivers;

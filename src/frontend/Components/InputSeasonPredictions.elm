@@ -1,5 +1,6 @@
 module Components.InputSeasonPredictions exposing (view)
 
+import Components.RequestButton
 import Helpers.Html
 import Html exposing (Html)
 import Html.Events
@@ -50,7 +51,10 @@ view model =
                 []
                 (List.indexedMap showTeam currentPredictions)
             ]
-        , Html.button
-            [ Html.Events.onClick Msg.SubmitSeasonPredictions ]
-            [ Html.text "Submit" ]
+        , Components.RequestButton.view
+            { status = model.submitSeasonPredictionsStatus
+            , disabled = False
+            , message = Msg.SubmitSeasonPredictions
+            , face = Html.text "Submit"
+            }
         ]

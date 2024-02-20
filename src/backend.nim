@@ -691,6 +691,49 @@ proc submitFormulaOneResults*(ctx: Context) {.async gcsafe.}=
   # the session has indeed started, although that's not strictly necessary.
   result = submitFormulaOnePredictionsLines(ctx, user_to_store, session)
 
+
+proc formulaOneSeasonPredictions*(ctx: Context) {.async gcsafe.}=
+  let db = open(databasePath, "", "", "")
+  let user_id = ctx.session.getOrDefault("userId")
+  let season = ctx.getPathParams("season")
+  let users_sql = """
+  select distinct users.id, case when users.fullname = "" then users.username else users.fullname end as user_name
+  from users
+  inner join formula_one_season_prediction_lines as predictions on predictions.user = users.id
+  where predictions.season = ?
+  ;
+  """
+  let userRows = db.getAllRows(sql(users_sql), season)
+  let resultArray = newJArray()
+  for user in userRows:
+    var userObj = newJObject()
+    let row_user_id = parseInt(user[0])
+    userObj["user"] = %row_user_id
+    userObj["name"] = %user[1]
+    # TODO: After the season has started, you need to return the *scored* predictions.
+    let prediction_sql = """
+      select pred.position, teams.id as team_id, teams.shortname
+      from formula_one_season_prediction_lines as pred
+      inner join formula_one_teams as teams on teams.id = pred.team
+      where pred.season = ? and user = ?
+      order by pred.position
+      ;
+    """
+    let predictionRows = db.getAllRows(sql(prediction_sql), season, row_user_id)
+    let predArray = newJArray()
+    for prediction in predictionRows:
+      if prediction.len >= 3:
+        var predObj = newJObject()
+        predObj["position"] = %parseInt(prediction[0])
+        predObj["team_id"] = %parseInt(prediction[1])
+        predObj["team_name"] = %prediction[2]
+        predArray.add(predObj)
+    userObj["predictions"] = predArray
+    resultArray.add(userObj)
+  resp jsonResponse(resultArray)
+  db.close()
+
+
 proc submitFormulaOneSeasonPrediction*(ctx: Context) {.async gcsafe.}=
   let db = open(databasePath, "", "", "")
   let user_id = ctx.session.getOrDefault("userId")
@@ -709,9 +752,8 @@ proc submitFormulaOneSeasonPrediction*(ctx: Context) {.async gcsafe.}=
         ;
       """
       db.exec(sql(upsert_sql), user_id, season, position, team)
-  resp jsonResponse(predictions)
   db.close()
-
+  result = formulaOneSeasonPredictions(ctx)
 
 let
   indexPatterns* = @[
@@ -735,6 +777,7 @@ let
     pattern("/submit-predictions/{session}", submitFormulaOnePredictions, @[HttpPost]),
     pattern("/submit-results/{session}", submitFormulaOneResults, @[HttpPost]),
     pattern("/submit-season-predictions/{season}", submitFormulaOneSeasonPrediction, @[HttpPost]),
+    pattern("/season-predictions/{season}", formulaOneSeasonPredictions, @[HttpGet]),
   ]
 
 

@@ -48,4 +48,5 @@ init _ url key =
         |> Return.andThen Update.getTeams
         |> Return.andThen Update.getEvents
         |> Return.andThen Update.getSessions
+        |> Return.andThen Update.getSeasonPredictions
 

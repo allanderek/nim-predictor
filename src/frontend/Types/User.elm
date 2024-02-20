@@ -4,7 +4,7 @@ module Types.User exposing
     )
 
 type alias Id =
-    String
+    Int
 
 type alias User =
     { id : Id

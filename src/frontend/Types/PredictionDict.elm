@@ -16,7 +16,7 @@ type Context
 
 
 type alias Key =
-    ( Types.User.Id, Types.Session.Id )
+    ( String, Types.Session.Id )
 
 
 type alias PredictionDict a =
@@ -27,7 +27,7 @@ getKey : Context -> Types.Session.Id -> Key
 getKey context sessionId =
     ( case context of
         UserPrediction userId ->
-            userId
+            String.fromInt userId
 
         SessionResult ->
             ""

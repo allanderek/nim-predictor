@@ -1,5 +1,6 @@
 module Update exposing
     ( getEvents
+    , getSeasonPredictions
     , getSessions
     , getTeams
     , initForRoute
@@ -9,6 +10,7 @@ module Update exposing
 import Browser
 import Browser.Navigation
 import Dict exposing (Dict)
+import Helpers.Dict
 import Helpers.List
 import Http
 import Json.Decode exposing (Decoder)
@@ -22,8 +24,10 @@ import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionDict
 import Types.Requests
+import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 import Types.Team exposing (Team)
+import Types.User
 import Url
 
 
@@ -49,10 +53,7 @@ getTeams model =
                         seasonParam =
                             String.fromInt 2024
                     in
-                    String.concat
-                        [ "/api/formulaone/teams/"
-                        , seasonParam
-                        ]
+                    String.append "/api/formulaone/teams/" seasonParam
             in
             Http.get
                 { url = url
@@ -131,14 +132,58 @@ getEntrants eventId model =
                 decoder =
                     Types.Entrant.decoder
                         |> Json.Decode.list
+
+                url : String
+                url =
+                    let
+                        eventParam : String
+                        eventParam =
+                            String.fromInt eventId
+                    in
+                    String.append "/api/formulaone/teams/" eventParam
             in
             Http.get
-                { url = String.append "/api/formulaone/entrants/" (String.fromInt eventId)
+                { url = url
                 , expect = Http.expectJson toMessage decoder
                 }
     in
     { model
         | getEntrantsStatus = Dict.insert eventId Types.Requests.InFlight model.getEntrantsStatus
+    }
+        |> Return.withCmd command
+
+
+getSeasonPredictions : Model -> ( Model, Cmd Msg )
+getSeasonPredictions model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult (List SeasonPrediction) -> Msg
+                toMessage =
+                    Msg.GetSeasonPredictionsResponse
+
+                decoder : Decoder (List SeasonPrediction)
+                decoder =
+                    Types.SeasonPrediction.decoder
+                        |> Json.Decode.list
+
+                url : String
+                url =
+                    let
+                        seasonParam : String
+                        seasonParam =
+                            String.fromInt 2024
+                    in
+                    String.append "/api/formulaone/season-predictions/" seasonParam
+            in
+            Http.get
+                { url = url
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model
+        | getSeasonPredictionsStatus = Types.Requests.InFlight
     }
         |> Return.withCmd command
 
@@ -244,6 +289,26 @@ update message model =
                             , getEntrantsStatus = Dict.remove eventId model.getEntrantsStatus
                         }
 
+        Msg.GetSeasonPredictionsResponse result ->
+            case result of
+                Err _ ->
+                    Return.noCmd
+                        { model
+                            | getSeasonPredictionsStatus = Types.Requests.Failed
+                        }
+
+                Ok predictions ->
+                    let
+                        seasonPredictions : Dict Types.User.Id SeasonPrediction
+                        seasonPredictions =
+                            Helpers.Dict.fromListWith .user predictions
+                    in
+                    Return.noCmd
+                        { model
+                            | seasonPredictions = seasonPredictions
+                            , getSeasonPredictionsStatus = Types.Requests.Succeeded
+                        }
+
         Msg.MoveSeasonPrediction index upDown ->
             let
                 currentPredictions : List Team
@@ -258,7 +323,6 @@ update message model =
 
                         Msg.Down ->
                             Helpers.List.moveItemDown
-
 
                 newPredictions : List Team
                 newPredictions =
@@ -276,13 +340,14 @@ update message model =
                 command : Cmd Msg
                 command =
                     let
-                        toMessage : Types.Requests.HttpResult () -> Msg
+                        toMessage : Types.Requests.HttpResult (List SeasonPrediction) -> Msg
                         toMessage =
                             Msg.SubmitSeasonPredictionsResponse
 
-                        decoder : Decoder ()
+                        decoder : Decoder (List SeasonPrediction)
                         decoder =
-                            Json.Decode.succeed ()
+                            Types.SeasonPrediction.decoder
+                                |> Json.Decode.list
 
                         predictions : List Team
                         predictions =
@@ -321,27 +386,18 @@ update message model =
             Return.withModel newModel command
 
         Msg.SubmitSeasonPredictionsResponse result ->
-            let
-                status : Types.Requests.Status
-                status =
-                    case result of
-                        Err _ ->
-                            Types.Requests.Failed
+            case result of
+                Err _ ->
+                    Return.noCmd
+                        { model | submitSeasonPredictionsStatus = Types.Requests.Failed }
 
-                        Ok () ->
-                            Types.Requests.Succeeded
-            in
-            Return.noCmd
-                { model
-                    | submitSeasonPredictionsStatus = status
-                    , inputSeasonPredictions =
-                        case result of
-                            Err _ ->
-                                model.inputSeasonPredictions
-
-                            Ok () ->
-                                Nothing
-                }
+                Ok seasonPredictions ->
+                    Return.noCmd
+                        { model
+                            | submitSeasonPredictionsStatus = Types.Requests.Succeeded
+                            , inputSeasonPredictions = Nothing
+                            , seasonPredictions = Helpers.Dict.fromListWith .user seasonPredictions
+                        }
 
         Msg.MovePrediction predictionContext sessionId index upDown ->
             let
@@ -448,4 +504,3 @@ update message model =
                     | submitPredictionsStatus =
                         Types.PredictionDict.insert predictionContext sessionId status model.submitPredictionsStatus
                 }
-

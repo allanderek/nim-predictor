@@ -6,10 +6,11 @@ module Msg exposing
 import Browser
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
-import Types.Team exposing (Team)
 import Types.PredictionDict
 import Types.Requests
+import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
+import Types.Team exposing (Team)
 import Url exposing (Url)
 
 
@@ -20,9 +21,10 @@ type Msg
     | GetEventsResponse (Types.Requests.HttpResult (List Event))
     | GetSessionsResponse (Types.Requests.HttpResult (List Session))
     | GetEntrantsResponse Types.Event.Id (Types.Requests.HttpResult (List Entrant))
-    | MoveSeasonPrediction Int UpDown 
+    | GetSeasonPredictionsResponse (Types.Requests.HttpResult (List SeasonPrediction))
+    | MoveSeasonPrediction Int UpDown
     | SubmitSeasonPredictions
-    | SubmitSeasonPredictionsResponse (Types.Requests.HttpResult () )
+    | SubmitSeasonPredictionsResponse (Types.Requests.HttpResult (List SeasonPrediction))
     | MovePrediction Types.PredictionDict.Context Types.Session.Id Int UpDown
     | SubmitPredictions Types.PredictionDict.Context Types.Session.Id
     | SubmitPredictionsResponse Types.PredictionDict.Context Types.Session.Id (Types.Requests.HttpResult ())

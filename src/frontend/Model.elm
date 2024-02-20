@@ -7,12 +7,14 @@ module Model exposing
 
 import Browser.Navigation
 import Dict exposing (Dict)
+import List.Extra
 import Route exposing (Route)
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
 import Types.Requests
+import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 import Types.Team exposing (Team)
 import Types.User exposing (User)
@@ -24,6 +26,8 @@ type alias Model =
     , user : Maybe User
     , getTeamsStatus : Types.Requests.Status
     , teams : List Team
+    , getSeasonPredictionsStatus : Types.Requests.Status
+    , seasonPredictions : Dict Types.User.Id SeasonPrediction
     , inputSeasonPredictions : Maybe (List Team)
     , submitSeasonPredictionsStatus : Types.Requests.Status
     , getEventsStatus : Types.Requests.Status
@@ -45,13 +49,15 @@ init config =
     -- TODO: Obviously wrong
     , user =
         Just
-            { id = "1"
+            { id = 1
             , username = "allanderek"
             , fullname = "Allan"
             , isAdmin = True
             }
     , getTeamsStatus = Types.Requests.Ready
     , teams = []
+    , getSeasonPredictionsStatus = Types.Requests.Ready
+    , seasonPredictions = Dict.empty
     , inputSeasonPredictions = Nothing
     , submitSeasonPredictionsStatus = Types.Requests.Ready
     , events = []
@@ -95,5 +101,25 @@ getInputPredictions model context sessionId =
 
 getSeasonInputPredictions : Model -> List Team
 getSeasonInputPredictions model =
-    model.inputSeasonPredictions
-        |> Maybe.withDefault model.teams
+    case model.inputSeasonPredictions of
+        Just teams ->
+            teams
+
+        Nothing ->
+            case model.user of
+                Just user ->
+                    case Dict.get user.id model.seasonPredictions of
+                        Just seasonPredictions ->
+                            let
+                                getPosition : Team -> Int
+                                getPosition team =
+                                    List.Extra.findIndex (\pred -> pred.teamId == team.id) seasonPredictions.predictions
+                                        |> Maybe.withDefault 100
+                            in
+                            List.sortBy getPosition model.teams
+
+                        Nothing ->
+                            model.teams
+
+                Nothing ->
+                    model.teams

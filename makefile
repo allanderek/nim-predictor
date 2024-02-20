@@ -16,6 +16,6 @@ deploy:
 
 
 static/main.js: elm.json $(shell ${FD} . 'src/frontend' -e elm)
-	elm make src/frontend/Main.elm --output=static/main.js
+	elm make --debug src/frontend/Main.elm --output=static/main.js
 
 .PHONY: all backend frontend

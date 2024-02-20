@@ -19,7 +19,7 @@ view model =
         showTeam index team =
             Html.tr
                 []
-                [ Html.td [] [ Helpers.Html.int index ]
+                [ Html.td [] [ Helpers.Html.int (index + 1) ]
                 , Html.td [] [ Html.text team.shortname ]
                 , Html.td []
                     [ Html.button

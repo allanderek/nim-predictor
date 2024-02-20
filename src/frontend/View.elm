@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Browser
 import Components.InputPredictions
+import Components.InputSeasonPredictions
 import Components.WorkingIndicator
 import Dict
 import Helpers.Html
@@ -76,6 +77,9 @@ viewHome model =
         [ Attributes.class "event-list" ]
         [ Html.tbody [] (List.map showEvent model.events)
         ]
+
+    -- Of course this should show results if the season has started.
+    , Components.InputSeasonPredictions.view model
     ]
 
 
@@ -134,7 +138,7 @@ showSession model session =
                             , session = session
                             }
                         , Components.InputPredictions.view model
-                            { context = Types.PredictionDict.SessionResult 
+                            { context = Types.PredictionDict.SessionResult
                             , session = session
                             }
                         ]

@@ -629,6 +629,29 @@ proc formulaOneEntrants*(ctx: Context) {.async gcsafe.} =
   resp jsonResponse(jsonArray)
   db.close()
 
+proc formulaOneTeams*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
+  let season = ctx.getPathParams("season")
+  let team_sql ="""
+  select id, season, fullname, shortname, color
+  from formula_one_teams
+  where season = ?
+  """
+  let dbRows = db.getAllRows(sql(team_sql), season)
+  let jsonArray = newJArray()
+  for row in dbRows:
+    if row.len >= 5: # Ensure there are at least two elements
+      var jsonObj = newJObject()
+      jsonObj["id"] = %parseInt(row[0])
+      jsonObj["season"] = %row[1]
+      jsonObj["fullname"] = %row[2]
+      jsonObj["shortname"] = %row[3] 
+      jsonObj["color"] = %row[4]
+      jsonArray.add(jsonObj)
+  resp jsonResponse(jsonArray)
+  db.close()
+
+
 proc submitFormulaOnePredictionsLines*(ctx: Context, user_id: string, session: string) {.async gcsafe.}=
   let db = open(databasePath, "", "", "")
   # TODO: Obviously I need to check that we are not past the time.
@@ -668,6 +691,28 @@ proc submitFormulaOneResults*(ctx: Context) {.async gcsafe.}=
   # the session has indeed started, although that's not strictly necessary.
   result = submitFormulaOnePredictionsLines(ctx, user_to_store, session)
 
+proc submitFormulaOneSeasonPrediction*(ctx: Context) {.async gcsafe.}=
+  let db = open(databasePath, "", "", "")
+  let user_id = ctx.session.getOrDefault("userId")
+  let season = ctx.getPathParams("season")
+  let predictions = parseJson(ctx.request.body())
+  if predictions.kind == JArray:
+    for prediction in predictions:
+      let position = prediction["position"].getInt()
+      let team = prediction["team"].getInt()
+      let upsert_sql = """
+        insert into formula_one_season_prediction_lines(user, season, position, team) values 
+        (?, ?, ?, ?)
+        on conflict(user,season,position) 
+        do update 
+        set team = excluded.team
+        ;
+      """
+      db.exec(sql(upsert_sql), user_id, season, position, team)
+  resp jsonResponse(predictions)
+  db.close()
+
+
 let
   indexPatterns* = @[
     pattern("/", index, @[HttpGet], name = "index"),
@@ -686,8 +731,10 @@ let
     pattern("/events", formulaOneEvents, @[HttpGet]),
     pattern("/sessions", formulaOneSessions, @[HttpGet]),
     pattern("/entrants/{event}", formulaOneEntrants, @[HttpGet]),
+    pattern("/teams/{season}", formulaOneTeams, @[HttpGet]),
     pattern("/submit-predictions/{session}", submitFormulaOnePredictions, @[HttpPost]),
     pattern("/submit-results/{session}", submitFormulaOneResults, @[HttpPost]),
+    pattern("/submit-season-predictions/{season}", submitFormulaOneSeasonPrediction, @[HttpPost]),
   ]
 
 

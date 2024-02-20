@@ -45,5 +45,7 @@ init _ url key =
                 }
     in
     Update.initForRoute initialModel
+        |> Return.andThen Update.getTeams
         |> Return.andThen Update.getEvents
         |> Return.andThen Update.getSessions
+

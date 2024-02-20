@@ -1,6 +1,7 @@
 module Model exposing
     ( Model
     , getInputPredictions
+    , getSeasonInputPredictions
     , init
     )
 
@@ -13,6 +14,7 @@ import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
 import Types.Requests
 import Types.Session exposing (Session)
+import Types.Team exposing (Team)
 import Types.User exposing (User)
 
 
@@ -20,6 +22,10 @@ type alias Model =
     { navigationKey : Browser.Navigation.Key
     , route : Route
     , user : Maybe User
+    , getTeamsStatus : Types.Requests.Status
+    , teams : List Team
+    , inputSeasonPredictions : Maybe (List Team)
+    , submitSeasonPredictionsStatus : Types.Requests.Status
     , getEventsStatus : Types.Requests.Status
     , events : List Event
     , getSessionsStatus : Types.Requests.Status
@@ -44,6 +50,10 @@ init config =
             , fullname = "Allan"
             , isAdmin = True
             }
+    , getTeamsStatus = Types.Requests.Ready
+    , teams = []
+    , inputSeasonPredictions = Nothing
+    , submitSeasonPredictionsStatus = Types.Requests.Ready
     , events = []
     , getEventsStatus = Types.Requests.Ready
     , sessions = []
@@ -81,3 +91,9 @@ getInputPredictions model context sessionId =
             Dict.get sessionId model.entrants
                 |> Maybe.withDefault []
                 |> List.indexedMap createPrediction
+
+
+getSeasonInputPredictions : Model -> List Team
+getSeasonInputPredictions model =
+    model.inputSeasonPredictions
+        |> Maybe.withDefault model.teams

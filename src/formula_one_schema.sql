@@ -1,5 +1,3 @@
--- drop table if exists users ;
--- drop table if exists drivers ;
 drop table if exists formula_one_teams ;
 drop table if exists formula_one_seasons ;
 drop table if exists formula_one_events ;
@@ -7,29 +5,8 @@ drop table if exists formula_one_sessions ;
 drop table if exists formula_one_entrants ;
 drop table if exists formula_one_prediction_lines ;
 drop table if exists constructors ;
+drop table if exists formula_one_season_prediction_lines ;
 
--- create table users (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     fullname TEXT NOT NULL,
---     username TEXT UNIQUE NOT NULL,
---     password TEXT NOT NULL,
---     admin integer default 0    
--- );
--- insert into users (id, fullname, username, password, admin) values (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
--- insert into users (id, fullname, username, password, admin) values (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
--- insert into users (id, fullname, username, password, admin) values (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
--- insert into users (id, fullname, username, password, admin) values (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
---
--- create table drivers ( 
---     id integer primary key autoincrement, 
---     name text 
--- );
-
-
-
-
-
--- STUFF different from schema.sql
 create table constructors (
     id integer primary key autoincrement,
     name text
@@ -221,4 +198,24 @@ insert into formula_one_entrants (number, driver, team, session)
     inner join drivers on temp_drivers.driver_name = drivers.name
     inner join formula_one_teams on temp_drivers.team_shortname = formula_one_teams.shortname
     cross join formula_one_sessions 
+    ;
+
+
+create table formula_one_season_prediction_lines (
+    -- In prediction lines, this can be null which represents a result, but here we calculate the
+    -- results from each of the season results so we never explicitly enter the 'results'. Aside from
+    -- which if we were to enter them then it would need to contain the points whereas here we just record
+    -- the position.
+    -- Also note there are several other constraints we could add here. You cannot have the same team twice
+    -- in the same season (though, note, *during* the update that would be true).
+    -- More importantly the 'season' of team must match that of the season, I'm not sure if we can specify such a constraint.
+    user integer not null,
+    season text not null,
+    position integer check (position >= 1 and position <= 10),
+    team integer not null,
+    foreign key (user) references users (id),
+    foreign key (season) references formula_one_seasons (year),
+    foreign key (team) references formula_one_teams (id),
+    unique(user, season, position)
+    )
     ;

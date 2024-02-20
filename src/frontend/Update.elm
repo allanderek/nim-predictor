@@ -1,6 +1,7 @@
 module Update exposing
     ( getEvents
     , getSessions
+    , getTeams
     , initForRoute
     , update
     )
@@ -22,7 +23,46 @@ import Types.Prediction exposing (Prediction)
 import Types.PredictionDict
 import Types.Requests
 import Types.Session exposing (Session)
+import Types.Team exposing (Team)
 import Url
+
+
+getTeams : Model -> ( Model, Cmd Msg )
+getTeams model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult (List Team) -> Msg
+                toMessage =
+                    Msg.GetTeamsResponse
+
+                decoder : Decoder (List Team)
+                decoder =
+                    Types.Team.decoder
+                        |> Json.Decode.list
+
+                url : String
+                url =
+                    let
+                        seasonParam : String
+                        seasonParam =
+                            String.fromInt 2024
+                    in
+                    String.concat
+                        [ "/api/formulaone/teams/"
+                        , seasonParam
+                        ]
+            in
+            Http.get
+                { url = url
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model
+        | getTeamsStatus = Types.Requests.InFlight
+    }
+        |> Return.withCmd command
 
 
 getEvents : Model -> ( Model, Cmd Msg )
@@ -133,6 +173,18 @@ update message model =
                     Browser.Navigation.load url
                         |> Return.withModel model
 
+        Msg.GetTeamsResponse result ->
+            case result of
+                Err _ ->
+                    Return.noCmd { model | getTeamsStatus = Types.Requests.Failed }
+
+                Ok teams ->
+                    Return.noCmd
+                        { model
+                            | getTeamsStatus = Types.Requests.Succeeded
+                            , teams = teams
+                        }
+
         Msg.GetEventsResponse result ->
             case result of
                 Err _ ->
@@ -191,6 +243,135 @@ update message model =
                             | entrants = Dict.union newEntrantsDict model.entrants
                             , getEntrantsStatus = Dict.remove eventId model.getEntrantsStatus
                         }
+
+        Msg.MoveSeasonPrediction index upDown ->
+            let
+                currentPredictions : List Team
+                currentPredictions =
+                    Model.getSeasonInputPredictions model
+
+                movingFun : Int -> List Team -> List Team
+                movingFun =
+                    case upDown of
+                        Msg.Up ->
+                            Helpers.List.moveItemUp
+
+                        Msg.Down ->
+                            Helpers.List.moveItemDown
+
+
+                newPredictions : List Team
+                newPredictions =
+                    movingFun index currentPredictions
+            in
+            Return.noCmd
+                { model | inputSeasonPredictions = Just newPredictions }
+
+        Msg.SubmitSeasonPredictions ->
+            let
+                newModel : Model
+                newModel =
+                    { model | submitSeasonPredictionsStatus = Types.Requests.InFlight }
+
+                command : Cmd Msg
+                command =
+                    let
+                        toMessage : Types.Requests.HttpResult () -> Msg
+                        toMessage =
+                            Msg.SubmitSeasonPredictionsResponse
+
+                        decoder : Decoder ()
+                        decoder =
+                            Json.Decode.succeed ()
+
+                        predictions : List Team
+                        predictions =
+                            Model.getSeasonInputPredictions model
+
+                        encodePrediction : Int -> Team -> Encode.Value
+                        encodePrediction index team =
+                            Encode.object
+                                [ ( "team", Encode.int team.id )
+                                , ( "position", Encode.int (index + 1) )
+                                ]
+
+                        body : Encode.Value
+                        body =
+                            List.indexedMap encodePrediction predictions
+                                |> Encode.list identity
+
+                        url : String
+                        url =
+                            let
+                                seasonParam : String
+                                seasonParam =
+                                    String.fromInt 2024
+                            in
+                            String.concat
+                                [ "/api/formulaone/submit-season-predictions/"
+                                , seasonParam
+                                ]
+                    in
+                    Http.post
+                        { url = url
+                        , body = Http.jsonBody body
+                        , expect = Http.expectJson toMessage decoder
+                        }
+            in
+            Return.withModel newModel command
+
+        Msg.SubmitSeasonPredictionsResponse result ->
+            let
+                status : Types.Requests.Status
+                status =
+                    case result of
+                        Err _ ->
+                            Types.Requests.Failed
+
+                        Ok () ->
+                            Types.Requests.Succeeded
+            in
+            Return.noCmd
+                { model
+                    | submitSeasonPredictionsStatus = status
+                    , inputSeasonPredictions =
+                        case result of
+                            Err _ ->
+                                model.inputSeasonPredictions
+
+                            Ok () ->
+                                Nothing
+                }
+
+        Msg.MovePrediction predictionContext sessionId index upDown ->
+            let
+                currentPredictions : List Prediction
+                currentPredictions =
+                    Model.getInputPredictions model predictionContext sessionId
+
+                movingFun : Int -> List Prediction -> List Prediction
+                movingFun =
+                    case upDown of
+                        Msg.Up ->
+                            Helpers.List.moveItemUp
+
+                        Msg.Down ->
+                            Helpers.List.moveItemDown
+
+                rePosition : Int -> Prediction -> Prediction
+                rePosition zeroIndexed prediction =
+                    { prediction | position = zeroIndexed + 1 }
+
+                newPredictions : List Prediction
+                newPredictions =
+                    movingFun index currentPredictions
+                        |> List.indexedMap rePosition
+            in
+            Return.noCmd
+                { model
+                    | inputPredictions =
+                        Types.PredictionDict.insert predictionContext sessionId newPredictions model.inputPredictions
+                }
 
         Msg.SubmitPredictions predictionContext sessionId ->
             let
@@ -268,32 +449,3 @@ update message model =
                         Types.PredictionDict.insert predictionContext sessionId status model.submitPredictionsStatus
                 }
 
-        Msg.MovePrediction predictionContext sessionId index upDown ->
-            let
-                currentPredictions : List Prediction
-                currentPredictions =
-                    Model.getInputPredictions model predictionContext sessionId
-
-                movingFun : Int -> List Prediction -> List Prediction
-                movingFun =
-                    case upDown of
-                        Msg.Up ->
-                            Helpers.List.moveItemUp
-
-                        Msg.Down ->
-                            Helpers.List.moveItemDown
-
-                rePosition : Int -> Prediction -> Prediction
-                rePosition zeroIndexed prediction =
-                    { prediction | position = zeroIndexed + 1 }
-
-                newPredictions : List Prediction
-                newPredictions =
-                    movingFun index currentPredictions
-                        |> List.indexedMap rePosition
-            in
-            Return.noCmd
-                { model
-                    | inputPredictions =
-                        Types.PredictionDict.insert predictionContext sessionId newPredictions model.inputPredictions
-                }

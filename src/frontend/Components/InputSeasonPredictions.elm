@@ -17,20 +17,29 @@ view model =
 
         showTeam : Int -> Team -> Html Msg
         showTeam index team =
+            let
+                moveButton : Bool -> Msg.UpDown -> String -> Html Msg
+                moveButton visible direction face =
+                    Html.td
+                        []
+                        [ case visible of
+                            False ->
+                                Helpers.Html.nothing
+
+                            True ->
+                                Html.button
+                                    [ Msg.MoveSeasonPrediction index direction
+                                        |> Html.Events.onClick
+                                    ]
+                                    [ Html.text face ]
+                        ]
+            in
             Html.tr
                 []
                 [ Html.td [] [ Helpers.Html.int (index + 1) ]
                 , Html.td [] [ Html.text team.shortname ]
-                , Html.td []
-                    [ Html.button
-                        [ Html.Events.onClick (Msg.MoveSeasonPrediction index Msg.Up) ]
-                        [ Html.text "Up" ]
-                    ]
-                , Html.td []
-                    [ Html.button
-                        [ Html.Events.onClick (Msg.MoveSeasonPrediction index Msg.Down) ]
-                        [ Html.text "Down" ]
-                    ]
+                , moveButton (index >= 1) Msg.Up "Up"
+                , moveButton (index < List.length currentPredictions - 1) Msg.Up "Up"
                 ]
     in
     Html.section
@@ -42,6 +51,6 @@ view model =
                 (List.indexedMap showTeam currentPredictions)
             ]
         , Html.button
-            [ Html.Events.onClick Msg.SubmitSeasonPredictions  ]
+            [ Html.Events.onClick Msg.SubmitSeasonPredictions ]
             [ Html.text "Submit" ]
         ]

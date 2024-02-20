@@ -446,7 +446,7 @@ with
                 td: text row[0]
                 td: text row[1]
                 td: text row[2]
-      let race_sql = """select id, round, name, country, circuit, date from races where season = ?"""
+      let race_sql = """select id, round, name, country, circuit, date from races where season = ? and cancelled = 0"""
       let race_rows = db.getAllRows(sql(race_sql), season)
       section: races(rows=race_rows)
   resp htmlResponse("<!DOCTYPE html>\n" & $vNode)

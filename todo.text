@@ -53,9 +53,10 @@ merging:
     * Change schema.sql so that formula_e has overarching teams.
     * Give both kinds of entrants a 'not-participating'
     * Remove the Indian grand prix
+    * WHY is the Indian grand prix still showing? DONE
 
-    * WHY is the Indian grand prix still showing?
 
+Do this once we're a bit closer to having a definite schema that we want to stick with, otherwise we'll have to do it again, or start being more careful with migratable changes to the database.
     * In litecli change all the passwords to be the same as mine, and the two Mexican grand prixs to have later start times.
     * Using the web interface sign-in as each player and record the two sets of predictions
     * change the two mexican times back, and enter the results for both.

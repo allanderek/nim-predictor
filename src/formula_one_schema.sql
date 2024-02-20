@@ -55,6 +55,7 @@ create table formula_one_events (
     round integer not null,
     name text,
     season text not null,
+    cancelled integer default 0,
     foreign key (season) references formula_one_seasons (year)
 );
 
@@ -63,6 +64,7 @@ create table formula_one_sessions (
     name text check (name in ("qualifying", "sprint-shootout", "sprint", "race")) not null,
     half_points integer default 0,
     start_time text,
+    cancelled integer default 0,
     event integer not null,
     foreign key (event) references formula_one_events (id)
 );

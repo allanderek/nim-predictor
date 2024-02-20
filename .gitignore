@@ -1,7 +1,7 @@
 blog
 predictions.db
 debug.predictions.db
-backup.db
+backup-dbs
 formulaone.db
 .devenv.flake.nix
 .devenv

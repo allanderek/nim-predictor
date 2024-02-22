@@ -698,16 +698,23 @@ proc formulaOneSessionPredictions*(ctx: Context) {.async gcsafe.}=
 
   # TODO: Before the session has started this should only be the user that is logged in.
   let users_sql = """
-  select distinct users.id, case when users.fullname = "" then users.username else users.fullname end as user_name, sessions.id
+  select distinct users.id, coalesce(nullif(users.fullname, ''), users.username) as username, sessions.id
   from 
   users
   inner join formula_one_prediction_lines as lines on lines.user = users.id
   inner join formula_one_sessions as sessions on lines.session = sessions.id
   inner join formula_one_events as events on sessions.event = events.id
-  where events.id = 1
+  where events.id = ?
+  union
+  select distinct "", "Results" as user_name, sessions.id
+  from 
+  formula_one_prediction_lines as lines 
+  inner join formula_one_sessions as sessions on lines.session = sessions.id
+  inner join formula_one_events as events on sessions.event = events.id
+  where events.id = ? and lines.user = ''
   ;
   """
-  let userRows = db.getAllRows(sql(users_sql), event)
+  let userRows = db.getAllRows(sql(users_sql), event, event)
   let resultArray = newJArray()
   for user in userRows:
     var userObj = newJObject()
@@ -724,7 +731,7 @@ proc formulaOneSessionPredictions*(ctx: Context) {.async gcsafe.}=
       ;
     """
     # We use user[0] here rather than row_user_id because if it is a result it won't be '0' but ""
-    let predictionRows = db.getAllRows(sql(prediction_sql), user[0], row_user_id)
+    let predictionRows = db.getAllRows(sql(prediction_sql), user[0], row_session_id)
     let predArray = newJArray()
     for prediction in predictionRows:
       if prediction.len >= 3:

@@ -1,45 +1,32 @@
 module Types.PredictionDict exposing
-    ( Context(..)
-    , PredictionDict
+    ( PredictionDict
     , get
     , insert
     )
 
 import Dict exposing (Dict)
+import Types.PredictionResults exposing (PredictionResults)
 import Types.Session
-import Types.User
-
-
-type Context
-    = UserPrediction Types.User.Id
-    | SessionResult
-
-
-type alias Key =
-    ( String, Types.Session.Id )
 
 
 type alias PredictionDict a =
-    Dict Key a
+    Dict Types.Session.Id (PredictionResults a)
 
 
-getKey : Context -> Types.Session.Id -> Key
-getKey context sessionId =
-    ( case context of
-        UserPrediction userId ->
-            String.fromInt userId
-
-        SessionResult ->
-            ""
-    , sessionId
-    )
+get : Types.PredictionResults.Key -> Types.Session.Id -> PredictionDict a -> Maybe a
+get key sessionId dict =
+    Dict.get sessionId dict
+        |> Maybe.andThen (Types.PredictionResults.get key)
 
 
-get : Context -> Types.Session.Id -> PredictionDict a -> Maybe a
-get context sessionId dict =
-    Dict.get (getKey context sessionId) dict
-
-
-insert : Context -> Types.Session.Id -> a -> PredictionDict a -> PredictionDict a
-insert context sessionId value dict =
-    Dict.insert (getKey context sessionId) value dict
+insert : Types.PredictionResults.Key -> Types.Session.Id -> a -> PredictionDict a -> PredictionDict a
+insert key sessionId value dict =
+    let
+        update : Maybe (PredictionResults a) -> Maybe (PredictionResults a)
+        update mPredResults =
+            mPredResults
+                |> Maybe.withDefault Types.PredictionResults.empty
+                |> Types.PredictionResults.insert key value
+                |> Just
+    in
+    Dict.update sessionId update dict

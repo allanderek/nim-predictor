@@ -13,9 +13,11 @@ import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
+import Types.PredictionResults
 import Types.Requests
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
+import Types.SessionPrediction exposing (SessionPrediction)
 import Types.Team exposing (Team)
 import Types.User exposing (User)
 
@@ -38,6 +40,8 @@ type alias Model =
     , getEntrantsStatus : Dict Types.Event.Id Types.Requests.Status
     , submitPredictionsStatus : PredictionDict Types.Requests.Status
     , inputPredictions : PredictionDict (List Prediction)
+    , getPredictionsStatus : Dict Types.Event.Id Types.Requests.Status
+    , predictions : PredictionDict SessionPrediction
     }
 
 
@@ -68,10 +72,12 @@ init config =
     , getEntrantsStatus = Dict.empty
     , submitPredictionsStatus = Dict.empty
     , inputPredictions = Dict.empty
+    , getPredictionsStatus = Dict.empty
+    , predictions = Dict.empty
     }
 
 
-getInputPredictions : Model -> Types.PredictionDict.Context -> Types.Session.Id -> List Prediction
+getInputPredictions : Model -> Types.PredictionResults.Key -> Types.Session.Id -> List Prediction
 getInputPredictions model context sessionId =
     let
         mInput : Maybe (List Prediction)
@@ -86,17 +92,22 @@ getInputPredictions model context sessionId =
             predictions
 
         Nothing ->
-            let
-                createPrediction : Int -> Entrant -> Prediction
-                createPrediction index entrant =
-                    { entrant = entrant.id
-                    , position = index + 1
-                    , fastestLap = False
-                    }
-            in
-            Dict.get sessionId model.entrants
-                |> Maybe.withDefault []
-                |> List.indexedMap createPrediction
+            case Types.PredictionDict.get context sessionId model.predictions of
+                Just sessionPrediction ->
+                    sessionPrediction.predictions
+
+                Nothing ->
+                    let
+                        createPrediction : Int -> Entrant -> Prediction
+                        createPrediction index entrant =
+                            { entrant = entrant.id
+                            , position = index + 1
+                            , fastestLap = False
+                            }
+                    in
+                    Dict.get sessionId model.entrants
+                        |> Maybe.withDefault []
+                        |> List.indexedMap createPrediction
 
 
 getSeasonInputPredictions : Model -> List Team

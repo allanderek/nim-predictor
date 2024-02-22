@@ -14,7 +14,7 @@ import Msg exposing (Msg)
 import Route
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
-import Types.PredictionDict
+import Types.PredictionResults
 import Types.Requests
 import Types.Session exposing (Session)
 
@@ -134,11 +134,11 @@ showSession model session =
                     Html.div
                         []
                         [ Components.InputPredictions.view model
-                            { context = Types.PredictionDict.UserPrediction user.id
+                            { context = Types.PredictionResults.UserPrediction user.id
                             , session = session
                             }
                         , Components.InputPredictions.view model
-                            { context = Types.PredictionDict.SessionResult
+                            { context = Types.PredictionResults.SessionResult
                             , session = session
                             }
                         ]

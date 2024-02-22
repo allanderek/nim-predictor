@@ -4,7 +4,7 @@ import karax / [karaxdsl, vdom]
 import prologue/security/hasher
 import prologue/middlewares/signedcookiesession
 import prologue/middlewares/staticfile
-from std/strutils import parseInt
+from std/strutils import parseInt, parseBool
 import std/[os, parseopt]
 import std/json
 
@@ -660,7 +660,7 @@ proc submitFormulaOnePredictionsLines*(ctx: Context, user_id: string, session: s
     for prediction in predictions:
       let position = prediction["position"].getInt()
       let entrant = prediction["entrant"].getInt()
-      let fastestLap = prediction["fastest_lap"].getBool()
+      let fastest_lap = prediction["fastest_lap"].getBool()
       let upsert_sql = """
         insert into formula_one_prediction_lines(user, session, position, entrant, fastest_lap) values 
         (?, ?, ?, ?, ?)
@@ -690,6 +690,53 @@ proc submitFormulaOneResults*(ctx: Context) {.async gcsafe.}=
   # TODO: First we have to get the user and check that they are an admin user. Second we should check that the
   # the session has indeed started, although that's not strictly necessary.
   result = submitFormulaOnePredictionsLines(ctx, user_to_store, session)
+
+proc formulaOneSessionPredictions*(ctx: Context) {.async gcsafe.}=
+  let db = open(databasePath, "", "", "")
+  let user_id = ctx.session.getOrDefault("userId")
+  let event = ctx.getPathParams("event")
+
+  # TODO: Before the session has started this should only be the user that is logged in.
+  let users_sql = """
+  select distinct users.id, case when users.fullname = "" then users.username else users.fullname end as user_name, sessions.id
+  from 
+  users
+  inner join formula_one_prediction_lines as lines on lines.user = users.id
+  inner join formula_one_sessions as sessions on lines.session = sessions.id
+  inner join formula_one_events as events on sessions.event = events.id
+  where events.id = 1
+  ;
+  """
+  let userRows = db.getAllRows(sql(users_sql), event)
+  let resultArray = newJArray()
+  for user in userRows:
+    var userObj = newJObject()
+    let row_user_id = if user[0] == "": 0 else: parseInt(user[0])
+    let row_session_id = parseInt(user[2])
+    userObj["user"] = %row_user_id
+    userObj["name"] = %user[1]
+    userObj["session"] = %row_session_id
+    # TODO: After the session has started, you need to return the *scored* predictions.
+    let prediction_sql = """
+      select entrant, position, fastest_lap
+      from formula_one_prediction_lines
+      where user = ? and session = ?
+      ;
+    """
+    # We use user[0] here rather than row_user_id because if it is a result it won't be '0' but ""
+    let predictionRows = db.getAllRows(sql(prediction_sql), user[0], row_user_id)
+    let predArray = newJArray()
+    for prediction in predictionRows:
+      if prediction.len >= 3:
+        var predObj = newJObject()
+        predObj["entrant"] = %parseInt(prediction[0])
+        predObj["position"] = %parseInt(prediction[1])
+        predObj["fastest_lap"] = %parseBool(prediction[2])
+        predArray.add(predObj)
+    userObj["predictions"] = predArray
+    resultArray.add(userObj)
+  resp jsonResponse(resultArray)
+  db.close()
 
 
 proc formulaOneSeasonPredictions*(ctx: Context) {.async gcsafe.}=
@@ -778,6 +825,7 @@ let
     pattern("/submit-results/{session}", submitFormulaOneResults, @[HttpPost]),
     pattern("/submit-season-predictions/{season}", submitFormulaOneSeasonPrediction, @[HttpPost]),
     pattern("/season-predictions/{season}", formulaOneSeasonPredictions, @[HttpGet]),
+    pattern("/session-predictions/{event}", formulaOneSessionPredictions, @[HttpGet]),
   ]
 
 

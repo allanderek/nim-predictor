@@ -9,13 +9,13 @@ import Model exposing (Model)
 import Msg exposing (Msg)
 import Types.Entrant exposing (Entrant)
 import Types.Prediction exposing (Prediction)
-import Types.PredictionDict
 import Types.Session exposing (Session)
+import Types.PredictionResults
 
 
 type alias Config =
     { session : Session
-    , context : Types.PredictionDict.Context
+    , context : Types.PredictionResults.Key
     }
 
 

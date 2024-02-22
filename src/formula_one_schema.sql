@@ -196,8 +196,8 @@ insert into formula_one_entrants (number, driver, team, session)
     select temp_drivers.number, drivers.id, formula_one_teams.id, formula_one_sessions.id 
     from temp_drivers
     inner join drivers on temp_drivers.driver_name = drivers.name
-    inner join formula_one_teams on temp_drivers.team_shortname = formula_one_teams.shortname
     cross join formula_one_sessions 
+    inner join formula_one_teams on temp_drivers.team_shortname = formula_one_teams.shortname
     ;
 
 

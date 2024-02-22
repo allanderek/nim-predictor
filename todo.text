@@ -53,6 +53,11 @@ merging:
     * Change schema.sql so that formula_e has overarching teams.
     * Give both kinds of entrants a 'not-participating'
 
+* season predictions - the button should be disabled if you haven't changed anything from your stored predictions.
+
+* Like the season predictions, we need to download the session predictions for each player etc.
+
+* Figure out why there are no formula one entrants.
 
 Do this once we're a bit closer to having a definite schema that we want to stick with, otherwise we'll have to do it again, or start being more careful with migratable changes to the database.
     * I think actually, I can just put the current predictions/results into the schema file.

@@ -22,10 +22,12 @@ import Route
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
-import Types.PredictionDict
+import Types.PredictionDict exposing (PredictionDict)
+import Types.PredictionResults
 import Types.Requests
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
+import Types.SessionPrediction exposing (SessionPrediction)
 import Types.Team exposing (Team)
 import Types.User
 import Url
@@ -140,7 +142,7 @@ getEntrants eventId model =
                         eventParam =
                             String.fromInt eventId
                     in
-                    String.append "/api/formulaone/teams/" eventParam
+                    String.append "/api/formulaone/entrants/" eventParam
             in
             Http.get
                 { url = url
@@ -188,6 +190,41 @@ getSeasonPredictions model =
         |> Return.withCmd command
 
 
+getSessionPredictions : Types.Event.Id -> Model -> ( Model, Cmd Msg )
+getSessionPredictions eventId model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult (List SessionPrediction) -> Msg
+                toMessage =
+                    Msg.GetPredictionsResponse eventId
+
+                decoder : Decoder (List SessionPrediction)
+                decoder =
+                    Types.SessionPrediction.decoder
+                        |> Json.Decode.list
+
+                url : String
+                url =
+                    let
+                        eventParam : String
+                        eventParam =
+                            String.fromInt eventId
+                    in
+                    String.append "/api/formulaone/session-predictions/" eventParam
+            in
+            Http.get
+                { url = url
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model
+        | getSeasonPredictionsStatus = Types.Requests.InFlight
+    }
+        |> Return.withCmd command
+
+
 initForRoute : Model -> ( Model, Cmd Msg )
 initForRoute model =
     case model.route of
@@ -199,6 +236,7 @@ initForRoute model =
 
         Route.EventPage eventId ->
             getEntrants eventId model
+                |> Return.andThen (getSessionPredictions eventId)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -399,6 +437,34 @@ update message model =
                             , seasonPredictions = Helpers.Dict.fromListWith .user seasonPredictions
                         }
 
+        Msg.GetPredictionsResponse eventId result ->
+            case result of
+                Err _ ->
+                    Return.noCmd
+                        { model | getPredictionsStatus = Dict.insert eventId Types.Requests.Failed model.getPredictionsStatus }
+
+                Ok predictions ->
+                    let
+                        insert : SessionPrediction -> PredictionDict SessionPrediction -> PredictionDict SessionPrediction
+                        insert sessionPrediction dict =
+                            let
+                                key : Types.PredictionResults.Key
+                                key =
+                                    case sessionPrediction.user == 0 of
+                                        True ->
+                                            Types.PredictionResults.SessionResult
+
+                                        False ->
+                                            Types.PredictionResults.UserPrediction sessionPrediction.user
+                            in
+                            Types.PredictionDict.insert key sessionPrediction.session sessionPrediction dict
+                    in
+                    Return.noCmd
+                        { model
+                            | predictions = List.foldl insert model.predictions predictions
+                            , getPredictionsStatus = Dict.insert eventId Types.Requests.Succeeded model.getPredictionsStatus
+                        }
+
         Msg.MovePrediction predictionContext sessionId index upDown ->
             let
                 currentPredictions : List Prediction
@@ -467,10 +533,10 @@ update message model =
                                 submitSuffix : String
                                 submitSuffix =
                                     case predictionContext of
-                                        Types.PredictionDict.UserPrediction _ ->
+                                        Types.PredictionResults.UserPrediction _ ->
                                             "predictions"
 
-                                        Types.PredictionDict.SessionResult ->
+                                        Types.PredictionResults.SessionResult ->
                                             "results"
                             in
                             String.concat

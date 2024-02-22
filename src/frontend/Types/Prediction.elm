@@ -20,7 +20,7 @@ decoder =
     Decode.succeed Prediction
         |> Pipeline.required "entrant" Decode.int
         |> Pipeline.required "position" Decode.int
-        |> Pipeline.required "fastestLap" Decode.bool
+        |> Pipeline.required "fastest_lap" Decode.bool
 
 encode : Prediction -> Encode.Value
 encode prediction =

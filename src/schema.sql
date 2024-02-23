@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS users ;
 DROP TABLE IF EXISTS drivers ;
+DROP TABLE IF EXISTS formula_e_constructors ;
 DROP TABLE IF EXISTS entrants ;
 DROP TABLE IF EXISTS races ;
 DROP TABLE IF EXISTS teams ;
@@ -9,7 +10,6 @@ DROP TABLE IF EXISTS predictions ;
 DROP TABLE IF EXISTS temp_drivers ;
 DROP TABLE IF EXISTS temp_entries ;
 DROP TABLE IF EXISTS temp_results ;
-DROP TABLE IF EXISTS formula_e_constructors ;
 
 
 

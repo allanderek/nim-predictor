@@ -1,5 +1,6 @@
 module Update exposing
     ( getEvents
+    , getMe
     , getSeasonPredictions
     , getSessions
     , getTeams
@@ -11,6 +12,7 @@ import Browser
 import Browser.Navigation
 import Dict exposing (Dict)
 import Helpers.Dict
+import Helpers.Http
 import Helpers.List
 import Http
 import Json.Decode exposing (Decoder)
@@ -29,8 +31,30 @@ import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
 import Types.Team exposing (Team)
-import Types.User
+import Types.User exposing (User)
 import Url
+
+
+getMe : Model -> ( Model, Cmd Msg )
+getMe model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult User -> Msg
+                toMessage =
+                    Msg.GetMeResponse
+
+                decoder : Decoder User
+                decoder =
+                    Types.User.decoder
+            in
+            Http.get
+                { url = "/api/auth/me"
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    Return.withCmd command model
 
 
 getTeams : Model -> ( Model, Cmd Msg )
@@ -239,6 +263,16 @@ initForRoute model =
                 |> Return.andThen (getSessionPredictions eventId)
 
 
+logoutIfUauthorised : Http.Error -> Model -> Model
+logoutIfUauthorised error model =
+    case Helpers.Http.isUnauthorised error of
+        False ->
+            model
+
+        True ->
+            { model | user = Nothing }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
@@ -255,6 +289,15 @@ update message model =
                 Browser.External url ->
                     Browser.Navigation.load url
                         |> Return.withModel model
+
+        Msg.GetMeResponse result ->
+            case result of
+                Err error ->
+                    logoutIfUauthorised error model
+                        |> Return.noCmd
+
+                Ok user ->
+                    Return.noCmd { model | user = Just user }
 
         Msg.GetTeamsResponse result ->
             case result of

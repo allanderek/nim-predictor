@@ -36,28 +36,18 @@ Formula-one:
 
 * Both dev and production serve the main.js from /static, which means as you are developing production will be serving the updated version, which is not what you want. Same is true of styles.css
 
+* We need to actually create a '/me' route and use that. 
+
 * Predictions for a session may become stale, in that the entrants have changed and hence the predictions are no longer valid. I think in that case, we just need to make sure that at least all of the valid entrants are included, and possibly mark those that are invalid, or simply remove them.
 
 * I think the schema will have to have entrants that are in-active. Otherwise predictions which have been entered will prevent the inactive entrant from being deleted. 
 
-* teams will have to have parent teams, and team is really an entry to a season.
 
 plan:
-    * Have overarching teams, then team-entrants, difficult as we'll have to change all the entrants to reference a team-entrant.
-    * Merge the two database schemas, may have to first introduce over-arching teams for FormulaE too, which will be great since we actually have two anyway.
-    * Try to have the two loading simultaneously, in particular, can I login and then use the formulaone site.
-    * Once I have that all working do the season team predictions
     * followed by the leaderboard (in SQL), and probably the scoring of predictions, possibily just in Elm (so that they can change without sending the result to the server.
 
-merging:
-    * Change schema.sql so that formula_e has overarching teams.
-    * Give both kinds of entrants a 'not-participating'
 
 * season predictions - the button should be disabled if you haven't changed anything from your stored predictions.
-
-* Like the season predictions, we need to download the session predictions for each player etc.
-
-* Figure out why there are no formula one entrants.
 
 Do this once we're a bit closer to having a definite schema that we want to stick with, otherwise we'll have to do it again, or start being more careful with migratable changes to the database.
     * I think actually, I can just put the current predictions/results into the schema file.

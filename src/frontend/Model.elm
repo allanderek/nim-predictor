@@ -49,15 +49,7 @@ init : { navigationKey : Browser.Navigation.Key, route : Route } -> Model
 init config =
     { navigationKey = config.navigationKey
     , route = config.route
-
-    -- TODO: Obviously wrong
-    , user =
-        Just
-            { id = 1
-            , username = "allanderek"
-            , fullname = "Allan"
-            , isAdmin = True
-            }
+    , user = Nothing
     , getTeamsStatus = Types.Requests.Ready
     , teams = []
     , getSeasonPredictionsStatus = Types.Requests.Ready

@@ -531,8 +531,7 @@ proc registerHandler*(ctx: Context) {.async gcsafe.} =
     var error: string
     let
       username = ctx.getPostParams("username")
-      password = pbkdf2_sha256encode(SecretKey(ctx.getPostParams(
-              "password")), "Prologue")
+      password = pbkdf2_sha256encode(SecretKey(ctx.getPostParams( "password")), "Prologue")
     var fullname = ctx.getPostParams("fullname")
 
     if username.len == 0:
@@ -554,6 +553,26 @@ proc registerHandler*(ctx: Context) {.async gcsafe.} =
     resp htmlResponse(registerPage(ctx, "Register"))
 
   db.close()
+
+proc getMe*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
+  let user_id = ctx.session.getOrDefault("userId")
+  if user_id == "":
+    resp "Unauthorised, no user to return.", Http401
+  else:
+    let user_sql = "select id, username, fullname, admin from users where id = ?"
+    let userRow = db.getRow(sql(user_sql), user_id)
+    db.close()
+
+    if userRow.len >= 4:
+      var userJson = newJObject()
+      userJson["id"] = %parseInt(userRow[0])
+      userJson["username"] = %userRow[1]
+      userJson["fullname"] = %userRow[2]
+      userJson["isAdmin"] = %(userRow[3] == "1")
+      resp jsonResponse(userJson)
+    else:
+      resp "User not found.", Http401
 
 
 
@@ -823,6 +842,9 @@ let
     pattern("/register", registerHandler, @[HttpGet, HttpPost]),
     pattern("/logout", logoutHandler, @[HttpGet, HttpPost]),
   ]
+  authApiPatterns* = @[
+    pattern("/me", getMe, name = "me"),
+  ]
   formulaOneApiPatterns* = @[
     pattern("/events", formulaOneEvents, @[HttpGet]),
     pattern("/sessions", formulaOneSessions, @[HttpGet]),
@@ -841,5 +863,6 @@ var app = newApp( settings = settings )
 app.use(staticFileMiddleware(env.get("staticDir")), sessionMiddleware(settings, path = "/"))
 app.addRoute(indexPatterns, "")
 app.addRoute(authPatterns, "/auth")
+app.addRoute(authApiPatterns, "/api/auth")
 app.addRoute(formulaOneApiPatterns, "/api/formulaone")
 app.run()

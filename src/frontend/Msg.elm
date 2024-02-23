@@ -6,19 +6,20 @@ module Msg exposing
 import Browser
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
-import Types.PredictionDict
+import Types.PredictionResults
 import Types.Requests
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
 import Types.Team exposing (Team)
+import Types.User exposing (User)
 import Url exposing (Url)
-import Types.PredictionResults
 
 
 type Msg
     = UrlRequest Browser.UrlRequest
     | UrlChange Url
+    | GetMeResponse (Types.Requests.HttpResult User)
     | GetTeamsResponse (Types.Requests.HttpResult (List Team))
     | GetEventsResponse (Types.Requests.HttpResult (List Event))
     | GetSessionsResponse (Types.Requests.HttpResult (List Session))

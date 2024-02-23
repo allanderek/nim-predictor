@@ -2,12 +2,10 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation
-import Dict
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Return
 import Route
-import Types.Requests
 import Update
 import Url exposing (Url)
 import View
@@ -49,4 +47,4 @@ init _ url key =
         |> Return.andThen Update.getEvents
         |> Return.andThen Update.getSessions
         |> Return.andThen Update.getSeasonPredictions
-
+        |> Return.andThen Update.getMe

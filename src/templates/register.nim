@@ -23,8 +23,8 @@ proc registerSection*(ctx: Context, error: string = ""): VNode =
       input(`type` = "submit", value = "Register")
 
 
-proc registerPage*(ctx: Context, title: string, error: string = ""): string =
-  let head = sharedHead(ctx, title, false)
+proc registerPage*(ctx: Context, staticPath : string, title: string, error: string = ""): string =
+  let head = sharedHead(ctx, staticPath, title, false)
   let nav = sharedNav(ctx)
   let register = registerSection(ctx, error)
   let vNode = buildHtml(html):

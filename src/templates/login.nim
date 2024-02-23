@@ -25,8 +25,8 @@ proc loginSection*(ctx: Context, title: string, error: string = ""): VNode =
       input(`type` = "submit", value = "Login")
 
 
-proc loginPage*(ctx: Context, title: string, error: string = ""): string =
-  let head = sharedHead(ctx, title, false)
+proc loginPage*(ctx: Context, staticPath : string, title: string, error: string = ""): string =
+  let head = sharedHead(ctx, staticPath, title, false)
   let nav = sharedNav(ctx)
   let login = loginSection(ctx, title, error)
   let vNode = buildHtml(html):

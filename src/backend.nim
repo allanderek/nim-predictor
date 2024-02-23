@@ -35,6 +35,7 @@ let
       secretKey = env.getOrDefault("secretKey", ""),
     )
     databasePath = env.getOrDefault("dbPath", "temp.db")
+    staticPath = env.get("staticDir")
 initdb.initDb(databasePath)
 
 proc drivers*(rows: seq[seq[string]]): VNode =
@@ -104,7 +105,7 @@ proc index*(ctx: Context) {.async gcsafe.} =
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
     let race_sql = """select id, round, name, country, circuit, date from races where season = '2023-24' and cancelled = 0"""
     let race_rows = db.getAllRows(sql(race_sql))
-    let head = sharedHead(ctx, "Formula E", false)
+    let head = sharedHead(ctx, staticPath, "Formula E", false)
     let nav = sharedNav(ctx)
     let vNode = buildHtml(html):
         head
@@ -121,7 +122,7 @@ proc index*(ctx: Context) {.async gcsafe.} =
 proc showFormulaOneIndex*(ctx: Context) {.async gcsafe.} =
     let db = open(databasePath, "", "", "")
 
-    let head = sharedHead(ctx, "Formula One", true)
+    let head = sharedHead(ctx, staticPath, "Formula One", true)
     let vNode = buildHtml(html):
         head
         body:
@@ -213,7 +214,7 @@ proc showRace* (ctx: Context) {.async gcsafe.} =
       db = open(databasePath, "", "", "")
       race_id = ctx.getPathParams("race")
       race = db.getRow(sql"SELECT id, name, country, circuit, unixepoch() > unixepoch(date) as 'Closed' FROM races WHERE id = ?", race_id)
-      head = sharedHead(ctx, "Formula E", false)
+      head = sharedHead(ctx, staticPath, "Formula E", false)
       nav = sharedNav(ctx)
       user_id = ctx.session.getOrDefault("userId")
       user = db.getRow(sql"select admin from users where id = ?", user_id)
@@ -425,7 +426,7 @@ with
     ;
       """
       leaderboardRows = db.getAllRows(sql(leaderboardSql), season)
-  let head = sharedHead(ctx, "Formula E", false)
+  let head = sharedHead(ctx, staticPath, "Formula E", false)
   let nav = sharedNav(ctx)
   let vNode = buildHtml(html):
       head
@@ -471,7 +472,7 @@ proc showProfile*(ctx: Context) {.async gcsafe.} =
   let
     user_row = db.getRow(sql"select fullname from users where id = ?", user_id)
     vNode = buildHtml(html):
-      sharedHead(ctx, "Formula E", false)
+      sharedHead(ctx, staticPath, "Formula E", false)
       sharedNav(ctx)
       section:
         h1: text user_row[0]
@@ -513,9 +514,9 @@ proc loginHandler*(ctx: Context) {.async gcsafe.} =
       ctx.session["userFullname"] = fullname
       resp redirect(urlFor(ctx, "index"), Http302)
     else:
-      resp htmlResponse(loginPage(ctx, "Login", error))
+      resp htmlResponse(loginPage(ctx, staticPath, "Login", error))
   else:
-    resp htmlResponse(loginPage(ctx, "Login"))
+    resp htmlResponse(loginPage(ctx, staticPath, "Login"))
 
   db.close()
 
@@ -548,9 +549,9 @@ proc registerHandler*(ctx: Context) {.async gcsafe.} =
               fullname, username, password)
       resp redirect(urlFor(ctx, "login"), Http301)
     else:
-      resp htmlResponse(registerPage(ctx, "Register", error))
+      resp htmlResponse(registerPage(ctx, staticPath, "Register", error))
   else:
-    resp htmlResponse(registerPage(ctx, "Register"))
+    resp htmlResponse(registerPage(ctx, staticPath, "Register"))
 
   db.close()
 
@@ -860,7 +861,7 @@ let
 
 var app = newApp( settings = settings )
 
-app.use(staticFileMiddleware(env.get("staticDir")), sessionMiddleware(settings, path = "/"))
+app.use(staticFileMiddleware(staticPath), sessionMiddleware(settings, path = "/"))
 app.addRoute(indexPatterns, "")
 app.addRoute(authPatterns, "/auth")
 app.addRoute(authApiPatterns, "/api/auth")

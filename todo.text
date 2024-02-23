@@ -36,7 +36,7 @@ Formula-one:
 
 * Both dev and production serve the main.js from /static, which means as you are developing production will be serving the updated version, which is not what you want. Same is true of styles.css
 
-* We need to actually create a '/me' route and use that. 
+* Need to improve the login and general routing for formulaone.
 
 * Predictions for a session may become stale, in that the entrants have changed and hence the predictions are no longer valid. I think in that case, we just need to make sure that at least all of the valid entrants are included, and possibly mark those that are invalid, or simply remove them.
 

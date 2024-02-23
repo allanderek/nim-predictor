@@ -516,3 +516,100 @@ insert into entrants (number, driver, team, race)
 
 drop table temp_drivers;
 
+-- 2024 so far
+
+create temporary table temp_entries (
+    user text not null,
+    race integer not null,
+    pole text not null,
+    fam text not null,
+    fl text not null,
+    hgc text not null,
+    first text not null,
+    second text not null,
+    third text not null,
+    fdnf text not null,
+    safety_car text not null
+);
+
+insert into temp_entries (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) values
+( "Dan",17,"Mitch Evans","Nick Cassidy","Mitch Evans","Jake Dennis","Mitch Evans","Nick Cassidy","Maximilian Günther","Dan Ticktum","yes" ),
+( "Charlie",17,"Mitch Evans","Sérgio Sette Câmara","Nick Cassidy","Lucas di Grassi","Jake Dennis","Sam Bird","Nick Cassidy","Nico Müller","yes" ),
+( "Allan",17,"Mitch Evans","Sam Bird","Nick Cassidy","Lucas di Grassi","Mitch Evans","Nick Cassidy","Jake Hughes","Maximilian Günther","yes" ),
+( "James",17,"Robin Frijns","Mitch Evans","Jake Hughes","Stoffel Vandoorne","Nick Cassidy","Mitch Evans","Sébastien Buemi","Sérgio Sette Câmara","yes" ),
+( "Charlie",18,"Pascal Wehrlein","Pascal Wehrlein","Nick Cassidy","Pascal Wehrlein","Pascal Wehrlein","Sébastien Buemi","Nick Cassidy","Nico Müller","yes" ),
+( "Charlie",19,"Pascal Wehrlein","Pascal Wehrlein","Nick Cassidy","Pascal Wehrlein","Pascal Wehrlein","Sébastien Buemi","Nick Cassidy","Nico Müller","yes" ),
+( "Allan",18,"Pascal Wehrlein","Sam Bird","Mitch Evans","Edoardo Mortara","Pascal Wehrlein","Mitch Evans","Jake Hughes","Sacha Fenestraz","yes" ),
+( "Dan",18,"Maximilian Günther","Lucas di Grassi","Jake Dennis","Robin Frijns","Jake Dennis","Maximilian Günther","Mitch Evans","Jehan Daruvala","yes" ),
+( "James",18,"Jake Dennis","Mitch Evans","Jake Dennis","António Félix da Costa","Sébastien Buemi","Nick Cassidy","Mitch Evans","Jehan Daruvala","yes" ),
+( "Allan",19,"Mitch Evans","Nico Müller","Jake Dennis","Sam Bird","Mitch Evans","Jake Dennis","Jean-Éric Vergne","Oliver Rowland","no" ),
+( "Dan",19,"Mitch Evans","Mitch Evans","Jake Dennis","Pascal Wehrlein","Jake Dennis","Mitch Evans","Nick Cassidy","Jehan Daruvala","no" ),
+( "James",19,"Mitch Evans","Jean-Éric Vergne","Jake Dennis","Pascal Wehrlein","Mitch Evans","Nick Cassidy","Jean-Éric Vergne","Nico Müller","yes" )
+    ;
+with 
+    race_entrants 
+    as (select 
+       entrants.id as id, 
+       drivers.name as driver_name,
+       entrants.race as race_id 
+       from entrants inner join drivers on entrants.driver = drivers.id
+       )
+insert into predictions (user, race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
+    select users.id, temp_entries.race, pole_entrants.id, fam_entrants.id, fl_entrants.id, hgc_entrants.id, first_entrants.id, second_entrants.id, third_entrants.id, fdnf_entrants.id, temp_entries.safety_car
+    from temp_entries
+    inner join users on temp_entries.user = users.fullname
+    inner join race_entrants as pole_entrants on temp_entries.pole = pole_entrants.driver_name and pole_entrants.race_id = temp_entries.race
+    inner join race_entrants as fam_entrants on temp_entries.fam = fam_entrants.driver_name and fam_entrants.race_id = temp_entries.race
+    inner join race_entrants as fl_entrants on temp_entries.fl = fl_entrants.driver_name and fl_entrants.race_id = temp_entries.race
+    inner join race_entrants as hgc_entrants on temp_entries.hgc = hgc_entrants.driver_name and hgc_entrants.race_id = temp_entries.race
+    inner join race_entrants as first_entrants on temp_entries.first = first_entrants.driver_name and first_entrants.race_id = temp_entries.race
+    inner join race_entrants as second_entrants on temp_entries.second = second_entrants.driver_name and second_entrants.race_id = temp_entries.race
+    inner join race_entrants as third_entrants on temp_entries.third = third_entrants.driver_name and third_entrants.race_id = temp_entries.race
+    inner join race_entrants as fdnf_entrants on temp_entries.fdnf = fdnf_entrants.driver_name and fdnf_entrants.race_id = temp_entries.race
+    ;
+
+drop table temp_entries;
+
+create temporary table temp_results (
+    race integer not null,
+    pole text not null,
+    fam text not null,
+    fl text not null,
+    hgc text not null,
+    first text not null,
+    second text not null,
+    third text not null,
+    fdnf text not null,
+    safety_car text not null
+);
+
+INSERT INTO temp_results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car) VALUES 
+( 17,"Pascal Wehrlein","Pascal Wehrlein","Nick Cassidy","Oliver Rowland","Pascal Wehrlein","Sébastien Buemi","Nick Cassidy","Lucas di Grassi","yes" ),
+( 18,"Jean-Éric Vergne","Jean-Éric Vergne","Jake Dennis","Edoardo Mortara","Jake Dennis","Jean-Éric Vergne","Nick Cassidy","Sacha Fenestraz","no" ),
+( 19,"Oliver Rowland","Stoffel Vandoorne","Jake Dennis","Edoardo Mortara","Nick Cassidy","Robin Frijns","Oliver Rowland","Sam Bird","no" )
+;
+
+with 
+    race_entrants 
+    as (select 
+       entrants.id as id, 
+       drivers.name as driver_name,
+       entrants.race as race_id 
+       from entrants inner join drivers on entrants.driver = drivers.id
+       )
+insert into results (race, pole, fam, fl, hgc, first, second, third, fdnf, safety_car)
+    select temp_results.race, pole_entrants.id, fam_entrants.id, fl_entrants.id, hgc_entrants.id, first_entrants.id, second_entrants.id, third_entrants.id, fdnf_entrants.id, temp_results.safety_car
+    from temp_results
+    inner join race_entrants as pole_entrants on temp_results.pole = pole_entrants.driver_name and pole_entrants.race_id = temp_results.race
+    inner join race_entrants as fam_entrants on temp_results.fam = fam_entrants.driver_name and fam_entrants.race_id = temp_results.race
+    inner join race_entrants as fl_entrants on temp_results.fl = fl_entrants.driver_name and fl_entrants.race_id = temp_results.race
+    inner join race_entrants as hgc_entrants on temp_results.hgc = hgc_entrants.driver_name and hgc_entrants.race_id = temp_results.race
+    inner join race_entrants as first_entrants on temp_results.first = first_entrants.driver_name and first_entrants.race_id = temp_results.race
+    inner join race_entrants as second_entrants on temp_results.second = second_entrants.driver_name and second_entrants.race_id = temp_results.race
+    inner join race_entrants as third_entrants on temp_results.third = third_entrants.driver_name and third_entrants.race_id = temp_results.race
+    inner join race_entrants as fdnf_entrants on temp_results.fdnf = fdnf_entrants.driver_name and fdnf_entrants.race_id = temp_results.race
+    ;
+
+
+drop table temp_results;
+

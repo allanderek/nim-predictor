@@ -11,7 +11,9 @@ src/backend: $(shell ${FD} . 'src/' -e nim)
 run:
 	nim compile -r src/backend.nim --config=config.debug.env
 
-deploy:
+deploy: static/main.js static/styles.css
+	mkdir -p dist
+	cp static/* dist
 	nim compile -d:release -r src/backend.nim --config=config.prod.env
 
 

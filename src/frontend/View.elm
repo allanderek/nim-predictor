@@ -3,6 +3,7 @@ module View exposing (view)
 import Browser
 import Components.InputPredictions
 import Components.InputSeasonPredictions
+import Components.Predictions
 import Components.WorkingIndicator
 import Dict
 import Helpers.Html
@@ -107,20 +108,6 @@ viewEventPage model eventId =
 showSession : Model -> Session -> Html Msg
 showSession model session =
     let
-        entrants : List Entrant
-        entrants =
-            Dict.get session.id model.entrants
-                |> Maybe.withDefault []
-
-        showEntrant : Entrant -> Html Msg
-        showEntrant entrant =
-            Html.tr
-                []
-                [ Html.td [] [ Html.text (String.fromInt entrant.number) ]
-                , Html.td [] [ Html.text entrant.driver ]
-                , Html.td [] [ Html.text entrant.team ]
-                ]
-
         -- TODO: Of course there are conditions on each of these, such that you should only see at most one.
         -- 1. Enter predictions if logged-in and the session hasn't yet started.
         -- 2. Enter results if logged-in, as an admin-user, and the session has started.
@@ -142,6 +129,10 @@ showSession model session =
                             , session = session
                             }
                         ]
+
+        scores : Html Msg
+        scores =
+            Components.Predictions.view model session.id
     in
     Html.section
         []
@@ -149,4 +140,5 @@ showSession model session =
             []
             [ Html.text session.name ]
         , input
+        , scores
         ]

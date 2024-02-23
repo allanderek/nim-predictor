@@ -34,7 +34,6 @@ Formula-one:
 
 * Enter in the data for the events of the 2024 calendar, do a similar thing that we did for formula-e to get the (predicted) entrants for each session.
 
-* Both dev and production serve the main.js from /static, which means as you are developing production will be serving the updated version, which is not what you want. Same is true of styles.css
 
 * Need to improve the login and general routing for formulaone.
 

@@ -1,6 +1,7 @@
 module Model exposing
     ( Model
     , getInputPredictions
+    , getPredictions
     , getSeasonInputPredictions
     , init
     )
@@ -13,7 +14,7 @@ import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
-import Types.PredictionResults
+import Types.PredictionResults exposing (PredictionResults)
 import Types.Requests
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
@@ -67,6 +68,11 @@ init config =
     , getPredictionsStatus = Dict.empty
     , predictions = Dict.empty
     }
+
+
+getPredictions : Model -> Types.Session.Id -> Maybe (PredictionResults SessionPrediction)
+getPredictions model sessionId =
+    Dict.get sessionId model.predictions
 
 
 getInputPredictions : Model -> Types.PredictionResults.Key -> Types.Session.Id -> List Prediction

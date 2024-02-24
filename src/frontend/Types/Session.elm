@@ -4,9 +4,11 @@ module Types.Session exposing
     , decoder
     )
 
+import Iso8601
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Pipeline
 import Types.Event
+import Time
 
 
 type alias Id =
@@ -18,7 +20,7 @@ type alias Session =
     , event : Types.Event.Id
     , name : String
     , fastestLap : Bool
-    , startTime : String
+    , startTime : Time.Posix
     , halfPoints : Bool
     }
 
@@ -54,5 +56,5 @@ decoder =
         |> Pipeline.required "event" Decode.int
         |> Pipeline.required "name" Decode.string
         |> Pipeline.required "name" fastestLap
-        |> Pipeline.required "start_time" Decode.string
+        |> Pipeline.required "start_time" Iso8601.decoder
         |> Pipeline.required "half_points" Decode.bool

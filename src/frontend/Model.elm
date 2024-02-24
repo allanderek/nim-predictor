@@ -10,6 +10,7 @@ import Browser.Navigation
 import Dict exposing (Dict)
 import List.Extra
 import Route exposing (Route)
+import Time
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
@@ -25,6 +26,8 @@ import Types.User exposing (User)
 
 type alias Model =
     { navigationKey : Browser.Navigation.Key
+    , now : Time.Posix
+    , zone : Time.Zone
     , route : Route
     , user : Maybe User
     , getTeamsStatus : Types.Requests.Status
@@ -46,9 +49,11 @@ type alias Model =
     }
 
 
-init : { navigationKey : Browser.Navigation.Key, route : Route } -> Model
+init : { navigationKey : Browser.Navigation.Key, now : Time.Posix, zone : Time.Zone, route : Route } -> Model
 init config =
     { navigationKey = config.navigationKey
+    , now = config.now
+    , zone = config.zone
     , route = config.route
     , user = Nothing
     , getTeamsStatus = Types.Requests.Ready

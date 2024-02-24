@@ -126,7 +126,7 @@ proc showFormulaOneIndex*(ctx: Context) {.async gcsafe.} =
     let vNode = buildHtml(html):
         head
         body:
-          script: verbatim """var app = Elm.Main.init({ "flags": {} }); """
+          script: verbatim """var app = Elm.Main.init({ "flags": { 'now' : Date.now() } }); """
 
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
     db.close()
@@ -834,6 +834,7 @@ let
     pattern("/", index, @[HttpGet], name = "index"),
     pattern("/formulaone", showFormulaOneIndex, @[HttpGet], name = "formula-one" ),
     pattern("/formulaone/event/{event}", showFormulaOneIndex, @[HttpGet], name = "formula-one-event" ),
+    pattern("/formulaone/profile", showFormulaOneIndex, @[HttpGet], name = "formula-one-profile" ),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
     pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
     pattern("/profile", showProfile, @[HttpGet, HttpPost], name = "profile"),

@@ -6,6 +6,7 @@ import Components.InputSeasonPredictions
 import Components.Predictions
 import Components.WorkingIndicator
 import Helpers.Html
+import Helpers.Time
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import List.Extra
@@ -178,6 +179,11 @@ showSession model session =
         [ Html.h2
             []
             [ Html.text session.name ]
+        , Html.h3
+            []
+            [ Helpers.Time.showPosix model.zone session.startTime
+                |> Html.text
+            ]
         , input
         , scores
         ]

@@ -32,9 +32,9 @@ Obviously, you have to make sure all this is actually working as a website. Do a
 
 Formula-one:
 
-* In addition, why is the score not showing? It should show already just from entering the predictions, without even submitting them? - It's because we don't get the input ones because we don't want them for predictions, suppose someone fiddles with their predictions but doesn't submit them before the deadline, we want to be scoring the ones stored on the server, *not* the input ones.
 * Correctly score the fastestLap, it's just if the entrant is correct, not also in the correct place.
-*  When we submit predictions, successfully, we need to remove them from the 'input', otherwise if the are updated on the server by someone else, we won't see that because we will still view the 'input' ones.
+
+* I think you shouldn't be allowed to guess someone for fastest lap if they aren't in your top ten. This means you have to worry about someone picking say 10th as fasest lap, and then moving them down.
 
 * Enter in the data for the events of the 2024 calendar, do a similar thing that we did for formula-e to get the (predicted) entrants for each session.
 

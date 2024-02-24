@@ -528,7 +528,13 @@ update message model =
 
                                 rePosition : Int -> Prediction -> Prediction
                                 rePosition zeroIndexed prediction =
-                                    { prediction | position = zeroIndexed + 1 }
+                                    { prediction
+                                        | position = zeroIndexed + 1
+
+                                        -- This avoids the possibility that someone selects the fastest lap as say 10th
+                                        -- and then moves that driver down.
+                                        , fastestLap = prediction.fastestLap && zeroIndexed < 10
+                                    }
                             in
                             movingFun index currentPredictions
                                 |> List.indexedMap rePosition

@@ -4,9 +4,12 @@ module Types.PredictionResults exposing
     , empty
     , get
     , insert
+    , nothingIfEmpty
+    , remove
     )
 
 import Dict exposing (Dict)
+import Maybe.Extra
 import Types.User
 
 
@@ -28,6 +31,21 @@ empty =
     }
 
 
+isEmpty : PredictionResults a -> Bool
+isEmpty predResults =
+    Maybe.Extra.isNothing predResults.result && Dict.isEmpty predResults.predictions
+
+
+nothingIfEmpty : PredictionResults a -> Maybe (PredictionResults a)
+nothingIfEmpty predResults =
+    case isEmpty predResults of
+        True ->
+            Nothing
+
+        False ->
+            Just predResults
+
+
 get : Key -> PredictionResults a -> Maybe a
 get key predResults =
     case key of
@@ -46,3 +64,13 @@ insert key value predResults =
 
         UserPrediction userId ->
             { predResults | predictions = Dict.insert userId value predResults.predictions }
+
+
+remove : Key -> PredictionResults a -> PredictionResults a
+remove key predResults =
+    case key of
+        SessionResult ->
+            { predResults | result = Nothing }
+
+        UserPrediction userId ->
+            { predResults | predictions = Dict.remove userId predResults.predictions }

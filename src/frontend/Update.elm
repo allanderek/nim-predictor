@@ -648,8 +648,14 @@ update message model =
                             }
                     in
                     insertStatus Types.Requests.Succeeded
+                        |> removeInputSessionPredictions predictionContext sessionId
                         |> insertSessionPredictions [ sessionPrediction ]
                         |> Return.noCmd
+
+
+removeInputSessionPredictions : Types.PredictionResults.Key -> Types.Session.Id -> Model -> Model
+removeInputSessionPredictions key sessionId model =
+    { model | inputPredictions = Types.PredictionDict.remove key sessionId model.inputPredictions }
 
 
 insertSessionPredictions : List SessionPrediction -> Model -> Model

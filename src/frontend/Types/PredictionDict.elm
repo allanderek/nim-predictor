@@ -2,6 +2,7 @@ module Types.PredictionDict exposing
     ( PredictionDict
     , get
     , insert
+    , remove
     )
 
 import Dict exposing (Dict)
@@ -28,5 +29,16 @@ insert key sessionId value dict =
                 |> Maybe.withDefault Types.PredictionResults.empty
                 |> Types.PredictionResults.insert key value
                 |> Just
+    in
+    Dict.update sessionId update dict
+
+
+remove : Types.PredictionResults.Key -> Types.Session.Id -> PredictionDict a -> PredictionDict a
+remove key sessionId dict =
+    let
+        update : Maybe (PredictionResults a) -> Maybe (PredictionResults a)
+        update mPredResults =
+            Maybe.map (Types.PredictionResults.remove key) mPredResults
+                |> Maybe.andThen Types.PredictionResults.nothingIfEmpty
     in
     Dict.update sessionId update dict

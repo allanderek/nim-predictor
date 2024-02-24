@@ -37,6 +37,22 @@ view model config =
         getEntrant entrantId =
             List.Extra.find (\entrant -> entrant.id == entrantId) entrants
 
+        fastestLapWarning : Html msg
+        fastestLapWarning =
+            case config.session.fastestLap of
+                False ->
+                    Helpers.Html.nothing
+
+                True ->
+                    case List.any .fastestLap predictions of
+                        True ->
+                            Helpers.Html.nothing
+
+                        False ->
+                            Html.div
+                                [ Attributes.class "fastest-lap-warning" ]
+                                [ Html.text "Do not forget to select a fastest lap." ]
+
         showPrediction : Int -> Prediction -> Html Msg
         showPrediction index prediction =
             let
@@ -116,7 +132,8 @@ view model config =
     in
     Html.section
         []
-        [ Html.table
+        [ fastestLapWarning
+        , Html.table
             []
             [ Html.tbody [] (List.indexedMap showPrediction predictions) ]
         , Html.button

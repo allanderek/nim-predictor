@@ -32,7 +32,9 @@ Obviously, you have to make sure all this is actually working as a website. Do a
 
 Formula-one:
 
+* When we download the events, we should include the start time of the event, i.e. the start time of the earliest session. Or we could get the earliest and latest and then do a kind Mar 1st - 3rd etc.
 
+* Would also be nice to mark the events as sprint weekends, especially as they start on Fridays. In fact we do get all the sessions so this would be doable entirely in Elm.
 
 * Enter in the data for the events of the 2024 calendar, do a similar thing that we did for formula-e to get the (predicted) entrants for each session.
 

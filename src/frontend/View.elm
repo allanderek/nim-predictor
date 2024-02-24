@@ -160,14 +160,17 @@ showSession model session =
                 Just user ->
                     Html.div
                         []
-                        [ Components.InputPredictions.view model
-                            { context = Types.PredictionResults.UserPrediction user.id
-                            , session = session
-                            }
-                        , Components.InputPredictions.view model
-                            { context = Types.PredictionResults.SessionResult
-                            , session = session
-                            }
+                        [ case Helpers.Time.isBefore model.now session.startTime of
+                            True ->
+                                Components.InputPredictions.view model
+                                    { context = Types.PredictionResults.UserPrediction user.id
+                                    , session = session
+                                    }
+                            False -> 
+                                Components.InputPredictions.view model
+                                    { context = Types.PredictionResults.SessionResult
+                                    , session = session
+                                    }
                         ]
 
         scores : Html Msg

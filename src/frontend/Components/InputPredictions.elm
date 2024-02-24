@@ -4,6 +4,7 @@ import Dict
 import Helpers.Attributes
 import Helpers.Html
 import Html exposing (Html)
+import Html.Attributes as Attributes
 import Html.Events
 import List.Extra
 import Model exposing (Model)
@@ -61,12 +62,19 @@ view model config =
 
                     True ->
                         Html.td []
-                            [ Html.button
-                                [ Msg.FastestLapPrediction index
-                                    |> toEditMessage
-                                    |> Helpers.Attributes.disabledOrOnClick (prediction.position > 10)
-                                ]
-                                [ Html.text "FL" ]
+                            [ case prediction.fastestLap of
+                                True ->
+                                    Html.span
+                                        [ Attributes.class "predicted-fastest-lap" ]
+                                        [ Html.text "FL" ]
+
+                                False ->
+                                    Html.button
+                                        [ Msg.FastestLapPrediction index
+                                            |> toEditMessage
+                                            |> Helpers.Attributes.disabledOrOnClick (prediction.position > 10)
+                                        ]
+                                        [ Html.text "FL" ]
                             ]
                 , Html.td []
                     [ case mEntrant of

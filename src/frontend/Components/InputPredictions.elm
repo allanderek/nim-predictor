@@ -1,6 +1,7 @@
 module Components.InputPredictions exposing (view)
 
 import Dict
+import Helpers.Attributes
 import Helpers.Html
 import Html exposing (Html)
 import Html.Events
@@ -9,8 +10,8 @@ import Model exposing (Model)
 import Msg exposing (Msg)
 import Types.Entrant exposing (Entrant)
 import Types.Prediction exposing (Prediction)
-import Types.Session exposing (Session)
 import Types.PredictionResults
+import Types.Session exposing (Session)
 
 
 type alias Config =
@@ -42,13 +43,31 @@ view model config =
                 mEntrant =
                     getEntrant prediction.entrant
 
+                toEditMessage : Msg.EditPredictions -> Msg
+                toEditMessage =
+                    Msg.EditPredictions config.context config.session.id
+
                 toMoveMessage : Msg.UpDown -> Msg
-                toMoveMessage =
-                    Msg.MovePrediction config.context config.session.id index
+                toMoveMessage upDown =
+                    Msg.MovePrediction index upDown
+                        |> toEditMessage
             in
             Html.tr
                 []
                 [ Html.td [] [ Helpers.Html.int prediction.position ]
+                , case config.session.fastestLap of
+                    False ->
+                        Helpers.Html.nothing
+
+                    True ->
+                        Html.td []
+                            [ Html.button
+                                [ Msg.FastestLapPrediction index
+                                    |> toEditMessage
+                                    |> Helpers.Attributes.disabledOrOnClick (prediction.position > 10)
+                                ]
+                                [ Html.text "FL" ]
+                            ]
                 , Html.td []
                     [ case mEntrant of
                         Nothing ->

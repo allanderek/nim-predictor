@@ -1,11 +1,13 @@
 module Msg exposing
-    ( Msg(..)
+    ( EditPredictions(..)
+    , Msg(..)
     , UpDown(..)
     )
 
 import Browser
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
+import Types.Prediction exposing (Prediction)
 import Types.PredictionResults
 import Types.Requests
 import Types.SeasonPrediction exposing (SeasonPrediction)
@@ -29,9 +31,14 @@ type Msg
     | SubmitSeasonPredictions
     | SubmitSeasonPredictionsResponse (Types.Requests.HttpResult (List SeasonPrediction))
     | GetPredictionsResponse Types.Event.Id (Types.Requests.HttpResult (List SessionPrediction))
-    | MovePrediction Types.PredictionResults.Key Types.Session.Id Int UpDown
+    | EditPredictions Types.PredictionResults.Key Types.Session.Id EditPredictions
     | SubmitPredictions Types.PredictionResults.Key Types.Session.Id
-    | SubmitPredictionsResponse Types.PredictionResults.Key Types.Session.Id (Types.Requests.HttpResult ())
+    | SubmitPredictionsResponse Types.PredictionResults.Key Types.Session.Id (Types.Requests.HttpResult (List Prediction))
+
+
+type EditPredictions
+    = MovePrediction Int UpDown
+    | FastestLapPrediction Int
 
 
 type UpDown

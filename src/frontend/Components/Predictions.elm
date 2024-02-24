@@ -4,11 +4,12 @@ import Dict exposing (Dict)
 import Helpers.Dict
 import Helpers.Html
 import Html exposing (Html)
+import Html.Attributes as Attributes
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Types.Entrant exposing (Entrant)
 import Types.Prediction exposing (Prediction)
-import Types.Session
+import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
 
 
@@ -18,13 +19,35 @@ type alias Scored a =
     }
 
 
-view : Model -> Types.Session.Id -> Html Msg
-view model sessionId =
-    case Model.getPredictions model sessionId of
+view : Model -> Session -> Html Msg
+view model session =
+    case Model.getPredictions model session.id of
         Nothing ->
             Helpers.Html.nothing
 
         Just sessionPredictions ->
+            let
+                entrants : Dict Types.Entrant.Id Entrant
+                entrants =
+                    model.entrants
+                        |> Dict.get session.id
+                        |> Maybe.withDefault []
+                        |> Helpers.Dict.fromListWith .id
+
+                viewEntrant : Types.Entrant.Id -> Html Msg
+                viewEntrant entrantId =
+                    case Dict.get entrantId entrants of
+                        Nothing ->
+                            Html.text "Unknown driver"
+
+                        Just entrant ->
+                            Html.div
+                                [ Attributes.class "entrant" ]
+                                [ Html.span [ Attributes.class "driver" ] [ Html.text entrant.driver ]
+                                , Html.span [ Attributes.class "number" ] [ Helpers.Html.int entrant.number ]
+                                , Html.span [ Attributes.class "team" ] [ Html.text entrant.team ]
+                                ]
+            in
             case sessionPredictions.result of
                 Nothing ->
                     -- TODO: We still want to show the predictions.
@@ -36,13 +59,6 @@ view model sessionId =
                         resultMap =
                             result.predictions
                                 |> Helpers.Dict.fromListWith .entrant
-
-                        entrants : Dict Types.Entrant.Id Entrant
-                        entrants =
-                            model.entrants
-                                |> Dict.get sessionId
-                                |> Maybe.withDefault []
-                                |> Helpers.Dict.fromListWith .id
 
                         viewPredictions : SessionPrediction -> Scored (Html Msg)
                         viewPredictions sessionPrediction =
@@ -66,26 +82,33 @@ view model sessionId =
                                                             0
 
                                                         True ->
+                                                            let
+                                                                fastestLap : Int
+                                                                fastestLap =
+                                                                    case session.fastestLap && prediction.fastestLap && resultLine.fastestLap of
+                                                                        False ->
+                                                                            0
+
+                                                                        True ->
+                                                                            1
+                                                            in
                                                             case abs (prediction.position - resultLine.position) of
                                                                 0 ->
-                                                                    4
+                                                                    4 + fastestLap
 
                                                                 1 ->
-                                                                    2
+                                                                    2 + fastestLap
 
                                                                 _ ->
-                                                                    1
+                                                                    1 + fastestLap
+
                                         driver : Html Msg
                                         driver =
-                                            case Dict.get prediction.entrant entrants of
-                                                Nothing ->
-                                                    Html.text "Unknown driver"
-                                                Just entrant ->
-                                                    Html.text entrant.driver
+                                            viewEntrant prediction.entrant
+
                                         intCell : Int -> Html msg
                                         intCell x =
                                             Html.td [] [ Helpers.Html.int x ]
-
                                     in
                                     { score = score
                                     , value =

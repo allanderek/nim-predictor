@@ -132,7 +132,7 @@ showSession model session =
 
         scores : Html Msg
         scores =
-            Components.Predictions.view model session.id
+            Components.Predictions.view model session
     in
     Html.section
         []

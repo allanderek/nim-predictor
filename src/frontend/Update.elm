@@ -502,35 +502,44 @@ update message model =
                             in
                             Types.PredictionDict.insert key sessionPrediction.session sessionPrediction dict
                     in
-                    Return.noCmd
-                        { model
-                            | predictions = List.foldl insert model.predictions predictions
-                            , getPredictionsStatus = Dict.insert eventId Types.Requests.Succeeded model.getPredictionsStatus
-                        }
+                    { model | getPredictionsStatus = Dict.insert eventId Types.Requests.Succeeded model.getPredictionsStatus }
+                        |> insertSessionPredictions predictions
+                        |> Return.noCmd
 
-        Msg.MovePrediction predictionContext sessionId index upDown ->
+        Msg.EditPredictions predictionContext sessionId edit ->
             let
                 currentPredictions : List Prediction
                 currentPredictions =
                     Model.getInputPredictions model predictionContext sessionId
 
-                movingFun : Int -> List Prediction -> List Prediction
-                movingFun =
-                    case upDown of
-                        Msg.Up ->
-                            Helpers.List.moveItemUp
-
-                        Msg.Down ->
-                            Helpers.List.moveItemDown
-
-                rePosition : Int -> Prediction -> Prediction
-                rePosition zeroIndexed prediction =
-                    { prediction | position = zeroIndexed + 1 }
-
                 newPredictions : List Prediction
                 newPredictions =
-                    movingFun index currentPredictions
-                        |> List.indexedMap rePosition
+                    case edit of
+                        Msg.MovePrediction index upDown ->
+                            let
+                                movingFun : Int -> List Prediction -> List Prediction
+                                movingFun =
+                                    case upDown of
+                                        Msg.Up ->
+                                            Helpers.List.moveItemUp
+
+                                        Msg.Down ->
+                                            Helpers.List.moveItemDown
+
+                                rePosition : Int -> Prediction -> Prediction
+                                rePosition zeroIndexed prediction =
+                                    { prediction | position = zeroIndexed + 1 }
+                            in
+                            movingFun index currentPredictions
+                                |> List.indexedMap rePosition
+
+                        Msg.FastestLapPrediction index ->
+                            let
+                                setFastestLap : Int -> Prediction -> Prediction
+                                setFastestLap innerIndex prediction =
+                                    { prediction | fastestLap = innerIndex == index }
+                            in
+                            List.indexedMap setFastestLap currentPredictions
             in
             Return.noCmd
                 { model
@@ -550,13 +559,14 @@ update message model =
                 command : Cmd Msg
                 command =
                     let
-                        toMessage : Types.Requests.HttpResult () -> Msg
+                        toMessage : Types.Requests.HttpResult (List Prediction) -> Msg
                         toMessage =
                             Msg.SubmitPredictionsResponse predictionContext sessionId
 
-                        decoder : Decoder ()
+                        decoder : Decoder (List Prediction)
                         decoder =
-                            Json.Decode.succeed ()
+                            Types.Prediction.decoder
+                                |> Json.Decode.list
 
                         predictions : List Prediction
                         predictions =
@@ -599,17 +609,64 @@ update message model =
 
         Msg.SubmitPredictionsResponse predictionContext sessionId result ->
             let
-                status : Types.Requests.Status
-                status =
-                    case result of
-                        Err _ ->
-                            Types.Requests.Failed
-
-                        Ok () ->
-                            Types.Requests.Succeeded
+                insertStatus : Types.Requests.Status -> Model
+                insertStatus status =
+                    { model
+                        | submitPredictionsStatus =
+                            Types.PredictionDict.insert predictionContext sessionId status model.submitPredictionsStatus
+                    }
             in
-            Return.noCmd
-                { model
-                    | submitPredictionsStatus =
-                        Types.PredictionDict.insert predictionContext sessionId status model.submitPredictionsStatus
-                }
+            case result of
+                Err _ ->
+                    insertStatus Types.Requests.Failed
+                        |> Return.noCmd
+
+                Ok predictions ->
+                    let
+                        user : { id : Types.User.Id, name : String }
+                        user =
+                            case predictionContext of
+                                Types.PredictionResults.UserPrediction userId ->
+                                    { id = userId
+                                    , name =
+                                        model.user
+                                            |> Maybe.map .fullname
+                                            |> Maybe.withDefault ""
+                                    }
+
+                                Types.PredictionResults.SessionResult ->
+                                    { id = 0
+                                    , name = "Results"
+                                    }
+
+                        sessionPrediction : SessionPrediction
+                        sessionPrediction =
+                            { session = sessionId
+                            , user = user.id
+                            , name = user.name
+                            , predictions = predictions
+                            }
+                    in
+                    insertStatus Types.Requests.Succeeded
+                        |> insertSessionPredictions [ sessionPrediction ]
+                        |> Return.noCmd
+
+
+insertSessionPredictions : List SessionPrediction -> Model -> Model
+insertSessionPredictions predictions model =
+    let
+        insert : SessionPrediction -> PredictionDict SessionPrediction -> PredictionDict SessionPrediction
+        insert sessionPrediction dict =
+            let
+                key : Types.PredictionResults.Key
+                key =
+                    case sessionPrediction.user == 0 of
+                        True ->
+                            Types.PredictionResults.SessionResult
+
+                        False ->
+                            Types.PredictionResults.UserPrediction sessionPrediction.user
+            in
+            Types.PredictionDict.insert key sessionPrediction.session sessionPrediction dict
+    in
+    { model | predictions = List.foldl insert model.predictions predictions }

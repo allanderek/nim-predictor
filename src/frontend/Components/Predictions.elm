@@ -54,9 +54,8 @@ view model session =
                 mResults : Maybe (List Prediction)
                 mResults =
                     -- We get the input ones here since we want to score without saving the results to the server.
-                    Helpers.Maybe.ifNothing
-                        (Types.PredictionDict.get Types.PredictionResults.SessionResult session.id model.inputPredictions)
-                        (Maybe.map .predictions sessionPredictions.result)
+                    (Types.PredictionDict.get Types.PredictionResults.SessionResult session.id model.inputPredictions)
+                        |> Helpers.Maybe.withMaybeDefault (Maybe.map .predictions sessionPredictions.result)
 
                 viewSessionPrediction : SessionPrediction -> Html Msg -> Html Msg
                 viewSessionPrediction sessionPrediction body =

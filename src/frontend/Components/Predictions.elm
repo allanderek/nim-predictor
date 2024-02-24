@@ -3,12 +3,15 @@ module Components.Predictions exposing (view)
 import Dict exposing (Dict)
 import Helpers.Dict
 import Helpers.Html
+import Helpers.Maybe
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Types.Entrant exposing (Entrant)
 import Types.Prediction exposing (Prediction)
+import Types.PredictionDict
+import Types.PredictionResults
 import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
 
@@ -47,17 +50,23 @@ view model session =
                                 , Html.span [ Attributes.class "number" ] [ Helpers.Html.int entrant.number ]
                                 , Html.span [ Attributes.class "team" ] [ Html.text entrant.team ]
                                 ]
+
+                mResults : Maybe (List Prediction)
+                mResults =
+                    -- We get the input ones here since we want to score without saving the results to the server.
+                    Types.PredictionDict.get Types.PredictionResults.SessionResult session.id model.inputPredictions
+                        |> Helpers.Maybe.ifNothing (Maybe.map .predictions sessionPredictions.result)
             in
-            case sessionPredictions.result of
+            case mResults of
                 Nothing ->
                     -- TODO: We still want to show the predictions.
                     Html.text "No results in yet."
 
-                Just result ->
+                Just resultPredictions ->
                     let
                         resultMap : Dict Types.Entrant.Id Prediction
                         resultMap =
-                            result.predictions
+                            resultPredictions
                                 |> Helpers.Dict.fromListWith .entrant
 
                         viewPredictions : SessionPrediction -> Scored (Html Msg)

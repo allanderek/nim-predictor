@@ -165,26 +165,26 @@ create temporary table temp_drivers(
      );
 
 insert into temp_drivers (number, driver_name, team_shortname) values
-    (10, 'Pierre Gasly', 'Alpine'),
-    (31, 'Esteban Ocon', 'Alpine'),
-    (14, 'Fernando Alonso', 'Aston Martin'),
-    (18, 'Lance Stroll', 'Aston Martin'),
-    (16, 'Charles Leclerc', 'Ferrari'),
-    (55, 'Carlos Sainz Jr.', 'Ferrari'),
     (20, 'Kevin Magnussen', 'Haas'),
     (27, 'Nico Hülkenberg', 'Haas'),
     (24, 'Zhou Guanyu', 'Stake'),
     (77, 'Valtteri Bottas', 'Stake'),
+    (2, 'Logan Sargeant', 'Williams'),
+    (23, 'Alexander Albon', 'Williams'),
+    (3, 'Daniel Ricciardo', 'Visa'),
+    (22, 'Yuki Tsunoda', 'Visa'),
+    (10, 'Pierre Gasly', 'Alpine'),
+    (31, 'Esteban Ocon', 'Alpine'),
+    (14, 'Fernando Alonso', 'Aston Martin'),
+    (18, 'Lance Stroll', 'Aston Martin'),
     (4, 'Lando Norris', 'McLaren'),
     (81, 'Oscar Piastri', 'McLaren'),
     (44, 'Lewis Hamilton', 'Mercedes'),
     (63, 'George Russell', 'Mercedes'),
-    (3, 'Daniel Ricciardo', 'Visa'),
-    (22, 'Yuki Tsunoda', 'Visa'),
-    (1, 'Max Verstappen', 'Red Bull'),
+    (16, 'Charles Leclerc', 'Ferrari'),
+    (55, 'Carlos Sainz Jr.', 'Ferrari'),
     (11, 'Sergio Pérez', 'Red Bull'),
-    (2, 'Logan Sargeant', 'Williams'),
-    (23, 'Alexander Albon', 'Williams')
+    (1, 'Max Verstappen', 'Red Bull')
     ;
 
 insert into drivers (name)

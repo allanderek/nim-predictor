@@ -64,10 +64,20 @@ view model config =
                 toEditMessage =
                     Msg.EditPredictions config.context config.session.id
 
-                toMoveMessage : Msg.UpDown -> Msg
-                toMoveMessage upDown =
-                    Msg.MovePrediction index upDown
-                        |> toEditMessage
+                moveButton : Msg.UpDown -> Bool -> Html Msg
+                moveButton upDown disabled =
+                    Html.button
+                        [ Msg.MovePrediction index upDown
+                            |> toEditMessage
+                            |> Helpers.Attributes.disabledOrOnClick disabled
+                        ]
+                        [ case upDown of
+                            Msg.Up ->
+                                Html.text "Up"
+
+                            Msg.Down ->
+                                Html.text "Down"
+                        ]
             in
             Html.tr
                 []
@@ -116,18 +126,8 @@ view model config =
                         Just entrant ->
                             Html.text entrant.team
                     ]
-
-                -- TODO: These should be disabled in the obvious cases.
-                , Html.td []
-                    [ Html.button
-                        [ Html.Events.onClick (toMoveMessage Msg.Up) ]
-                        [ Html.text "Up" ]
-                    ]
-                , Html.td []
-                    [ Html.button
-                        [ Html.Events.onClick (toMoveMessage Msg.Down) ]
-                        [ Html.text "Down" ]
-                    ]
+                , Html.td [] [ moveButton Msg.Up (index == 0) ]
+                , Html.td [] [ moveButton Msg.Down (index >= List.length predictions - 1) ]
                 ]
     in
     Html.section

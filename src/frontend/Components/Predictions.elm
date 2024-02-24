@@ -56,11 +56,53 @@ view model session =
                     -- We get the input ones here since we want to score without saving the results to the server.
                     Types.PredictionDict.get Types.PredictionResults.SessionResult session.id model.inputPredictions
                         |> Helpers.Maybe.ifNothing (Maybe.map .predictions sessionPredictions.result)
+
+                viewSessionPrediction : SessionPrediction -> Html Msg -> Html Msg
+                viewSessionPrediction sessionPrediction body =
+                    Html.li
+                        []
+                        [ Html.h4 [] [ Html.text sessionPrediction.name ]
+                        , body
+                        ]
+
+                intCell : Int -> Html msg
+                intCell x =
+                    Html.td [] [ Helpers.Html.int x ]
+
+                viewPredictionLine : Prediction -> Html Msg -> Html Msg
+                viewPredictionLine prediction score =
+                    let
+                        driver : Html Msg
+                        driver =
+                            viewEntrant prediction.entrant
+                    in
+                    Html.tr
+                        []
+                        [ intCell prediction.position
+                        , Html.td [] [ driver ]
+                        , score
+                        ]
             in
             case mResults of
                 Nothing ->
-                    -- TODO: We still want to show the predictions.
-                    Html.text "No results in yet."
+                    let
+                        viewPredictions : SessionPrediction -> Html Msg
+                        viewPredictions sessionPrediction =
+                            let
+                                predictionLines : List (Html Msg)
+                                predictionLines =
+                                    List.map (\p -> viewPredictionLine p Helpers.Html.nothing) sessionPrediction.predictions
+                            in
+                            Html.table [] [ Html.tbody [] predictionLines ]
+                                |> viewSessionPrediction sessionPrediction
+
+                        viewedPredictions : List (Html Msg)
+                        viewedPredictions =
+                            sessionPredictions.predictions
+                                |> Dict.values
+                                |> List.map viewPredictions
+                    in
+                    Html.ul [] viewedPredictions
 
                 Just resultPredictions ->
                     let
@@ -110,24 +152,9 @@ view model session =
 
                                                                 _ ->
                                                                     1 + fastestLap
-
-                                        driver : Html Msg
-                                        driver =
-                                            viewEntrant prediction.entrant
-
-                                        intCell : Int -> Html msg
-                                        intCell x =
-                                            Html.td [] [ Helpers.Html.int x ]
                                     in
                                     { score = score
-                                    , value =
-                                        Html.tr
-                                            []
-                                            [ Html.td
-                                                []
-                                                [ driver ]
-                                            , intCell score
-                                            ]
+                                    , value = viewPredictionLine prediction (intCell score)
                                     }
 
                                 scoredLines : List (Scored (Html Msg))
@@ -136,13 +163,8 @@ view model session =
                             in
                             { score = List.map .score scoredLines |> List.sum
                             , value =
-                                Html.li
-                                    []
-                                    [ Html.h4 [] [ Html.text sessionPrediction.name ]
-                                    , Html.table
-                                        []
-                                        [ Html.tbody [] (List.map .value scoredLines) ]
-                                    ]
+                                Html.table [] [ Html.tbody [] (List.map .value scoredLines) ]
+                                    |> viewSessionPrediction sessionPrediction
                             }
 
                         scoredPredictions : List (Html Msg)

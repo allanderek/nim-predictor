@@ -32,7 +32,6 @@ Obviously, you have to make sure all this is actually working as a website. Do a
 
 Formula-one:
 
-* Correctly score the fastestLap, it's just if the entrant is correct, not also in the correct place.
 
 * I think you shouldn't be allowed to guess someone for fastest lap if they aren't in your top ten. This means you have to worry about someone picking say 10th as fasest lap, and then moving them down.
 
@@ -43,7 +42,6 @@ Formula-one:
 
 * Predictions for a session may become stale, in that the entrants have changed and hence the predictions are no longer valid. I think in that case, we just need to make sure that at least all of the valid entrants are included, and possibly mark those that are invalid, or simply remove them.
 
-* I think the schema will have to have entrants that are in-active. Otherwise predictions which have been entered will prevent the inactive entrant from being deleted. 
 
 
 plan:
@@ -51,11 +49,3 @@ plan:
 
 
 * season predictions - the button should be disabled if you haven't changed anything from your stored predictions.
-
-Do this once we're a bit closer to having a definite schema that we want to stick with, otherwise we'll have to do it again, or start being more careful with migratable changes to the database.
-    * I think actually, I can just put the current predictions/results into the schema file.
-    * In litecli change all the passwords to be the same as mine, and the two Mexican grand prixs to have later start times.
-    * Using the web interface sign-in as each player and record the two sets of predictions
-    * change the two mexican times back, and enter the results for both.
-    * change the passwords back to what they are in the actual database (check full names as well).
-

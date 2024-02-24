@@ -5,34 +5,74 @@ import Components.InputPredictions
 import Components.InputSeasonPredictions
 import Components.Predictions
 import Components.WorkingIndicator
-import Dict
 import Helpers.Html
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import List.Extra
 import Model exposing (Model)
 import Msg exposing (Msg)
-import Route
-import Types.Entrant exposing (Entrant)
+import Route exposing (Route)
 import Types.Event exposing (Event)
 import Types.PredictionResults
 import Types.Requests
 import Types.Session exposing (Session)
 
 
+routeHref : Route -> Html.Attribute msg
+routeHref route =
+    route
+        |> Route.unparse
+        |> Attributes.href
+
+
 view : Model -> Browser.Document Msg
 view model =
+    let
+        navBar : Html msg
+        navBar =
+            Html.nav
+                []
+                [ Html.ul
+                    []
+                    [ Html.li
+                        []
+                        [ Html.a
+                            [ routeHref Route.Home ]
+                            [ Html.text "Events" ]
+                        ]
+                    , Html.li
+                        []
+                        [ case model.user of
+                            Nothing ->
+                                Html.a
+                                    []
+                                    [ Html.text "Login" ]
+
+                            Just user ->
+                                Html.a
+                                    [ routeHref Route.ProfilePage ]
+                                    [ Html.text user.fullname ]
+                        ]
+                    ]
+                ]
+
+        main : List (Html Msg)
+        main =
+            case model.route of
+                Route.Home ->
+                    viewHome model
+
+                Route.EventPage id ->
+                    viewEventPage model id
+
+                Route.ProfilePage ->
+                    [ Html.text "Sorry, I've not written a profile page yet." ]
+
+                Route.NotFound ->
+                    [ Html.text "Sorry, I do not recognise that page." ]
+    in
     { title = "Pole prediction"
-    , body =
-        case model.route of
-            Route.Home ->
-                viewHome model
-
-            Route.EventPage id ->
-                viewEventPage model id
-
-            Route.NotFound ->
-                [ Html.text "Sorry, I do not recognise that page." ]
+    , body = navBar :: main
     }
 
 
@@ -66,8 +106,7 @@ viewHome model =
                 , Html.td []
                     [ Html.a
                         [ Route.EventPage event.id
-                            |> Route.unparse
-                            |> Attributes.href
+                            |> routeHref
                         ]
                         [ Html.text event.name ]
                     ]

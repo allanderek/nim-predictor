@@ -13,6 +13,7 @@ import Url.Parser as Parser exposing ((</>))
 type Route
     = Home
     | EventPage Types.Event.Id
+    | ProfilePage
     | NotFound
 
 
@@ -23,6 +24,7 @@ parse url =
             Parser.oneOf
                 [ Parser.s "formulaone" |> Parser.map Home
                 , Parser.map EventPage (Parser.s "formulaone" </> Parser.s "event" </> Parser.int)
+                , Parser.map ProfilePage (Parser.s "formulaone" </> Parser.s "profile")
                 ]
     in
     url
@@ -41,6 +43,9 @@ unparse route =
 
                 EventPage id ->
                     [ "event", String.fromInt id ]
+
+                ProfilePage ->
+                    [ "profile" ]
 
                 NotFound ->
                     [ "notfound" ]

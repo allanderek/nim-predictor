@@ -255,6 +255,9 @@ initForRoute model =
         Route.Home ->
             Return.noCmd model
 
+        Route.ProfilePage ->
+            Return.noCmd model
+
         Route.NotFound ->
             Return.noCmd model
 

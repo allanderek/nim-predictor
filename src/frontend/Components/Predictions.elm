@@ -1,5 +1,6 @@
 module Components.Predictions exposing (view)
 
+import Components.Symbols
 import Dict exposing (Dict)
 import Helpers.Dict
 import Helpers.Html
@@ -37,24 +38,10 @@ view model session =
                         |> Maybe.withDefault []
                         |> Helpers.Dict.fromListWith .id
 
-                viewEntrant : Types.Entrant.Id -> Html Msg
-                viewEntrant entrantId =
-                    case Dict.get entrantId entrants of
-                        Nothing ->
-                            Html.text "Unknown driver"
-
-                        Just entrant ->
-                            Html.div
-                                [ Attributes.class "entrant" ]
-                                [ Html.span [ Attributes.class "driver" ] [ Html.text entrant.driver ]
-                                , Html.span [ Attributes.class "number" ] [ Helpers.Html.int entrant.number ]
-                                , Html.span [ Attributes.class "team" ] [ Html.text entrant.team ]
-                                ]
-
                 mResults : Maybe (List Prediction)
                 mResults =
                     -- We get the input ones here since we want to score without saving the results to the server.
-                    (Types.PredictionDict.get Types.PredictionResults.SessionResult session.id model.inputPredictions)
+                    Types.PredictionDict.get Types.PredictionResults.SessionResult session.id model.inputPredictions
                         |> Helpers.Maybe.withMaybeDefault (Maybe.map .predictions sessionPredictions.result)
 
                 viewSessionPrediction : SessionPrediction -> Html Msg -> Html Msg
@@ -69,12 +56,38 @@ view model session =
                 intCell x =
                     Html.td [] [ Helpers.Html.int x ]
 
-                viewPredictionLine : Prediction -> Html Msg -> Html Msg
-                viewPredictionLine prediction score =
+                viewEntrant : String -> Prediction -> Html Msg
+                viewEntrant class prediction =
+                    case Dict.get prediction.entrant entrants of
+                        Nothing ->
+                            Html.text "Unknown driver"
+
+                        Just entrant ->
+                            Html.div
+                                [ Attributes.class class ]
+                                [ Html.span [ Attributes.class "driver" ] [ Html.text entrant.driver ]
+                                , Html.span [ Attributes.class "number" ] [ Helpers.Html.int entrant.number ]
+                                , Html.span [ Attributes.class "team" ] [ Html.text entrant.team ]
+                                , case session.fastestLap && prediction.fastestLap of
+                                    False ->
+                                        Helpers.Html.nothing
+
+                                    True ->
+                                        Html.span [ Attributes.class "fastest-lap" ] [ Components.Symbols.stopWatch ]
+                                ]
+
+                viewPredictionLine : Prediction -> Maybe Prediction -> Html Msg -> Html Msg
+                viewPredictionLine prediction mResultLine score =
                     let
                         driver : Html Msg
                         driver =
-                            viewEntrant prediction.entrant
+                            Html.td
+                                []
+                                [ viewEntrant "prediction-driver" prediction
+                                , mResultLine
+                                    |> Maybe.map (viewEntrant "result-driver")
+                                    |> Helpers.Html.maybe
+                                ]
                     in
                     Html.tr
                         []
@@ -91,7 +104,7 @@ view model session =
                             let
                                 predictionLines : List (Html Msg)
                                 predictionLines =
-                                    List.map (\p -> viewPredictionLine p Helpers.Html.nothing) sessionPrediction.predictions
+                                    List.map (\p -> viewPredictionLine p Nothing Helpers.Html.nothing) sessionPrediction.predictions
                             in
                             Html.table [] [ Html.tbody [] predictionLines ]
                                 |> viewSessionPrediction sessionPrediction
@@ -154,7 +167,7 @@ view model session =
                                                                     1 + fastestLap
                                     in
                                     { score = score
-                                    , value = viewPredictionLine prediction (intCell score)
+                                    , value = viewPredictionLine prediction mResultLine (intCell score)
                                     }
 
                                 scoredLines : List (Scored (Html Msg))

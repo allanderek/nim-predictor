@@ -1,5 +1,6 @@
 module Components.InputPredictions exposing (view)
 
+import Components.Symbols
 import Dict
 import Helpers.Attributes
 import Helpers.Html
@@ -73,10 +74,10 @@ view model config =
                         ]
                         [ case upDown of
                             Msg.Up ->
-                                Html.text "Up"
+                                Components.Symbols.upArrow
 
                             Msg.Down ->
-                                Html.text "Down"
+                                Components.Symbols.downArrow
                         ]
             in
             Html.tr
@@ -92,7 +93,7 @@ view model config =
                                 True ->
                                     Html.span
                                         [ Attributes.class "predicted-fastest-lap" ]
-                                        [ Html.text "FL" ]
+                                        [ Components.Symbols.stopWatch ]
 
                                 False ->
                                     Html.button
@@ -100,7 +101,7 @@ view model config =
                                             |> toEditMessage
                                             |> Helpers.Attributes.disabledOrOnClick (prediction.position > 10)
                                         ]
-                                        [ Html.text "FL" ]
+                                        [ Components.Symbols.stopWatch ]
                             ]
                 , Html.td []
                     [ case mEntrant of

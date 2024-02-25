@@ -14,14 +14,9 @@ import Types.Entrant exposing (Entrant)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionDict
 import Types.PredictionResults
+import Types.Scored exposing (Scored)
 import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
-
-
-type alias Scored a =
-    { score : Int
-    , value : a
-    }
 
 
 view : Model -> Session -> Html Msg
@@ -171,7 +166,7 @@ view model session =
                                 scoredLines =
                                     List.map scoreLine sessionPrediction.predictions
                             in
-                            { score = List.map .score scoredLines |> List.sum
+                            { score = Types.Scored.total scoredLines
                             , value =
                                 Html.table [] [ Html.tbody [] (List.map .value scoredLines) ]
                                     |> viewSessionPrediction sessionPrediction
@@ -182,8 +177,7 @@ view model session =
                             sessionPredictions.predictions
                                 |> Dict.values
                                 |> List.map viewPredictions
-                                |> List.sortBy .score
-                                |> List.reverse
-                                |> List.map .value
+                                |> Types.Scored.sortHighestFirst
+                                |> Types.Scored.values
                     in
                     Html.ul [] scoredPredictions

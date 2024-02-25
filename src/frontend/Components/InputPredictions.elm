@@ -1,10 +1,10 @@
 module Components.InputPredictions exposing (view)
 
-import Helpers.Table
 import Components.Symbols
 import Dict
 import Helpers.Attributes
 import Helpers.Html
+import Helpers.Table
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import Html.Events
@@ -83,7 +83,7 @@ view model config =
             in
             Html.tr
                 []
-                [ Helpers.Table.intCell prediction.position 
+                [ Helpers.Table.intCell prediction.position
                 , case config.session.fastestLap of
                     False ->
                         Helpers.Html.nothing
@@ -133,7 +133,13 @@ view model config =
                 ]
     in
     Html.section
-        []
+        [ case config.context of
+            Types.PredictionResults.UserPrediction _ ->
+                Attributes.class "input-predictions-section"
+
+            Types.PredictionResults.SessionResult ->
+                Attributes.class "input-results-section"
+        ]
         [ fastestLapWarning
         , Html.table
             []

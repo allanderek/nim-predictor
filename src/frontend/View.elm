@@ -132,7 +132,6 @@ viewHome model =
         seasonStarted =
             Helpers.Time.isBefore seasonStarting model.now
     in
-    -- Of course this should show results if the season has started.
     [ case seasonStarted || Maybe.Extra.isNothing model.user of
         False ->
             Components.InputSeasonPredictions.view model seasonStarting

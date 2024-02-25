@@ -110,6 +110,7 @@ create temporary table temp_sessions(
 -- To do this I downloaded from f1calendar.com the ics calendar file and then uploaded that to chatGPT and basically
 -- asked it to output the following.
 insert into temp_sessions (event_name, name, start_time) values
+    ("Bahrain Grand Prix", "qualifying", "2024-02-01T16:00:00Z"),
     ("Bahrain Grand Prix", "qualifying", "2024-03-01T16:00:00Z"),
     ("Bahrain Grand Prix", "race", "2024-03-02T15:00:00Z"),
     ("Saudi Arabian Grand Prix", "qualifying", "2024-03-08T17:00:00Z"),

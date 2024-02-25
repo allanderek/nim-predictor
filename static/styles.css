@@ -1,3 +1,7 @@
 option {
     background-color: #545454;
 }
+
+section.input-results-section {
+    border: 2px solid #e81212;
+}

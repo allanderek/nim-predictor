@@ -604,6 +604,7 @@ proc formulaOneSessions*(ctx: Context) {.async gcsafe.} =
   let event_sql = """
       select id, event, name, start_time, half_points
       from formula_one_sessions
+      order by start_time
       """
   let dbRows = db.getAllRows(sql(event_sql))
   let jsonArray = newJArray()

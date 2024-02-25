@@ -205,9 +205,10 @@ viewEventPage model eventId =
 showSession : Model -> Session -> Html Msg
 showSession model session =
     let
-        -- TODO: Of course there are conditions on each of these, such that you should only see at most one.
-        -- 1. Enter predictions if logged-in and the session hasn't yet started.
-        -- 2. Enter results if logged-in, as an admin-user, and the session has started.
+        sessionStarted : Bool
+        sessionStarted =
+            Helpers.Time.isBefore session.startTime model.now
+
         input : Html Msg
         input =
             case model.user of
@@ -215,25 +216,32 @@ showSession model session =
                     Helpers.Html.nothing
 
                 Just user ->
-                    Html.div
-                        []
-                        [ case Helpers.Time.isBefore model.now session.startTime of
-                            True ->
-                                Components.InputPredictions.view model
-                                    { context = Types.PredictionResults.UserPrediction user.id
-                                    , session = session
-                                    }
+                    case sessionStarted of
+                        False ->
+                            Components.InputPredictions.view model
+                                { context = Types.PredictionResults.UserPrediction user.id
+                                , session = session
+                                }
 
-                            False ->
-                                Components.InputPredictions.view model
-                                    { context = Types.PredictionResults.SessionResult
-                                    , session = session
-                                    }
-                        ]
+                        True ->
+                            case user.isAdmin of
+                                False ->
+                                    Helpers.Html.nothing
+
+                                True ->
+                                    Components.InputPredictions.view model
+                                        { context = Types.PredictionResults.SessionResult
+                                        , session = session
+                                        }
 
         scores : Html Msg
         scores =
-            Components.Predictions.view model session
+            case sessionStarted of
+                False ->
+                    Helpers.Html.nothing
+
+                True ->
+                    Components.Predictions.view model session
     in
     Html.section
         []

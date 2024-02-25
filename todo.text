@@ -45,7 +45,15 @@ Formula-one:
 
 * Why do the sprint sessions show in the wrong order?
 
+* Better show that the predictions have been saved, at least have the 'Submit' button disabled if there is nothing to save.
+
 plan:
+    [ ] pico
+    [ ] scored html
+    [x] order of sessions
+    [ ] indications submissions saved successfully
+    [ ] indicate sprint race
+    [ ] Tabs for the sessions of an event
     * followed by the leaderboard (in SQL), and probably the scoring of predictions, possibily just in Elm (so that they can change without sending the result to the server.
 
 

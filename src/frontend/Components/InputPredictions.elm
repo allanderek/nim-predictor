@@ -39,6 +39,17 @@ view model config =
         getEntrant entrantId =
             List.Extra.find (\entrant -> entrant.id == entrantId) entrants
 
+        inputResultsWarning : Html msg
+        inputResultsWarning =
+            case config.context of
+                Types.PredictionResults.UserPrediction _ ->
+                    Helpers.Html.nothing
+
+                Types.PredictionResults.SessionResult ->
+                    Html.p
+                        []
+                        [ Html.text "You are inputting the results" ]
+
         fastestLapWarning : Html msg
         fastestLapWarning =
             case config.session.fastestLap of
@@ -51,7 +62,7 @@ view model config =
                             Helpers.Html.nothing
 
                         False ->
-                            Html.div
+                            Html.p
                                 [ Attributes.class "fastest-lap-warning" ]
                                 [ Html.text "Do not forget to select a fastest lap." ]
 
@@ -140,7 +151,8 @@ view model config =
             Types.PredictionResults.SessionResult ->
                 Attributes.class "input-results-section"
         ]
-        [ fastestLapWarning
+        [ inputResultsWarning
+        , fastestLapWarning
         , Html.table
             []
             [ Html.tbody [] (List.indexedMap showPrediction predictions) ]

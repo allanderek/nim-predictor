@@ -1,5 +1,6 @@
 module Types.SeasonPrediction exposing
     ( SeasonPrediction
+    , Line
     , decoder
     )
 
@@ -12,11 +13,11 @@ import Types.User
 type alias SeasonPrediction =
     { user : Types.User.Id
     , name : String
-    , predictions : List SeasonPredictionLine
+    , predictions : List Line
     }
 
 
-type alias SeasonPredictionLine =
+type alias Line =
     { teamId : Types.Team.Id
     , teamName : String
     }
@@ -25,9 +26,9 @@ type alias SeasonPredictionLine =
 decoder : Decoder SeasonPrediction
 decoder =
     let
-        prediction : Decoder SeasonPredictionLine
+        prediction : Decoder Line
         prediction =
-            Decode.succeed SeasonPredictionLine
+            Decode.succeed Line
                 |> Pipeline.required "team_id" Decode.int
                 |> Pipeline.required "team_name" Decode.string
     in

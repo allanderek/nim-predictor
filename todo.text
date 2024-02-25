@@ -43,7 +43,7 @@ Formula-one:
 
 * Predictions for a session may become stale, in that the entrants have changed and hence the predictions are no longer valid. I think in that case, we just need to make sure that at least all of the valid entrants are included, and possibly mark those that are invalid, or simply remove them.
 
-
+* Why do the sprint sessions show in the wrong order?
 
 plan:
     * followed by the leaderboard (in SQL), and probably the scoring of predictions, possibily just in Elm (so that they can change without sending the result to the server.

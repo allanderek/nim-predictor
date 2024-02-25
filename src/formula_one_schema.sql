@@ -107,6 +107,8 @@ create temporary table temp_sessions(
     start_time not null
     );
 
+-- To do this I downloaded from f1calendar.com the ics calendar file and then uploaded that to chatGPT and basically
+-- asked it to output the following.
 insert into temp_sessions (event_name, name, start_time) values
     ("Bahrain Grand Prix", "qualifying", "2024-03-01T16:00:00Z"),
     ("Bahrain Grand Prix", "race", "2024-03-02T15:00:00Z"),
@@ -115,7 +117,59 @@ insert into temp_sessions (event_name, name, start_time) values
     ("Australian Grand Prix", "qualifying", "2024-03-23T05:00:00Z"),
     ("Australian Grand Prix", "race", "2024-03-24T04:00:00Z"),
     ("Japanese Grand Prix", "qualifying", "2024-04-06T06:00:00Z"),
-    ("Japanese Grand Prix", "race", "2024-04-07T05:00:00Z")
+    ("Japanese Grand Prix", "race", "2024-04-07T05:00:00Z"),
+    ("Chinese Grand Prix", "sprint-shootout", "2024-04-19T07:30:00Z"),
+    ("Chinese Grand Prix", "sprint", "2024-04-20T03:00:00Z"),
+    ("Chinese Grand Prix", "qualifying", "2024-04-20T07:00:00Z"),
+    ("Chinese Grand Prix", "race", "2024-04-21T07:00:00Z"),
+    ("Miami Grand Prix", "sprint-shootout", "2024-05-03T20:30:00Z"),
+    ("Miami Grand Prix", "sprint", "2024-05-04T16:00:00Z"),
+    ("Miami Grand Prix", "qualifying", "2024-05-04T20:00:00Z"),
+    ("Miami Grand Prix", "race", "2024-05-05T20:00:00Z"),
+    ("Emilia Romagna Grand Prix", "qualifying", "2024-05-18T14:00:00Z"),
+    ("Emilia Romagna Grand Prix", "race", "2024-05-19T13:00:00Z"),
+    ("Monaco Grand Prix", "qualifying", "2024-05-25T14:00:00Z"),
+    ("Monaco Grand Prix", "race", "2024-05-26T13:00:00Z"),
+    ("Canadian Grand Prix", "qualifying", "2024-06-08T20:00:00Z"),
+    ("Canadian Grand Prix", "race", "2024-06-09T18:00:00Z"),
+    ("Spanish Grand Prix", "qualifying", "2024-06-22T14:00:00Z"),
+    ("Spanish Grand Prix", "race", "2024-06-23T13:00:00Z"),
+    ("Austrian Grand Prix", "sprint-shootout", "2024-06-28T14:30:00Z"),
+    ("Austrian Grand Prix", "sprint", "2024-06-29T10:00:00Z"),
+    ("Austrian Grand Prix", "qualifying", "2024-06-29T14:00:00Z"),
+    ("Austrian Grand Prix", "race", "2024-06-30T13:00:00Z"),
+    ("British Grand Prix", "qualifying", "2024-07-06T13:00:00Z"),
+    ("British Grand Prix", "race", "2024-07-07T13:00:00Z"),
+    ("Hungarian Grand Prix", "qualifying", "2024-07-20T13:00:00Z"),
+    ("Hungarian Grand Prix", "race", "2024-07-21T13:00:00Z"),
+    ("Belgian Grand Prix", "qualifying", "2024-07-27T13:00:00Z"),
+    ("Belgian Grand Prix", "race", "2024-07-28T13:00:00Z"),
+    ("Dutch Grand Prix", "qualifying", "2024-08-24T13:00:00Z"),
+    ("Dutch Grand Prix", "race", "2024-08-25T13:00:00Z"),
+    ("Italian Grand Prix", "qualifying", "2024-08-31T14:00:00Z"),
+    ("Italian Grand Prix", "race", "2024-09-01T13:00:00Z"),
+    ("Azerbaijan Grand Prix", "qualifying", "2024-09-14T12:00:00Z"),
+    ("Azerbaijan Grand Prix", "race", "2024-09-15T11:00:00Z"),
+    ("Singapore Grand Prix", "qualifying", "2024-09-21T13:00:00Z"),
+    ("Singapore Grand Prix", "race", "2024-09-22T12:00:00Z"),
+    ("United States Grand Prix", "sprint-shootout", "2024-10-18T21:30:00Z"),
+    ("United States Grand Prix", "sprint", "2024-10-19T18:00:00Z"),
+    ("United States Grand Prix", "qualifying", "2024-10-19T22:00:00Z"),
+    ("United States Grand Prix", "race", "2024-10-20T19:00:00Z"),
+    ("Mexico City Grand Prix", "qualifying", "2024-10-26T21:00:00Z"),
+    ("Mexico City Grand Prix", "race", "2024-10-27T20:00:00Z"),
+    ("Brazilian Grand Prix", "sprint-shootout", "2024-11-01T18:30:00Z"),
+    ("Brazilian Grand Prix", "sprint", "2024-11-02T14:00:00Z"),
+    ("Brazilian Grand Prix", "qualifying", "2024-11-02T18:00:00Z"),
+    ("Brazilian Grand Prix", "race", "2024-11-03T17:00:00Z"),
+    ("Las Vegas Grand Prix", "qualifying", "2024-11-22T06:00:00Z"),
+    ("Las Vegas Grand Prix", "race", "2024-11-23T06:00:00Z"),
+    ("Qatar Grand Prix", "sprint-shootout", "2024-11-29T17:30:00Z"),
+    ("Qatar Grand Prix", "sprint", "2024-11-30T13:00:00Z"),
+    ("Qatar Grand Prix", "qualifying", "2024-11-30T17:00:00Z"),
+    ("Qatar Grand Prix", "race", "2024-12-01T17:00:00Z"),
+    ("Abu Dhabi Grand Prix", "qualifying", "2024-12-07T14:00:00Z"),
+    ("Abu Dhabi Grand Prix", "race", "2024-12-08T13:00:00Z")
     ;
 
 insert into formula_one_sessions (name, start_time, event) 
@@ -132,6 +186,7 @@ create temporary table temp_teams(
      );
 
 insert into temp_teams (shortname, fullname, constructor) values
+    ('Red Bull', 'Oracle Red Bull Racing', 'Red Bull'),
     ('Alpine', 'BWT Alpine F1 Team', 'Renault'),
     ('Aston Martin', 'Aston Martin Aramco F1 Team', 'Aston Martin'),
     ('Ferrari', 'Scuderia Ferrari', 'Ferrari'),
@@ -140,7 +195,6 @@ insert into temp_teams (shortname, fullname, constructor) values
     ('McLaren', 'McLaren F1 Team', 'McLaren'),
     ('Mercedes', 'Mercedes-AMG Petronas F1 Team', 'Mercedes'),
     ('Visa', 'Visa Cash App RB F1 Team', 'Torro Rosso'),
-    ('Red Bull', 'Oracle Red Bull Racing', 'Red Bull'),
     ('Williams', 'Williams Racing', 'Williams')
     ;
 

@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Helpers.Dict
 import Helpers.Html
 import Helpers.Maybe
+import Helpers.Table
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import Model exposing (Model)
@@ -52,10 +53,6 @@ view model session =
                         , body
                         ]
 
-                intCell : Int -> Html msg
-                intCell x =
-                    Html.td [] [ Helpers.Html.int x ]
-
                 viewEntrant : String -> Prediction -> Html Msg
                 viewEntrant class prediction =
                     case Dict.get prediction.entrant entrants of
@@ -91,8 +88,8 @@ view model session =
                     in
                     Html.tr
                         []
-                        [ intCell prediction.position
-                        , Html.td [] [ driver ]
+                        [ Helpers.Table.intCell prediction.position
+                        , driver
                         , score
                         ]
             in
@@ -167,7 +164,7 @@ view model session =
                                                                     1 + fastestLap
                                     in
                                     { score = score
-                                    , value = viewPredictionLine prediction mResultLine (intCell score)
+                                    , value = viewPredictionLine prediction mResultLine (Helpers.Table.intCell score)
                                     }
 
                                 scoredLines : List (Scored (Html Msg))

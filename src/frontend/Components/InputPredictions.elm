@@ -1,5 +1,6 @@
 module Components.InputPredictions exposing (view)
 
+import Helpers.Table
 import Components.Symbols
 import Dict
 import Helpers.Attributes
@@ -82,7 +83,7 @@ view model config =
             in
             Html.tr
                 []
-                [ Html.td [] [ Helpers.Html.int prediction.position ]
+                [ Helpers.Table.intCell prediction.position 
                 , case config.session.fastestLap of
                     False ->
                         Helpers.Html.nothing

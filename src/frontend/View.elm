@@ -5,17 +5,23 @@ import Components.InputPredictions
 import Components.InputSeasonPredictions
 import Components.Predictions
 import Components.WorkingIndicator
+import Dict
 import Helpers.Html
+import Helpers.Table
 import Helpers.Time
 import Html exposing (Html)
 import Html.Attributes as Attributes
+import Iso8601
 import List.Extra
+import Maybe.Extra
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Route exposing (Route)
+import Time
 import Types.Event exposing (Event)
 import Types.PredictionResults
 import Types.Requests
+import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 
 
@@ -103,7 +109,7 @@ viewHome model =
         showEvent event =
             Html.tr
                 []
-                [ Html.td [] [ String.fromInt event.round |> Html.text ]
+                [ Helpers.Table.intCell event.round
                 , Html.td []
                     [ Html.a
                         [ Route.EventPage event.id
@@ -112,16 +118,68 @@ viewHome model =
                         [ Html.text event.name ]
                     ]
                 ]
+
+        seasonStarting : Time.Posix
+        seasonStarting =
+            case Iso8601.toTime "2024-03-01T16:00:00Z" of
+                Ok t ->
+                    t
+
+                Err _ ->
+                    Helpers.Time.epoch
+
+        seasonStarted : Bool
+        seasonStarted =
+            Helpers.Time.isBefore seasonStarting model.now
     in
-    [ getEventsStatus
+    -- Of course this should show results if the season has started.
+    [ case seasonStarted || Maybe.Extra.isNothing model.user of
+        False ->
+            Components.InputSeasonPredictions.view model seasonStarting
+
+        True ->
+            Helpers.Html.nothing
+    , getEventsStatus
     , Html.table
         [ Attributes.class "event-list" ]
-        [ Html.tbody [] (List.map showEvent model.events)
-        ]
+        [ Html.tbody [] (List.map showEvent model.events) ]
+    , case seasonStarted of
+        False ->
+            Helpers.Html.nothing
 
-    -- Of course this should show results if the season has started.
-    , Components.InputSeasonPredictions.view model
+        True ->
+            showSeasonPredictions model
     ]
+
+
+showSeasonPredictions : Model -> Html msg
+showSeasonPredictions model =
+    let
+        showUserPredictions : SeasonPrediction -> Html msg
+        showUserPredictions seasonPrediction =
+            let
+                viewLine : Types.SeasonPrediction.Line -> Html msg
+                viewLine line =
+                    Html.tr
+                        []
+                        [ Helpers.Table.stringCell line.teamName ]
+            in
+            Html.div
+                [ Attributes.class "user-season-predictions" ]
+                [ Html.h4 [] [ Html.text seasonPrediction.name ]
+                , Html.table
+                    []
+                    [ Html.tbody
+                        []
+                        (List.map viewLine seasonPrediction.predictions)
+                    ]
+                ]
+    in
+    Html.ul
+        []
+        (Dict.values model.seasonPredictions
+            |> List.map showUserPredictions
+        )
 
 
 viewEventPage : Model -> Types.Event.Id -> List (Html Msg)
@@ -166,7 +224,8 @@ showSession model session =
                                     { context = Types.PredictionResults.UserPrediction user.id
                                     , session = session
                                     }
-                            False -> 
+
+                            False ->
                                 Components.InputPredictions.view model
                                     { context = Types.PredictionResults.SessionResult
                                     , session = session

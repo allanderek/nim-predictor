@@ -1,5 +1,6 @@
 module Helpers.Time exposing
     ( encodePosix
+    , epoch
     , isBefore
     , posixDecoder
     , showPosix
@@ -8,6 +9,11 @@ module Helpers.Time exposing
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import Time
+
+
+epoch : Time.Posix
+epoch =
+    Time.millisToPosix 0
 
 
 isBefore : Time.Posix -> Time.Posix -> Bool

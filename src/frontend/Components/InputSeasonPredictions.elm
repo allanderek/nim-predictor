@@ -2,15 +2,18 @@ module Components.InputSeasonPredictions exposing (view)
 
 import Components.RequestButton
 import Helpers.Html
+import Helpers.Table
+import Helpers.Time
 import Html exposing (Html)
 import Html.Events
 import Model exposing (Model)
 import Msg exposing (Msg)
+import Time
 import Types.Team exposing (Team)
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> Time.Posix -> Html Msg
+view model seasonStarting =
     let
         currentPredictions : List Team
         currentPredictions =
@@ -21,8 +24,7 @@ view model =
             let
                 moveButton : Bool -> Msg.UpDown -> String -> Html Msg
                 moveButton visible direction face =
-                    Html.td
-                        []
+                    Html.td []
                         [ case visible of
                             False ->
                                 Helpers.Html.nothing
@@ -37,15 +39,21 @@ view model =
             in
             Html.tr
                 []
-                [ Html.td [] [ Helpers.Html.int (index + 1) ]
-                , Html.td [] [ Html.text team.shortname ]
+                [ Helpers.Table.intCell (index + 1)
+                , Helpers.Table.stringCell team.shortname
                 , moveButton (index >= 1) Msg.Up "Up"
                 , moveButton (index < List.length currentPredictions - 1) Msg.Up "Up"
                 ]
     in
     Html.section
         []
-        [ Html.table
+        [ Html.p
+            []
+            [ Html.text "Enter predictions by: "
+            , Helpers.Time.showPosix model.zone seasonStarting
+                |> Html.text
+            ]
+        , Html.table
             []
             [ Html.tbody
                 []

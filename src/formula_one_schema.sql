@@ -94,8 +94,8 @@ insert into formula_one_events (round, name, season) values
     (18, "Singapore Grand Prix", "2024"),
     (19, "United States Grand Prix", "2024"),
     (20, "Mexico City Grand Prix", "2024"),
-    (21, "São Paulo Grand Prix", "2024"),
-    (22, "Las Vegas Grand PriX", "2024"),
+    (21, "Brazilian Grand Prix", "2024"),
+    (22, "Las Vegas Grand Prix", "2024"),
     (23, "Qatar Grand Prix", "2024"),
     (24, "Abu Dhabi Grand Prix", "2024")
     ;

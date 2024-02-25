@@ -1,5 +1,6 @@
 module Components.Symbols exposing
     ( downArrow
+    , sprint
     , stopWatch
     , upArrow
     )
@@ -20,3 +21,8 @@ downArrow =
 stopWatch : Html msg
 stopWatch =
     Html.text "⏱"
+
+
+sprint : Html msg
+sprint =
+    Html.text "🏃"

@@ -4,6 +4,7 @@ import Browser
 import Components.InputPredictions
 import Components.InputSeasonPredictions
 import Components.Predictions
+import Components.Symbols
 import Components.WorkingIndicator
 import Dict
 import Helpers.Html
@@ -115,7 +116,14 @@ viewHome model =
                         [ Route.EventPage event.id
                             |> routeHref
                         ]
-                        [ Html.text event.name ]
+                        [ Html.text event.name
+                        , case event.isSprint of
+                            False ->
+                                Helpers.Html.nothing
+
+                            True ->
+                                Components.Symbols.sprint
+                        ]
                     ]
                 ]
 

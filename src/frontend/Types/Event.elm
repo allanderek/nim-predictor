@@ -17,6 +17,7 @@ type alias Event =
     , round : Int
     , name : String
     , season : String
+    , isSprint : Bool
     }
 
 
@@ -27,3 +28,4 @@ decoder =
         |> Pipeline.required "round" Decode.int
         |> Pipeline.required "name" Decode.string
         |> Pipeline.required "season" Decode.string
+        |> Pipeline.required "isSprint" Decode.bool

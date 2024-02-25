@@ -48,11 +48,11 @@ Formula-one:
 * Better show that the predictions have been saved, at least have the 'Submit' button disabled if there is nothing to save.
 
 plan:
-    [ ] pico
     [ ] scored html
     [x] order of sessions
     [ ] indications submissions saved successfully
-    [ ] indicate sprint race
+    [x] indicate sprint race
+    [x] Include the event start time in the event json, so that we can show which ones have finished *and* use that for the season starting.
     [ ] Tabs for the sessions of an event
     * followed by the leaderboard (in SQL), and probably the scoring of predictions, possibily just in Elm (so that they can change without sending the result to the server.
 

@@ -7,6 +7,7 @@ proc sharedHead*(ctx: Context, staticPath : string, title: string, includeElmScr
   let vNode = buildHtml(head):
     title: text title 
     link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/gh/kimeiga/bahunya/dist/bahunya.min.css")
+    # link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.conditional.slate.min.css")
     link(rel = "stylesheet", href = staticPath & "/styles.css")
     if includeElmScript:
       link(rel = "preload", href = staticPath & "/main.js")

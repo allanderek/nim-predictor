@@ -580,20 +580,32 @@ proc getMe*(ctx: Context) {.async gcsafe.} =
 proc formulaOneEvents*(ctx: Context) {.async gcsafe.} =
   let db = open(databasePath, "", "", "")
   let event_sql = """
-      select id, round, name, season
-      from formula_one_events
+      select 
+      id, round, name, season,
+      case
+        when exists (
+            select 1
+            from formula_one_sessions
+            where event = events.id and name = "sprint"
+        ) then 1
+        else 0 
+      end as isSprint,
+      ( select min(start_time) from formula_one_sessions where event = events.id) as start_time
+      from formula_one_events as events
       where season = "2024"
       """
   let dbRows = db.getAllRows(sql(event_sql))
   let jsonArray = newJArray()
 
   for row in dbRows:
-    if row.len >= 4: # Ensure there are at least two elements
+    if row.len >= 6: 
       var jsonObj = newJObject()
       jsonObj["id"] = %parseInt(row[0])
       jsonObj["round"] = %parseInt(row[1])
       jsonObj["name"] = %row[2]
       jsonObj["season"] = %row[3] 
+      jsonObj["isSprint" ] = %parseBool(row[4])
+      jsonObj["startTime" ] = %row[5] 
       jsonArray.add(jsonObj)
   resp jsonResponse(jsonArray)
   db.close()

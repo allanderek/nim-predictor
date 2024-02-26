@@ -1,6 +1,6 @@
 module Components.InputPredictions exposing (view)
 
-import Components.Button
+import Components.RequestButton
 import Components.Symbols
 import Dict
 import Helpers.Attributes
@@ -171,11 +171,10 @@ view model config =
         , Html.table
             []
             [ Html.tbody [] (List.indexedMap showPrediction predictions) ]
-        , Html.button
-            [ Msg.SubmitPredictions config.context config.session.id
-                |> Helpers.Attributes.disabledOrOnClick submitDisabled
-            ]
-            [ Html.text "Submit"
-                |> Components.Button.faceOrWorking requestStatus
-            ]
+        , Components.RequestButton.view
+            { status = requestStatus
+            , disabled = submitDisabled
+            , message = Msg.SubmitPredictions config.context config.session.id
+            , face = Html.text "Submit"
+            }
         ]

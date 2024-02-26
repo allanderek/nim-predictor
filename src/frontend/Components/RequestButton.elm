@@ -14,6 +14,16 @@ type alias Config msg =
     }
 
 
+faceOrWorking : Types.Requests.Status -> Html msg -> Html msg
+faceOrWorking status face =
+    case Types.Requests.isInFlight status of
+        True ->
+            Components.WorkingIndicator.view
+
+        False ->
+            face
+
+
 view : Config msg -> Html msg
 view config =
     let
@@ -37,18 +47,7 @@ view config =
 
         face : Html msg
         face =
-            case config.status of
-                Types.Requests.InFlight ->
-                    Components.WorkingIndicator.view
-
-                Types.Requests.Ready ->
-                    config.face
-
-                Types.Requests.Succeeded ->
-                    config.face
-
-                Types.Requests.Failed ->
-                    config.face
+            faceOrWorking config.status config.face
     in
     Html.button
         [ Helpers.Attributes.disabledOrOnClick (config.disabled || statusDisabled) config.message ]

@@ -17,6 +17,7 @@ import Types.PredictionDict
 import Types.PredictionResults
 import Types.Requests
 import Types.Session exposing (Session)
+import Types.SessionPrediction exposing (SessionPrediction)
 
 
 type alias Config =
@@ -31,6 +32,10 @@ view model config =
         predictions : List Prediction
         predictions =
             Model.getInputPredictions model config.context config.session.id
+
+        mSavedPredictions : Maybe SessionPrediction
+        mSavedPredictions =
+            Types.PredictionDict.get config.context config.session.id model.predictions
 
         entrants : List Entrant
         entrants =
@@ -154,9 +159,18 @@ view model config =
         requestInFlight =
             Types.Requests.isInFlight requestStatus
 
+        noUnsavedChanges : Bool
+        noUnsavedChanges =
+            case mSavedPredictions of
+                Nothing ->
+                    False
+
+                Just sessionPrediction ->
+                    sessionPrediction.predictions == predictions
+
         submitDisabled : Bool
         submitDisabled =
-            requestInFlight
+            requestInFlight || noUnsavedChanges
     in
     Html.section
         [ case config.context of

@@ -1,8 +1,9 @@
 module Components.WorkingIndicator exposing (view)
 
 import Html exposing (Html)
+import Components.Symbols
 
 
 view : Html msg
 view =
-    Html.text "Working"
+    Components.Symbols.gear

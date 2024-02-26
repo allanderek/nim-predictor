@@ -1,5 +1,6 @@
 module Components.InputPredictions exposing (view)
 
+import Components.Button
 import Components.Symbols
 import Dict
 import Helpers.Attributes
@@ -7,13 +8,14 @@ import Helpers.Html
 import Helpers.Table
 import Html exposing (Html)
 import Html.Attributes as Attributes
-import Html.Events
 import List.Extra
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Types.Entrant exposing (Entrant)
 import Types.Prediction exposing (Prediction)
+import Types.PredictionDict
 import Types.PredictionResults
+import Types.Requests
 import Types.Session exposing (Session)
 
 
@@ -142,6 +144,19 @@ view model config =
                 , Html.td [] [ moveButton Msg.Up (index == 0) ]
                 , Html.td [] [ moveButton Msg.Down (index >= List.length predictions - 1) ]
                 ]
+
+        requestStatus : Types.Requests.Status
+        requestStatus =
+            Types.PredictionDict.get config.context config.session.id model.submitPredictionsStatus
+                |> Maybe.withDefault Types.Requests.Ready
+
+        requestInFlight : Bool
+        requestInFlight =
+            Types.Requests.isInFlight requestStatus
+
+        submitDisabled : Bool
+        submitDisabled =
+            requestInFlight
     in
     Html.section
         [ case config.context of
@@ -157,6 +172,10 @@ view model config =
             []
             [ Html.tbody [] (List.indexedMap showPrediction predictions) ]
         , Html.button
-            [ Html.Events.onClick (Msg.SubmitPredictions config.context config.session.id) ]
-            [ Html.text "Submit" ]
+            [ Msg.SubmitPredictions config.context config.session.id
+                |> Helpers.Attributes.disabledOrOnClick submitDisabled
+            ]
+            [ Html.text "Submit"
+                |> Components.Button.faceOrWorking requestStatus
+            ]
         ]

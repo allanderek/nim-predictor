@@ -1,11 +1,17 @@
 module Components.Symbols exposing
     ( downArrow
+    , gear
     , sprint
     , stopWatch
     , upArrow
     )
 
 import Html exposing (Html)
+
+
+gear : Html msg
+gear =
+    Html.text "⚙"
 
 
 upArrow : Html msg

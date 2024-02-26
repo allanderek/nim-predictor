@@ -48,7 +48,7 @@ Formula-one:
 * Better show that the predictions have been saved, at least have the 'Submit' button disabled if there is nothing to save.
 
 plan:
-    [ ] scored html
+    [x] scored html
     [x] order of sessions
     [ ] indications submissions saved successfully
     [x] indicate sprint race

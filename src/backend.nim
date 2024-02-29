@@ -876,7 +876,7 @@ proc submitFormulaOneSeasonPrediction*(ctx: Context) {.async gcsafe.}=
 
 let
   indexPatterns* = @[
-    pattern("/", index, @[HttpGet], name = "index"),
+    pattern("/", showFormulaOneIndex, @[HttpGet], name = "index"),
     pattern("/formulaone", showFormulaOneIndex, @[HttpGet], name = "formula-one" ),
     pattern("/formulaone/event/{event}", showFormulaOneIndex, @[HttpGet], name = "formula-one-event" ),
     pattern("/formulaone/profile", showFormulaOneIndex, @[HttpGet], name = "formula-one-profile" ),

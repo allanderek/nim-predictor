@@ -22,7 +22,8 @@ parse url =
     let
         routeParser =
             Parser.oneOf
-                [ Parser.s "formulaone" |> Parser.map Home
+                [ Parser.top |> Parser.map Home
+                , Parser.s "formulaone" |> Parser.map Home
                 , Parser.map EventPage (Parser.s "formulaone" </> Parser.s "event" </> Parser.int)
                 , Parser.map ProfilePage (Parser.s "formulaone" </> Parser.s "profile")
                 ]

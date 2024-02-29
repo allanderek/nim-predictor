@@ -21,10 +21,13 @@ CREATE TABLE users (
     password TEXT NOT NULL,
     admin integer default 0    
 );
-insert into users (id, fullname, username, password, admin) values (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1);
-insert into users (id, fullname, username, password, admin) values (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$8kdAzWvj4i78PF0TTiaouMsa/jPK08pk4TtL1xXJdjOUH1PEnKB6r0p1PQ18DyKWriZR13hbsuqm7A8J8mauiA==', 1);
-insert into users (id, fullname, username, password, admin) values (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$Rw+otrxmI2uoEmrspm+0ftsK3h1Xu/6V9B4EHOioSLif4jepM+pxre3cavdVoVsXb6z74zENM//URTwis508BQ==', 1);
-insert into users (id, fullname, username, password, admin) values (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$dteSREtZlbugOwmed76fXUva70mFjKBzZ40HkLc3psZKcHP/8McibNqwXGtBw6BZMnuwNuJ/9mUUBP9LGCsI4w==', 1);
+insert into users (id, fullname, username, password, admin) values 
+    (1, 'Allan', 'allanderek', 'pdkdf2_sha256$Prologue$24400$OrNEbmqgkoK/6Oow6KFoMTXNUN0FD+9N3+uvxmpanYoMvSiEDWtbgpe1PvYxmF//a6Zs3fVE4ngq/InSYaGuCA==', 1),
+    (2, 'Dan', 'dan', 'pdkdf2_sha256$Prologue$24400$8kdAzWvj4i78PF0TTiaouMsa/jPK08pk4TtL1xXJdjOUH1PEnKB6r0p1PQ18DyKWriZR13hbsuqm7A8J8mauiA==', 1),
+    (3, 'Charlie', 'charlie', 'pdkdf2_sha256$Prologue$24400$Rw+otrxmI2uoEmrspm+0ftsK3h1Xu/6V9B4EHOioSLif4jepM+pxre3cavdVoVsXb6z74zENM//URTwis508BQ==', 1),
+    (4, 'James', 'james', 'pdkdf2_sha256$Prologue$24400$dteSREtZlbugOwmed76fXUva70mFjKBzZ40HkLc3psZKcHP/8McibNqwXGtBw6BZMnuwNuJ/9mUUBP9LGCsI4w==', 1),
+    (5, 'Joost', 'joost', 'pdkdf2_sha256$Prologue$24400$QILHlVtNC/6nsieSEVIjlmmgCNEzHKulqLLOODOHakX11KOSHNdHgaag+TUbn166YxEHAyET9uV01jw4/BFy1g==', 1)
+    ;
 
 CREATE TABLE drivers ( 
     id integer primary key autoincrement, 

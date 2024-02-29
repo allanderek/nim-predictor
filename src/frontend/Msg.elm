@@ -21,6 +21,12 @@ import Url exposing (Url)
 type Msg
     = UrlRequest Browser.UrlRequest
     | UrlChange Url
+    | LoginInputUsername String
+    | LoginInputPassword String
+    | Login
+    | LoginResponse (Types.Requests.HttpResult User)
+    | Logout
+    | LogoutResponse (Types.Requests.HttpResult ())
     | GetMeResponse (Types.Requests.HttpResult User)
     | GetTeamsResponse (Types.Requests.HttpResult (List Team))
     | GetEventsResponse (Types.Requests.HttpResult (List Event))

@@ -30,6 +30,10 @@ type alias Model =
     , zone : Time.Zone
     , route : Route
     , user : Maybe User
+    , loginUsername : String
+    , loginPassword : String
+    , loginStatus : Types.Requests.Status
+    , logoutStatus : Types.Requests.Status
     , getTeamsStatus : Types.Requests.Status
     , teams : List Team
     , getSeasonPredictionsStatus : Types.Requests.Status
@@ -56,6 +60,10 @@ init config =
     , zone = config.zone
     , route = config.route
     , user = Nothing
+    , loginUsername = ""
+    , loginPassword = ""
+    , loginStatus = Types.Requests.Ready
+    , logoutStatus = Types.Requests.Ready
     , getTeamsStatus = Types.Requests.Ready
     , teams = []
     , getSeasonPredictionsStatus = Types.Requests.Ready

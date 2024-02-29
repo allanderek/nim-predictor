@@ -266,6 +266,11 @@ initForRoute model =
                 |> Return.andThen (getSessionPredictions eventId)
 
 
+logoutUser : Model -> Model
+logoutUser model =
+    { model | user = Nothing }
+
+
 logoutIfUauthorised : Http.Error -> Model -> Model
 logoutIfUauthorised error model =
     case Helpers.Http.isUnauthorised error of
@@ -273,7 +278,7 @@ logoutIfUauthorised error model =
             model
 
         True ->
-            { model | user = Nothing }
+            logoutUser model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -292,6 +297,97 @@ update message model =
                 Browser.External url ->
                     Browser.Navigation.load url
                         |> Return.withModel model
+
+        Msg.LoginInputUsername input ->
+            Return.noCmd
+                { model | loginUsername = input }
+
+        Msg.LoginInputPassword input ->
+            Return.noCmd
+                { model | loginPassword = input }
+
+        Msg.Login ->
+            let
+                newModel : Model
+                newModel =
+                    { model | loginStatus = Types.Requests.InFlight }
+
+                command : Cmd Msg
+                command =
+                    let
+                        toMessage : Types.Requests.HttpResult User -> Msg
+                        toMessage =
+                            Msg.LoginResponse
+
+                        decoder : Decoder User
+                        decoder =
+                            Types.User.decoder
+
+                        body : Encode.Value
+                        body =
+                            Encode.object
+                                [ ( "username", Encode.string model.loginUsername )
+                                , ( "password", Encode.string model.loginPassword )
+                                ]
+                    in
+                    Http.post
+                        { url = "/api/auth/login"
+                        , body = Http.jsonBody body
+                        , expect = Http.expectJson toMessage decoder
+                        }
+            in
+            Return.withModel newModel command
+
+        Msg.LoginResponse result ->
+            case result of
+                Err _ ->
+                    Return.noCmd
+                        { model | loginStatus = Types.Requests.Failed }
+
+                Ok user ->
+                    Return.noCmd
+                        { model
+                            | user = Just user
+                            , loginUsername = ""
+                            , loginPassword = ""
+                            , loginStatus = Types.Requests.Ready
+                        }
+
+        Msg.Logout ->
+            let
+                newModel : Model
+                newModel =
+                    { model | logoutStatus = Types.Requests.InFlight }
+
+                command : Cmd Msg
+                command =
+                    let
+                        toMessage : Types.Requests.HttpResult () -> Msg
+                        toMessage =
+                            Msg.LogoutResponse
+
+                        decoder : Decoder ()
+                        decoder =
+                            Json.Decode.succeed ()
+                    in
+                    Http.post
+                        { url = "/api/auth/logout"
+                        , body = Http.emptyBody
+                        , expect = Http.expectJson toMessage decoder
+                        }
+            in
+            Return.withModel newModel command
+
+        Msg.LogoutResponse result ->
+            case result of
+                Err err ->
+                    Return.noCmd
+                        { model | logoutStatus = Types.Requests.Failed }
+
+                Ok () ->
+                    { model | logoutStatus = Types.Requests.Succeeded }
+                        |> logoutUser
+                        |> Return.noCmd
 
         Msg.GetMeResponse result ->
             case result of

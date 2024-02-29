@@ -1,4 +1,7 @@
-module Components.RequestButton exposing (view)
+module Components.RequestButton exposing
+    ( faceOrWorking
+    , view
+    )
 
 import Components.WorkingIndicator
 import Helpers.Attributes

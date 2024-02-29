@@ -520,10 +520,42 @@ proc loginHandler*(ctx: Context) {.async gcsafe.} =
 
   db.close()
 
-# /logout
+proc apiLoginHandler*(ctx: Context) {.async gcsafe.} =
+  let db = open(databasePath, "", "", "")
+  let form = parseJson(ctx.request.body())
+  let username = form["username"].str
+  let password = SecretKey(form["password"].str)
+  let userRow = db.getRow(sql"SELECT id, fullname, username, admin, password FROM users WHERE username = ?", username)
+
+  if userRow.len < 3:
+    resp "User not found.", Http401
+
+  else:
+      let id = userRow[0]
+      let fullname = userRow[1]
+      var userJson = newJObject()
+      userJson["id"] = %parseInt(id)
+      userJson["fullname"] = %fullname
+      userJson["username"] = %userRow[2]
+      userJson["isAdmin"] = %(userRow[3] == "1")
+      let encoded = userRow[4]
+      if not pbkdf2_sha256verify(password, encoded):
+        resp "Incorrect password", Http401
+      else:
+        ctx.session.clear()
+        ctx.session["userId"] = id
+        ctx.session["userFullname"] = fullname
+        resp jsonResponse(userJson)
+
+  db.close()
+
 proc logoutHandler*(ctx: Context) {.async.} =
   ctx.session.clear()
   resp redirect(urlFor(ctx, "index"), Http302)
+
+proc apiLogoutHandler*(ctx: Context) {.async.} =
+  ctx.session.clear()
+  resp jsonResponse(newJNull())
 
 # /register
 proc registerHandler*(ctx: Context) {.async gcsafe.} =
@@ -858,7 +890,9 @@ let
     pattern("/logout", logoutHandler, @[HttpGet, HttpPost]),
   ]
   authApiPatterns* = @[
-    pattern("/me", getMe, name = "me"),
+    pattern("/me", getMe, @[HttpGet], name = "me"),
+    pattern("/login", apiLoginHandler, @[HttpPost]),
+    pattern("/logout", apiLogoutHandler, @[HttpPost]),
   ]
   formulaOneApiPatterns* = @[
     pattern("/events", formulaOneEvents, @[HttpGet]),

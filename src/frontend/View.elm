@@ -4,9 +4,11 @@ import Browser
 import Components.InputPredictions
 import Components.InputSeasonPredictions
 import Components.Predictions
+import Components.RequestButton
 import Components.Symbols
 import Components.WorkingIndicator
 import Dict
+import Helpers.Attributes
 import Helpers.Html
 import Helpers.Table
 import Helpers.Time
@@ -50,16 +52,13 @@ view model =
                         ]
                     , Html.li
                         []
-                        [ case model.user of
-                            Nothing ->
-                                Html.a
-                                    []
-                                    [ Html.text "Login" ]
-
-                            Just user ->
-                                Html.a
-                                    [ routeHref Route.ProfilePage ]
-                                    [ Html.text user.fullname ]
+                        [ Html.a
+                            [ routeHref Route.ProfilePage ]
+                            [ model.user
+                                |> Maybe.map .fullname
+                                |> Maybe.withDefault "Login"
+                                |> Html.text
+                            ]
                         ]
                     ]
                 ]
@@ -74,7 +73,49 @@ view model =
                     viewEventPage model id
 
                 Route.ProfilePage ->
-                    [ Html.text "Sorry, I've not written a profile page yet." ]
+                    case model.user of
+                        Nothing ->
+                            let
+                                disabled : Bool
+                                disabled =
+                                    Types.Requests.isInFlight model.loginStatus
+
+                                fieldInput : String -> String -> (String -> Msg) -> Html Msg
+                                fieldInput label current toMessage =
+                                    Html.p
+                                        []
+                                        [ Html.label [] [ Html.text label ]
+                                        , Html.input
+                                            [ Attributes.value current
+                                            , Helpers.Attributes.disabledOrOnInput disabled toMessage
+                                            ]
+                                            []
+                                        ]
+                            in
+                            [ Html.form
+                                [ Helpers.Attributes.disabledOrOnSubmit disabled Msg.Login ]
+                                [ Html.fieldset
+                                    []
+                                    [ fieldInput "Username" model.loginUsername Msg.LoginInputUsername
+                                    , fieldInput "Password" model.loginPassword Msg.LoginInputPassword
+                                    ]
+                                , Html.button
+                                    [ Attributes.type_ "submit" ]
+                                    [ Html.text "Login"
+                                        |> Components.RequestButton.faceOrWorking model.loginStatus
+                                    ]
+                                ]
+                            ]
+
+                        Just _ ->
+                            [ Html.text "Sorry, I've not written a profile page yet."
+                            , Components.RequestButton.view
+                                { status = model.logoutStatus
+                                , disabled = False
+                                , message = Msg.Logout
+                                , face = Html.text "Logout"
+                                }
+                            ]
 
                 Route.NotFound ->
                     [ Html.text "Sorry, I do not recognise that page." ]

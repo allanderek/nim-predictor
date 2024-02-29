@@ -50,10 +50,14 @@ Formula-one:
 plan:
     [x] scored html
     [x] order of sessions
-    [ ] indications submissions saved successfully
+    [x] indications submissions saved successfully
     [x] indicate sprint race
     [x] Include the event start time in the event json, so that we can show which ones have finished *and* use that for the season starting.
     [ ] Tabs for the sessions of an event
+    [ ] A login/profile page.
+       [ ] Get the form working
+       [ ] Disable submit when username/password is empty
+       [ ] Password field should be a **** field.
     * followed by the leaderboard (in SQL), and probably the scoring of predictions, possibily just in Elm (so that they can change without sending the result to the server.
 
 

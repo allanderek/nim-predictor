@@ -10,6 +10,7 @@ import Model exposing (Model)
 import Msg exposing (Msg)
 import Time
 import Types.Team exposing (Team)
+import Components.Symbols
 
 
 view : Model -> Time.Posix -> Html Msg
@@ -22,7 +23,7 @@ view model seasonStarting =
         showTeam : Int -> Team -> Html Msg
         showTeam index team =
             let
-                moveButton : Bool -> Msg.UpDown -> String -> Html Msg
+                moveButton : Bool -> Msg.UpDown -> Html Msg -> Html Msg
                 moveButton visible direction face =
                     Html.td []
                         [ case visible of
@@ -34,15 +35,15 @@ view model seasonStarting =
                                     [ Msg.MoveSeasonPrediction index direction
                                         |> Html.Events.onClick
                                     ]
-                                    [ Html.text face ]
+                                    [ face ]
                         ]
             in
             Html.tr
                 []
                 [ Helpers.Table.intCell (index + 1)
                 , Helpers.Table.stringCell team.shortname
-                , moveButton (index >= 1) Msg.Up "Up"
-                , moveButton (index < List.length currentPredictions - 1) Msg.Up "Up"
+                , moveButton (index >= 1) Msg.Up Components.Symbols.upArrow
+                , moveButton (index < List.length currentPredictions - 1) Msg.Down Components.Symbols.downArrow
                 ]
     in
     Html.section

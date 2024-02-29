@@ -1,5 +1,6 @@
 module Components.Symbols exposing
-    ( downArrow
+    ( champion
+    , downArrow
     , gear
     , sprint
     , stopWatch
@@ -7,6 +8,11 @@ module Components.Symbols exposing
     )
 
 import Html exposing (Html)
+
+
+champion : Html msg
+champion =
+    Html.text "🏆"
 
 
 gear : Html msg

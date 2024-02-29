@@ -44,7 +44,15 @@ view model session =
                 viewSessionPrediction sessionPrediction body =
                     Html.li
                         []
-                        [ Html.h4 [] [ Html.text sessionPrediction.name ]
+                        [ Html.h4 []
+                            [ Html.text sessionPrediction.name
+                            , case sessionPrediction.user == 5 of
+                                True ->
+                                    Components.Symbols.champion
+
+                                False ->
+                                    Helpers.Html.nothing
+                            ]
                         , body
                         ]
 

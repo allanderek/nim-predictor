@@ -104,7 +104,7 @@ view model =
                                     , fieldInput "Password" model.loginPassword Msg.LoginInputPassword
                                     ]
                                 , Html.button
-                                    [ Attributes.type_ "submit" 
+                                    [ Attributes.type_ "submit"
                                     , Attributes.disabled submitDisabled
                                     ]
                                     [ Html.text "Login"

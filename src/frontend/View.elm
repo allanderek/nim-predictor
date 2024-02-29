@@ -91,6 +91,10 @@ view model =
                                             ]
                                             []
                                         ]
+
+                                submitDisabled : Bool
+                                submitDisabled =
+                                    disabled || String.isEmpty model.loginUsername || String.isEmpty model.loginPassword
                             in
                             [ Html.form
                                 [ Helpers.Attributes.disabledOrOnSubmit disabled Msg.Login ]
@@ -101,7 +105,7 @@ view model =
                                     ]
                                 , Html.button
                                     [ Attributes.type_ "submit" 
-                                    , Attributes.disabled disabled
+                                    , Attributes.disabled submitDisabled
                                     ]
                                     [ Html.text "Login"
                                         |> Components.RequestButton.faceOrWorking model.loginStatus

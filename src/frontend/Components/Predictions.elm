@@ -40,8 +40,8 @@ view model session =
                     Types.PredictionDict.get Types.PredictionResults.SessionResult session.id model.inputPredictions
                         |> Helpers.Maybe.withMaybeDefault (Maybe.map .predictions sessionPredictions.result)
 
-                viewSessionPrediction : SessionPrediction -> Html Msg -> Html Msg
-                viewSessionPrediction sessionPrediction body =
+                viewSessionPrediction : SessionPrediction -> Maybe Int -> Html Msg -> Html Msg
+                viewSessionPrediction sessionPrediction mScore body =
                     Html.li
                         []
                         [ Html.h4 []
@@ -52,6 +52,12 @@ view model session =
 
                                 False ->
                                     Helpers.Html.nothing
+                            , Helpers.Html.nbsp
+                            , case mScore of
+                                Nothing ->
+                                    Helpers.Html.nothing
+                                Just score ->
+                                    Html.span [] [ Helpers.Html.int score ]
                             ]
                         , body
                         ]
@@ -107,7 +113,7 @@ view model session =
                                     List.map (\p -> viewPredictionLine p Nothing Helpers.Html.nothing) sessionPrediction.predictions
                             in
                             Html.table [] [ Html.tbody [] predictionLines ]
-                                |> viewSessionPrediction sessionPrediction
+                                |> viewSessionPrediction sessionPrediction Nothing
 
                         viewedPredictions : List (Html Msg)
                         viewedPredictions =
@@ -173,11 +179,15 @@ view model session =
                                 scoredLines : List (Scored (Html Msg))
                                 scoredLines =
                                     List.map scoreLine sessionPrediction.predictions
+
+                                totalScore : Int
+                                totalScore =
+                                    Types.Scored.total scoredLines
                             in
-                            { score = Types.Scored.total scoredLines
+                            { score = totalScore
                             , value =
                                 Html.table [] [ Html.tbody [] (List.map .value scoredLines) ]
-                                    |> viewSessionPrediction sessionPrediction
+                                    |> viewSessionPrediction sessionPrediction (Just totalScore)
                             }
 
                         scoredPredictions : List (Html Msg)

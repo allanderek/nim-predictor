@@ -1,6 +1,7 @@
 module Helpers.Html exposing
     ( int
     , maybe
+    , nbsp
     , nothing
     )
 
@@ -21,3 +22,8 @@ int : Int -> Html msg
 int i =
     String.fromInt i
         |> Html.text
+
+
+nbsp : Html msg
+nbsp =
+    Html.text "\u{00A0}"

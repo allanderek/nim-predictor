@@ -5,6 +5,7 @@ module Msg exposing
     )
 
 import Browser
+import Time
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
 import Types.Prediction exposing (Prediction)
@@ -19,7 +20,8 @@ import Url exposing (Url)
 
 
 type Msg
-    = UrlRequest Browser.UrlRequest
+    = Tick Time.Posix
+    | UrlRequest Browser.UrlRequest
     | UrlChange Url
     | LoginInputUsername String
     | LoginInputPassword String

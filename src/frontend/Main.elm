@@ -22,9 +22,14 @@ type alias ProgramFlags =
 main : Program ProgramFlags Model Msg
 main =
     let
+        minuteOfMilliseconds : Float
+        minuteOfMilliseconds =
+            1000 * 60
+
         subscriptions : Model -> Sub Msg
         subscriptions =
-            always Sub.none
+            Time.every minuteOfMilliseconds Msg.Tick
+                |> always
     in
     Browser.application
         { init = init

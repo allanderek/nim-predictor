@@ -284,6 +284,10 @@ logoutIfUauthorised error model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
+        Msg.Tick now ->
+            Return.noCmd
+                { model | now = now }
+
         Msg.UrlChange url ->
             initForRoute { model | route = Route.parse url }
 

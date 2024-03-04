@@ -22,6 +22,7 @@ import Msg exposing (Msg)
 import Route exposing (Route)
 import Time
 import Types.Event exposing (Event)
+import Types.Leaderboard
 import Types.PredictionResults
 import Types.Requests
 import Types.SeasonPrediction exposing (SeasonPrediction)
@@ -50,6 +51,13 @@ view model =
                             [ routeHref Route.Home ]
                             [ Html.text "Events" ]
                         ]
+                    , Html.li
+                        []
+                        [ Html.a
+                            [ routeHref Route.Leaderboard ]
+                            [ Html.text "Leaderboard" ]
+                        ]
+
                     , Html.li
                         []
                         [ Html.a
@@ -121,6 +129,47 @@ view model =
                                 , message = Msg.Logout
                                 , face = Html.text "Logout"
                                 }
+                            ]
+
+                Route.Leaderboard ->
+                    case model.leaderboard of
+                        Nothing ->
+                            case model.getLeaderboardStatus of
+                                Types.Requests.InFlight ->
+                                    [ Components.WorkingIndicator.view ]
+
+                                _ ->
+                                    -- A bit of a generic error, I could check if there *should* be a leaderboard.
+                                    [ Html.text "No leaderboard to show." ]
+
+                        Just leaderboard ->
+                            let
+                                showLine : Types.Leaderboard.Line -> Html msg
+                                showLine line =
+                                    Html.tr
+                                        []
+                                        [ Html.td
+                                            []
+                                            [ Html.text line.fullname ]
+                                        , Html.td
+                                            []
+                                            [ Helpers.Html.int line.score ]
+                                        ]
+                            in
+                            [ Html.table
+                                []
+                                [ Html.thead
+                                    []
+                                    [ Html.tr
+                                        []
+                                        [ Html.th [] [ Html.text "Predictor" ]
+                                        , Html.th [] [ Html.text "Score" ]
+                                        ]
+                                    ]
+                                , Html.tbody
+                                    []
+                                    (List.map showLine leaderboard)
+                                ]
                             ]
 
                 Route.NotFound ->

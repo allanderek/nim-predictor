@@ -8,6 +8,7 @@ import Browser
 import Time
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
+import Types.Leaderboard exposing (Leaderboard)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionResults
 import Types.Requests
@@ -42,6 +43,7 @@ type Msg
     | EditPredictions Types.PredictionResults.Key Types.Session.Id EditPredictions
     | SubmitPredictions Types.PredictionResults.Key Types.Session.Id
     | SubmitPredictionsResponse Types.PredictionResults.Key Types.Session.Id (Types.Requests.HttpResult (List Prediction))
+    | GetLeaderboardResponse (Types.Requests.HttpResult Leaderboard)
 
 
 type EditPredictions

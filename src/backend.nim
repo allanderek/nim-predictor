@@ -874,6 +874,55 @@ proc submitFormulaOneSeasonPrediction*(ctx: Context) {.async gcsafe.}=
   db.close()
   result = formulaOneSeasonPredictions(ctx)
 
+proc formulaOneLeaderboard*(ctx: Context) {.async gcsafe.}=
+  let db = open(databasePath, "", "", "")
+  let season = ctx.getPathParams("season")
+  let leaderboard_sql = """
+with
+    predictions as (select * from formula_one_prediction_lines where user != "" and position <= 10),
+    results as (select * from formula_one_prediction_lines where user == "")
+select 
+    users.id,
+    users.fullname,
+    sum( case when predictions.position <= 10 and results.position <= 10 
+        then
+            case when predictions.position == results.position 
+                then 4 
+                else 
+                    case when predictions.position + 1 == results.position  or predictions.position - 1 == results.position
+                    then 2
+                    else 1
+                    end
+                end +
+            case when sessions.name == "race" and results.fastest_lap = "true" and predictions.fastest_lap = "true" 
+                then 1
+                else 0
+                end
+        else
+            0
+        end
+    )
+        as score
+    from predictions
+    inner join results on results.session == predictions.session and results.entrant == predictions.entrant
+    inner join formula_one_sessions as sessions on predictions.session = sessions.id
+    inner join formula_one_events as events on sessions.event == events.id and events.season == ?
+    inner join users on predictions.user = users.id
+    group by users.id
+    order by score desc
+    ;
+  """
+  let leaderboardRows = db.getAllRows(sql(leaderboard_sql), season)
+  let resultArray = newJArray()
+  for user in leaderboardRows:
+    var userObj = newJObject()
+    userObj["user"] = %parseInt(user[0])
+    userObj["fullname"] = %user[1]
+    userObj["score"] = %parseInt(user[2])
+    resultArray.add(userObj)
+  resp jsonResponse(resultArray)
+  db.close()
+
 let
   indexPatterns* = @[
     pattern("/", showFormulaOneIndex, @[HttpGet], name = "index"),
@@ -904,6 +953,7 @@ let
     pattern("/submit-season-predictions/{season}", submitFormulaOneSeasonPrediction, @[HttpPost]),
     pattern("/season-predictions/{season}", formulaOneSeasonPredictions, @[HttpGet]),
     pattern("/session-predictions/{event}", formulaOneSessionPredictions, @[HttpGet]),
+    pattern("/leaderboard/{season}", formulaOneLeaderboard, @[HttpGet]),
   ]
 
 

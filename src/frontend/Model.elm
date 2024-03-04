@@ -13,6 +13,7 @@ import Route exposing (Route)
 import Time
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
+import Types.Leaderboard exposing (Leaderboard)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
 import Types.PredictionResults exposing (PredictionResults)
@@ -50,6 +51,8 @@ type alias Model =
     , inputPredictions : PredictionDict (List Prediction)
     , getPredictionsStatus : Dict Types.Event.Id Types.Requests.Status
     , predictions : PredictionDict SessionPrediction
+    , getLeaderboardStatus : Types.Requests.Status
+    , leaderboard : Maybe Leaderboard
     }
 
 
@@ -80,6 +83,8 @@ init config =
     , inputPredictions = Dict.empty
     , getPredictionsStatus = Dict.empty
     , predictions = Dict.empty
+    , getLeaderboardStatus = Types.Requests.Ready
+    , leaderboard = Nothing
     }
 
 

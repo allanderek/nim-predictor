@@ -8,6 +8,7 @@ import Helpers.Maybe
 import Helpers.Table
 import Html exposing (Html)
 import Html.Attributes as Attributes
+import List.Extra
 import Model exposing (Model)
 import Msg exposing (Msg)
 import Types.Entrant exposing (Entrant)
@@ -56,6 +57,7 @@ view model session =
                             , case mScore of
                                 Nothing ->
                                     Helpers.Html.nothing
+
                                 Just score ->
                                     Html.span [] [ Helpers.Html.int score ]
                             ]
@@ -136,13 +138,17 @@ view model session =
                                 scoreLine : Prediction -> Scored (Html Msg)
                                 scoreLine prediction =
                                     let
-                                        mResultLine : Maybe Prediction
-                                        mResultLine =
+                                        mDriverResultLine : Maybe Prediction
+                                        mDriverResultLine =
                                             Dict.get prediction.entrant resultMap
+
+                                        mPositionResultLine : Maybe Prediction
+                                        mPositionResultLine =
+                                            List.Extra.find (\p -> p.position == prediction.position) resultPredictions
 
                                         score : Int
                                         score =
-                                            case mResultLine of
+                                            case mDriverResultLine of
                                                 Nothing ->
                                                     0
 
@@ -173,7 +179,7 @@ view model session =
                                                                     1 + fastestLap
                                     in
                                     { score = score
-                                    , value = viewPredictionLine prediction mResultLine (Helpers.Table.intCell score)
+                                    , value = viewPredictionLine prediction mPositionResultLine (Helpers.Table.intCell score)
                                     }
 
                                 scoredLines : List (Scored (Html Msg))

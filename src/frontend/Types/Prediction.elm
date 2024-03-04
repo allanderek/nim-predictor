@@ -5,9 +5,10 @@ module Types.Prediction exposing
     )
 
 import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
 import Json.Decode.Pipeline as Pipeline
+import Json.Encode as Encode
 import Types.Entrant
+
 
 type alias Prediction =
     { entrant : Types.Entrant.Id
@@ -15,12 +16,14 @@ type alias Prediction =
     , fastestLap : Bool
     }
 
+
 decoder : Decoder Prediction
 decoder =
     Decode.succeed Prediction
         |> Pipeline.required "entrant" Decode.int
         |> Pipeline.required "position" Decode.int
         |> Pipeline.required "fastest_lap" Decode.bool
+
 
 encode : Prediction -> Encode.Value
 encode prediction =

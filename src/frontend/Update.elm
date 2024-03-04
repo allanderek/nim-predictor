@@ -23,6 +23,7 @@ import Return
 import Route
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
+import Types.Leaderboard exposing (Leaderboard)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
 import Types.PredictionResults
@@ -249,11 +250,46 @@ getSessionPredictions eventId model =
         |> Return.withCmd command
 
 
+getLeaderboard : Model -> ( Model, Cmd Msg )
+getLeaderboard model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult Leaderboard -> Msg
+                toMessage =
+                    Msg.GetLeaderboardResponse
+
+                decoder : Decoder Leaderboard
+                decoder =
+                    Types.Leaderboard.decoder
+
+                url : String
+                url =
+                    let
+                        seasonParam : String
+                        seasonParam =
+                            String.fromInt 2024
+                    in
+                    String.append "/api/formulaone/leaderboard/" seasonParam
+            in
+            Http.get
+                { url = url
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model | getLeaderboardStatus = Types.Requests.InFlight }
+        |> Return.withCmd command
+
+
 initForRoute : Model -> ( Model, Cmd Msg )
 initForRoute model =
     case model.route of
         Route.Home ->
             Return.noCmd model
+
+        Route.Leaderboard ->
+            getLeaderboard model
 
         Route.ProfilePage ->
             Return.noCmd model
@@ -760,6 +796,19 @@ update message model =
                         |> removeInputSessionPredictions predictionContext sessionId
                         |> insertSessionPredictions [ sessionPrediction ]
                         |> Return.noCmd
+
+        Msg.GetLeaderboardResponse result ->
+            case result of
+                Err _ ->
+                    Return.noCmd
+                        { model | getLeaderboardStatus = Types.Requests.Failed }
+
+                Ok newLeaderboard ->
+                    Return.noCmd
+                        { model
+                            | getLeaderboardStatus = Types.Requests.Succeeded
+                            , leaderboard = Just newLeaderboard
+                        }
 
 
 removeInputSessionPredictions : Types.PredictionResults.Key -> Types.Session.Id -> Model -> Model

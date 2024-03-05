@@ -151,9 +151,11 @@ view model =
                                         [ Html.td
                                             []
                                             [ Html.text line.fullname ]
-                                        , Html.td
-                                            []
-                                            [ Helpers.Html.int line.score ]
+                                        , Helpers.Table.intCell line.sprintShootout
+                                        , Helpers.Table.intCell line.sprint
+                                        , Helpers.Table.intCell line.qualifying
+                                        , Helpers.Table.intCell line.race
+                                        , Helpers.Table.intCell line.total
                                         ]
                             in
                             [ Html.table
@@ -162,8 +164,12 @@ view model =
                                     []
                                     [ Html.tr
                                         []
-                                        [ Html.th [] [ Html.text "Predictor" ]
-                                        , Html.th [] [ Html.text "Score" ]
+                                        [ Helpers.Table.stringHeaderCell "Predictor"
+                                        , Helpers.Table.stringHeaderCell "Sprint-Shootout"
+                                        , Helpers.Table.stringHeaderCell "Sprint"
+                                        , Helpers.Table.stringHeaderCell "Qualifying"
+                                        , Helpers.Table.stringHeaderCell "Race"
+                                        , Helpers.Table.stringHeaderCell "Total"
                                         ]
                                     ]
                                 , Html.tbody

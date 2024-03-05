@@ -1,6 +1,7 @@
 module Helpers.Table exposing
     ( intCell
     , stringCell
+    , stringHeaderCell
     )
 
 import Helpers.Html
@@ -15,3 +16,8 @@ intCell x =
 stringCell : String -> Html msg
 stringCell s =
     Html.td [] [ Html.text s ]
+
+
+stringHeaderCell : String -> Html msg
+stringHeaderCell s =
+    Html.th [] [ Html.text s ]

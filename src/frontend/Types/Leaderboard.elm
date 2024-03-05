@@ -16,7 +16,11 @@ type alias Leaderboard =
 type alias Line =
     { id : Types.User.Id
     , fullname : String
-    , score : Int
+    , sprintShootout : Int
+    , sprint : Int
+    , qualifying : Int
+    , race : Int
+    , total : Int
     }
 
 
@@ -28,6 +32,10 @@ decoder =
             Decode.succeed Line
                 |> Pipeline.required "user" Decode.int
                 |> Pipeline.required "fullname" Decode.string
-                |> Pipeline.required "score" Decode.int
+                |> Pipeline.required "sprint-shootout" Decode.int
+                |> Pipeline.required "sprint" Decode.int
+                |> Pipeline.required "qualifying" Decode.int
+                |> Pipeline.required "race" Decode.int
+                |> Pipeline.required "total" Decode.int
     in
     Decode.list lineDecoder

@@ -880,36 +880,55 @@ proc formulaOneLeaderboard*(ctx: Context) {.async gcsafe.}=
   let leaderboard_sql = """
 with
     predictions as (select * from formula_one_prediction_lines where user != "" and position <= 10),
-    results as (select * from formula_one_prediction_lines where user == "")
-select 
-    users.id,
-    users.fullname,
-    sum( case when predictions.position <= 10 and results.position <= 10 
-        then
-            case when predictions.position == results.position 
-                then 4 
-                else 
-                    case when predictions.position + 1 == results.position  or predictions.position - 1 == results.position
-                    then 2
-                    else 1
+    results as (select * from formula_one_prediction_lines where user == ""),
+    scored_lines as (
+    select 
+        users.id as user_id,
+        users.fullname as user_fullname,
+        sessions.name as session_name,
+        case when predictions.position <= 10 and results.position <= 10 
+            then
+                case when predictions.position == results.position 
+                    then 4 
+                    else 
+                        case when predictions.position + 1 == results.position  or predictions.position - 1 == results.position
+                        then 2
+                        else 1
+                        end
+                    end +
+                case when sessions.name == "race" and results.fastest_lap = "true" and predictions.fastest_lap = "true" 
+                    then 1
+                    else 0
                     end
-                end +
-            case when sessions.name == "race" and results.fastest_lap = "true" and predictions.fastest_lap = "true" 
-                then 1
-                else 0
-                end
-        else
-            0
-        end
+            else
+                0
+            end
+            as score
+        from predictions
+        inner join results on results.session == predictions.session and results.entrant == predictions.entrant
+        inner join formula_one_sessions as sessions on predictions.session = sessions.id
+        inner join formula_one_events as events on sessions.event == events.id and events.season == ?
+        inner join users on predictions.user = users.id
     )
-        as score
-    from predictions
-    inner join results on results.session == predictions.session and results.entrant == predictions.entrant
-    inner join formula_one_sessions as sessions on predictions.session = sessions.id
-    inner join formula_one_events as events on sessions.event == events.id and events.season == ?
-    inner join users on predictions.user = users.id
-    group by users.id
-    order by score desc
+select 
+    user_id,
+    user_fullname,
+    sum(
+        case when session_name == "sprint-shootout" then score else 0 end
+    ) as sprint_shootout,
+    sum(
+        case when session_name == "sprint" then score else 0 end
+    ) as sprint,
+    sum(
+        case when session_name == "qualifying" then score else 0 end
+    ) as qualifying,
+    sum(
+        case when session_name == "race" then score else 0 end
+    ) as race,
+    sum(score) as total
+    from scored_lines
+    group by user_id
+    order by total desc
     ;
   """
   let leaderboardRows = db.getAllRows(sql(leaderboard_sql), season)
@@ -918,7 +937,11 @@ select
     var userObj = newJObject()
     userObj["user"] = %parseInt(user[0])
     userObj["fullname"] = %user[1]
-    userObj["score"] = %parseInt(user[2])
+    userObj["sprint-shootout"] = %parseInt(user[2])
+    userObj["sprint"] = %parseInt(user[3])
+    userObj["qualifying"] = %parseInt(user[4])
+    userObj["race"] = %parseInt(user[5])
+    userObj["total"] = %parseInt(user[6])
     resultArray.add(userObj)
   resp jsonResponse(resultArray)
   db.close()
@@ -929,6 +952,7 @@ let
     pattern("/formulaone", showFormulaOneIndex, @[HttpGet], name = "formula-one" ),
     pattern("/formulaone/event/{event}", showFormulaOneIndex, @[HttpGet], name = "formula-one-event" ),
     pattern("/formulaone/profile", showFormulaOneIndex, @[HttpGet], name = "formula-one-profile" ),
+    pattern("/formulaone/leaderboard", showFormulaOneIndex, @[HttpGet], name = "formula-one-leaderboard" ),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
     pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
     pattern("/profile", showProfile, @[HttpGet, HttpPost], name = "profile"),

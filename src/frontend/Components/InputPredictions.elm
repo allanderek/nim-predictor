@@ -4,6 +4,7 @@ import Components.RequestButton
 import Components.Symbols
 import Dict
 import Helpers.Attributes
+import Helpers.Classes
 import Helpers.Html
 import Helpers.Table
 import Html exposing (Html)
@@ -100,7 +101,7 @@ view model config =
                         ]
             in
             Html.tr
-                []
+                [ Helpers.Classes.topTenClass prediction.position ]
                 [ Helpers.Table.intCell prediction.position
                 , case config.session.fastestLap of
                     False ->

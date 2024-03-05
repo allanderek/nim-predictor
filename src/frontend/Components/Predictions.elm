@@ -2,6 +2,7 @@ module Components.Predictions exposing (view)
 
 import Components.Symbols
 import Dict exposing (Dict)
+import Helpers.Classes
 import Helpers.Dict
 import Helpers.Html
 import Helpers.Maybe
@@ -98,7 +99,7 @@ view model session =
                                 ]
                     in
                     Html.tr
-                        []
+                        [ Helpers.Classes.topTenClass prediction.position ]
                         [ Helpers.Table.intCell prediction.position
                         , driver
                         , score

@@ -949,6 +949,7 @@ select
 let
   indexPatterns* = @[
     pattern("/", showFormulaOneIndex, @[HttpGet], name = "index"),
+    pattern("/formulae", index, @[HttpGet]),
     pattern("/formulaone", showFormulaOneIndex, @[HttpGet], name = "formula-one" ),
     pattern("/formulaone/event/{event}", showFormulaOneIndex, @[HttpGet], name = "formula-one-event" ),
     pattern("/formulaone/profile", showFormulaOneIndex, @[HttpGet], name = "formula-one-profile" ),

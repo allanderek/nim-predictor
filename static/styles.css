@@ -5,3 +5,7 @@ option {
 section.input-results-section {
     border: 2px solid #e81212;
 }
+
+tr.not-in-top-ten {
+    font-weight: lighter;
+}

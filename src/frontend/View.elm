@@ -156,20 +156,55 @@ view model =
                                         True ->
                                             content
 
+                                getMax : (Types.Leaderboard.Line -> Int) -> Int
+                                getMax getNum =
+                                    List.Extra.maximumBy getNum leaderboard
+                                        |> Maybe.map getNum
+                                        |> Maybe.withDefault 0
+
+                                maxSprintShootout : Int
+                                maxSprintShootout =
+                                    getMax .sprintShootout
+
+                                maxSprint : Int
+                                maxSprint =
+                                    getMax .sprint
+
+                                maxQualifying : Int
+                                maxQualifying =
+                                    getMax .qualifying
+
+                                maxRace : Int
+                                maxRace =
+                                    getMax .race
+
+                                showPossibleMax : Int -> Int -> Html msg
+                                showPossibleMax max value =
+                                    case value == max && max > 0 of
+                                        True ->
+                                            value
+                                                |> Helpers.Html.int
+                                                |> Helpers.Html.wrapped Html.u
+                                                |> Helpers.Table.cell
+
+                                        False ->
+                                            Helpers.Table.intCell value
+
                                 showLine : Types.Leaderboard.Line -> Html msg
                                 showLine line =
                                     Html.tr
                                         []
-                                        [ Html.td
-                                            []
-                                            [ Html.text line.fullname ]
-                                        , Helpers.Table.intCell line.sprintShootout
+                                        [ Helpers.Table.stringCell line.fullname
+                                        , showPossibleMax maxSprintShootout line.sprintShootout
                                             |> ifIncludingSprint
-                                        , Helpers.Table.intCell line.sprint
+                                        , showPossibleMax maxSprint line.sprint
                                             |> ifIncludingSprint
-                                        , Helpers.Table.intCell line.qualifying
-                                        , Helpers.Table.intCell line.race
-                                        , Helpers.Table.intCell line.total
+                                        , showPossibleMax maxQualifying line.qualifying
+                                        , showPossibleMax maxRace line.race
+                                        , line.total
+                                            |> Helpers.Html.int
+                                            |> Helpers.Html.wrapped Html.b
+                                            |> Helpers.Table.cell
                                         ]
                             in
                             [ Html.table

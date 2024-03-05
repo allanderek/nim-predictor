@@ -57,7 +57,6 @@ view model =
                             [ routeHref Route.Leaderboard ]
                             [ Html.text "Leaderboard" ]
                         ]
-
                     , Html.li
                         []
                         [ Html.a
@@ -144,6 +143,19 @@ view model =
 
                         Just leaderboard ->
                             let
+                                includeSprint : Bool
+                                includeSprint =
+                                    List.any (\line -> line.sprintShootout /= 0) leaderboard
+
+                                ifIncludingSprint : Html msg -> Html msg
+                                ifIncludingSprint content =
+                                    case includeSprint of
+                                        False ->
+                                            Helpers.Html.nothing
+
+                                        True ->
+                                            content
+
                                 showLine : Types.Leaderboard.Line -> Html msg
                                 showLine line =
                                     Html.tr
@@ -152,7 +164,9 @@ view model =
                                             []
                                             [ Html.text line.fullname ]
                                         , Helpers.Table.intCell line.sprintShootout
+                                            |> ifIncludingSprint
                                         , Helpers.Table.intCell line.sprint
+                                            |> ifIncludingSprint
                                         , Helpers.Table.intCell line.qualifying
                                         , Helpers.Table.intCell line.race
                                         , Helpers.Table.intCell line.total
@@ -166,7 +180,9 @@ view model =
                                         []
                                         [ Helpers.Table.stringHeaderCell "Predictor"
                                         , Helpers.Table.stringHeaderCell "Sprint-Shootout"
+                                            |> ifIncludingSprint
                                         , Helpers.Table.stringHeaderCell "Sprint"
+                                            |> ifIncludingSprint
                                         , Helpers.Table.stringHeaderCell "Qualifying"
                                         , Helpers.Table.stringHeaderCell "Race"
                                         , Helpers.Table.stringHeaderCell "Total"

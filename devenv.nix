@@ -1,12 +1,25 @@
 { pkgs, ... }:
-
+let
+  rosettaPkgs = 
+    if pkgs.stdenv.isDarwin && pkgs.stdenv.isAarch64
+    then pkgs.pkgsx86_64Darwin
+    else pkgs;
+in 
 {
 
   # https://devenv.sh/packages/
   packages = [ 
         pkgs.git 
+        rosettaPkgs.neovim
+        pkgs.entr
+        pkgs.fd
+        pkgs.sd
         pkgs.sqlite
         pkgs.litecli
+        pkgs.nodejs
+        pkgs.gnumake
+        pkgs.elmPackages.elm-review
+        pkgs.elmPackages.elm-test-rs
     ];
 
   # https://devenv.sh/languages/

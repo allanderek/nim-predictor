@@ -44,6 +44,7 @@ type Msg
     | SubmitPredictions Types.PredictionResults.Key Types.Session.Id
     | SubmitPredictionsResponse Types.PredictionResults.Key Types.Session.Id (Types.Requests.HttpResult (List Prediction))
     | GetLeaderboardResponse (Types.Requests.HttpResult Leaderboard)
+    | OpenEventTab Types.Event.Id Types.Session.Id
 
 
 type EditPredictions

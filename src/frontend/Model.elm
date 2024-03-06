@@ -53,6 +53,7 @@ type alias Model =
     , predictions : PredictionDict SessionPrediction
     , getLeaderboardStatus : Types.Requests.Status
     , leaderboard : Maybe Leaderboard
+    , eventTabs : Dict Types.Event.Id Types.Session.Id
     }
 
 
@@ -85,6 +86,7 @@ init config =
     , predictions = Dict.empty
     , getLeaderboardStatus = Types.Requests.Ready
     , leaderboard = Nothing
+    , eventTabs = Dict.empty
     }
 
 

@@ -351,15 +351,57 @@ viewEventPage model eventId =
 
         Just event ->
             let
-                sessions : List (Html Msg)
+                sessions : List Session
                 sessions =
                     List.filter (\session -> session.event == eventId) model.sessions
-                        |> List.map (showSession model)
+
+                viewTabHeading : Session -> Html Msg
+                viewTabHeading session =
+                    let
+                        isSelectedTab : Bool
+                        isSelectedTab =
+                            case selectedTab of
+                                Nothing ->
+                                    False
+
+                                Just selected ->
+                                    selected.id == session.id
+                    in
+                    Html.button
+                        [ Attributes.class "tab-heading"
+                        , Helpers.Attributes.disabledOrOnClick isSelectedTab (Msg.OpenEventTab event.id session.id)
+                        ]
+                        [ Html.text session.name ]
+
+                tabs : Html Msg
+                tabs =
+                    Html.div
+                        [ Attributes.class "tab-selector" ]
+                        (List.map viewTabHeading sessions)
+
+                selectedTab : Maybe Session
+                selectedTab =
+                    Dict.get event.id model.eventTabs
+                        |> Maybe.andThen (\sessionId -> List.Extra.find (\session -> session.id == sessionId) sessions)
+                        |> Maybe.Extra.orElse (List.head sessions)
+
+                content : Html Msg
+                content =
+                    case selectedTab of
+                        Nothing ->
+                            Html.text "There are no sessions in this event"
+
+                        Just session ->
+                            showSession model session
             in
             [ Html.h2
                 []
                 [ Html.text event.name ]
-            , Html.node "main" [] sessions
+            , Html.node "main"
+                []
+                [ tabs
+                , content
+                ]
             ]
 
 

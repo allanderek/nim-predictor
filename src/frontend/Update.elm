@@ -297,7 +297,7 @@ initForRoute model =
         Route.NotFound ->
             Return.noCmd model
 
-        Route.EventPage eventId ->
+        Route.EventPage eventId _ ->
             getEntrants eventId model
                 |> Return.andThen (getSessionPredictions eventId)
 

@@ -1,6 +1,7 @@
 module Components.Predictions exposing (view)
 
 import Components.Symbols
+import Components.Username
 import Dict exposing (Dict)
 import Helpers.Classes
 import Helpers.Dict
@@ -47,13 +48,7 @@ view model session =
                     Html.li
                         []
                         [ Html.h4 []
-                            [ Html.text sessionPrediction.name
-                            , case sessionPrediction.user == 5 of
-                                True ->
-                                    Components.Symbols.champion
-
-                                False ->
-                                    Helpers.Html.nothing
+                            [ Components.Username.view { id = sessionPrediction.user, fullname = sessionPrediction.name }
                             , Helpers.Html.nbsp
                             , case mScore of
                                 Nothing ->

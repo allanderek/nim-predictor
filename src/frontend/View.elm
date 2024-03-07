@@ -6,6 +6,7 @@ import Components.InputSeasonPredictions
 import Components.Predictions
 import Components.RequestButton
 import Components.Symbols
+import Components.Username
 import Components.WorkingIndicator
 import Dict
 import Helpers.Attributes
@@ -76,8 +77,8 @@ view model =
                 Route.Home ->
                     viewHome model
 
-                Route.EventPage id ->
-                    viewEventPage model id
+                Route.EventPage eventId mSessionId ->
+                    viewEventPage model eventId mSessionId
 
                 Route.ProfilePage ->
                     case model.user of
@@ -194,7 +195,7 @@ view model =
                                 showLine line =
                                     Html.tr
                                         []
-                                        [ Helpers.Table.stringCell line.fullname
+                                        [ Components.Username.view line
                                         , showPossibleMax maxSprintShootout line.sprintShootout
                                             |> ifIncludingSprint
                                         , showPossibleMax maxSprint line.sprint
@@ -266,7 +267,7 @@ viewHome model =
                 [ Helpers.Table.intCell event.round
                 , Html.td []
                     [ Html.a
-                        [ Route.EventPage event.id
+                        [ Route.EventPage event.id Nothing
                             |> routeHref
                         ]
                         [ Html.text event.name
@@ -342,8 +343,8 @@ showSeasonPredictions model =
         )
 
 
-viewEventPage : Model -> Types.Event.Id -> List (Html Msg)
-viewEventPage model eventId =
+viewEventPage : Model -> Types.Event.Id -> Maybe Types.Session.Id -> List (Html Msg)
+viewEventPage model eventId mSessionId =
     case List.Extra.find (\event -> event.id == eventId) model.events of
         Nothing ->
             -- TODO: It should check if we are downloading the events.
@@ -367,21 +368,26 @@ viewEventPage model eventId =
                                 Just selected ->
                                     selected.id == session.id
                     in
-                    Html.button
-                        [ Attributes.class "tab-heading"
-                        , Helpers.Attributes.disabledOrOnClick isSelectedTab (Msg.OpenEventTab event.id session.id)
+                    Html.li
+                        []
+                        [ Html.a
+                            [ Attributes.class "tab-heading"
+                            , Attributes.disabled isSelectedTab
+                            , Route.EventPage event.id (Just session.id)
+                                |> routeHref
+                            ]
+                            [ Html.text session.name ]
                         ]
-                        [ Html.text session.name ]
 
                 tabs : Html Msg
                 tabs =
                     Html.div
                         [ Attributes.class "tab-selector" ]
-                        (List.map viewTabHeading sessions)
+                        [ Html.ul [] (List.map viewTabHeading sessions) ]
 
                 selectedTab : Maybe Session
                 selectedTab =
-                    Dict.get event.id model.eventTabs
+                    mSessionId
                         |> Maybe.andThen (\sessionId -> List.Extra.find (\session -> session.id == sessionId) sessions)
                         |> Maybe.Extra.orElse (List.head sessions)
 

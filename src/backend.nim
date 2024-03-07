@@ -952,6 +952,7 @@ let
     pattern("/formulae", index, @[HttpGet]),
     pattern("/formulaone", showFormulaOneIndex, @[HttpGet], name = "formula-one" ),
     pattern("/formulaone/event/{event}", showFormulaOneIndex, @[HttpGet], name = "formula-one-event" ),
+    pattern("/formulaone/event/{event}/{session}", showFormulaOneIndex, @[HttpGet], name = "formula-one-event-session" ),
     pattern("/formulaone/profile", showFormulaOneIndex, @[HttpGet], name = "formula-one-profile" ),
     pattern("/formulaone/leaderboard", showFormulaOneIndex, @[HttpGet], name = "formula-one-leaderboard" ),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),

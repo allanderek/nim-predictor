@@ -809,11 +809,12 @@ update message model =
                             | getLeaderboardStatus = Types.Requests.Succeeded
                             , leaderboard = Just newLeaderboard
                         }
+
         Msg.OpenEventTab eventId sessionId ->
-            Return.noCmd
-                { model
-                    | eventTabs = Dict.insert eventId sessionId model.eventTabs
-                }
+            Route.EventPage eventId (Just sessionId)
+                |> Route.unparse
+                |> Browser.Navigation.pushUrl model.navigationKey
+                |> Return.withModel model
 
 
 removeInputSessionPredictions : Types.PredictionResults.Key -> Types.Session.Id -> Model -> Model

@@ -368,22 +368,21 @@ viewEventPage model eventId mSessionId =
                                 Just selected ->
                                     selected.id == session.id
                     in
-                    Html.li
-                        []
-                        [ Html.a
-                            [ Attributes.class "tab-heading"
-                            , Attributes.disabled isSelectedTab
-                            , Route.EventPage event.id (Just session.id)
-                                |> routeHref
-                            ]
-                            [ Html.text session.name ]
+                    Html.button
+                        [ Attributes.class "tab-heading"
+
+                        -- , Route.EventPage event.id (Just session.id)
+                        --     |> routeHref
+                        , Msg.OpenEventTab event.id session.id
+                            |> Helpers.Attributes.disabledOrOnClick isSelectedTab
                         ]
+                        [ Html.text session.name ]
 
                 tabs : Html Msg
                 tabs =
                     Html.div
                         [ Attributes.class "tab-selector" ]
-                        [ Html.ul [] (List.map viewTabHeading sessions) ]
+                        (List.map viewTabHeading sessions)
 
                 selectedTab : Maybe Session
                 selectedTab =

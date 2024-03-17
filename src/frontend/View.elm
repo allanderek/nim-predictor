@@ -252,7 +252,7 @@ view model =
 
                         Just leaderboard ->
                             let
-                                makeGroup : (Types.SeasonLeaderboard.Line, List Types.SeasonLeaderboard.Line) -> { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
+                                makeGroup : ( Types.SeasonLeaderboard.Line, List Types.SeasonLeaderboard.Line ) -> { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
                                 makeGroup ( principal, lines ) =
                                     { id = principal.id
                                     , fullname = principal.fullname
@@ -266,7 +266,7 @@ view model =
                                         |> List.map makeGroup
                                         |> List.sortBy .total
 
-                                showGroup : { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line } -> List (Html msg)
+                                showGroup : { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line } -> Html msg
                                 showGroup group =
                                     let
                                         showLine : Types.SeasonLeaderboard.Line -> Html msg
@@ -278,19 +278,21 @@ view model =
                                                 , Helpers.Table.intCell line.difference
                                                 ]
                                     in
-                                    [ Html.h3
-                                        [ Attributes.class "season-leaderboard-group-title" ]
-                                        [ Components.Username.view group
-                                        , Helpers.Html.int group.total
-                                            |> Helpers.Html.wrapped Html.b
+                                    Html.details
+                                        []
+                                        [ Html.summary
+                                            [ Attributes.class "season-leaderboard-group-title" ]
+                                            [ Components.Username.view group
+                                            , Helpers.Html.int group.total
+                                                |> Helpers.Html.wrapped Html.b
+                                            ]
+                                        , Helpers.Table.simple
+                                            { head = [ Helpers.Table.headerRow [ "Position", "Team", "Difference" ] ]
+                                            , body = List.map showLine group.lines
+                                            }
                                         ]
-                                    , Helpers.Table.simple
-                                        { head = [ Helpers.Table.headerRow [ "Position", "Team", "Difference" ] ]
-                                        , body = List.map showLine group.lines
-                                        }
-                                    ]
                             in
-                            List.concatMap showGroup groups
+                            List.map showGroup groups
 
                 Route.NotFound ->
                     [ Html.text "Sorry, I do not recognise that page." ]

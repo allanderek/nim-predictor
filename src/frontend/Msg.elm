@@ -1,10 +1,12 @@
 module Msg exposing
     ( EditPredictions(..)
+    , FormulaEMsg(..)
     , Msg(..)
     , UpDown(..)
     )
 
 import Browser
+import FormulaE.Event
 import Time
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
@@ -46,6 +48,7 @@ type Msg
     | SubmitPredictionsResponse Types.PredictionResults.Key Types.Session.Id (Types.Requests.HttpResult (List Prediction))
     | GetLeaderboardResponse (Types.Requests.HttpResult Leaderboard)
     | GetSeasonLeaderboardResponse (Types.Requests.HttpResult SeasonLeaderboard)
+    | FormulaEMsg FormulaEMsg
     | OpenEventTab Types.Event.Id Types.Session.Id
 
 
@@ -57,3 +60,7 @@ type EditPredictions
 type UpDown
     = Up
     | Down
+
+
+type FormulaEMsg
+    = GetFormulaEEventsResponse (Types.Requests.HttpResult (List FormulaE.Event.Event))

@@ -118,6 +118,27 @@ proc index*(ctx: Context) {.async gcsafe.} =
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
     db.close()
 
+proc formulaEEvents*(ctx: Context) {.async gcsafe.} =
+    let db = open(databasePath, "", "", "")
+    let season = ctx.getPathParams("season")
+    let race_sql = """select id, round, name, country, circuit, date from races where season = ? and cancelled = 0"""
+    let race_rows = db.getAllRows(sql(race_sql), season)
+    let jsonArray = newJArray()
+
+    for row in race_rows:
+      if row.len >= 6: 
+        var jsonObj = newJObject()
+        jsonObj["id"] = %parseInt(row[0])
+        jsonObj["round"] = %parseInt(row[1])
+        jsonObj["name"] = %row[2]
+        jsonObj["country"] = %row[3]
+        jsonObj["circuit" ] = %row[4]
+        jsonObj["startTime" ] = %row[5] 
+        jsonArray.add(jsonObj)
+    resp jsonResponse(jsonArray)
+    db.close()
+
+
 
 proc showFormulaOneIndex*(ctx: Context) {.async gcsafe.} =
     let db = open(databasePath, "", "", "")
@@ -1050,6 +1071,7 @@ let
     pattern("/formulaone/profile", showFormulaOneIndex, @[HttpGet], name = "formula-one-profile" ),
     pattern("/formulaone/leaderboard", showFormulaOneIndex, @[HttpGet], name = "formula-one-leaderboard" ),
     pattern("/formulaone/seasonleaderboard", showFormulaOneIndex, @[HttpGet], name = "formula-one-season-leaderboard" ),
+    pattern("/formulae/events", showFormulaOneIndex, @[HttpGet]),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
     pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
     pattern("/profile", showProfile, @[HttpGet, HttpPost], name = "profile"),
@@ -1077,6 +1099,9 @@ let
     pattern("/leaderboard/{season}", formulaOneLeaderboard, @[HttpGet]),
     pattern("/season-leaderboard/{season}", formulaOneSeasonLeaderboard, @[HttpGet]),
   ]
+  formulaEApiPatterns* = @[
+    pattern("/events/{season}", formulaEEvents, @[HttpGet]),
+  ]
 
 
 var app = newApp( settings = settings )
@@ -1086,4 +1111,5 @@ app.addRoute(indexPatterns, "")
 app.addRoute(authPatterns, "/auth")
 app.addRoute(authApiPatterns, "/api/auth")
 app.addRoute(formulaOneApiPatterns, "/api/formulaone")
+app.addRoute(formulaEApiPatterns, "/api/formulae")
 app.run()

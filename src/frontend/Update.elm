@@ -8,6 +8,7 @@ module Update exposing
     , update
     )
 
+import FormulaE.Event
 import Formula1.Route
 import FormulaE.Route
 import Browser
@@ -337,7 +338,35 @@ initForRoute model =
         Route.FormulaE subRoute ->
             case subRoute of
                 FormulaE.Route.Events ->
-                    Return.noCmd model
+                    let
+                        getFormulaEEvents : Cmd Msg
+                        getFormulaEEvents = 
+                            let
+                                toMessage : Types.Requests.HttpResult (List FormulaE.Event.Event) -> Msg
+                                toMessage =
+                                    Msg.GetFormulaEEventsResponse
+                                        >> Msg.FormulaEMsg
+
+                                decoder : Decoder (List FormulaE.Event.Event)
+                                decoder =
+                                    Json.Decode.list FormulaE.Event.decoder
+
+                                url : String
+                                url =
+                                    let
+                                        seasonParam : String
+                                        seasonParam =
+                                            "2023-24" 
+                                    in
+                                    String.append "/api/formulae/events/" seasonParam
+                            in
+                            Http.get
+                                { url = url
+                                , expect = Http.expectJson toMessage decoder
+                                }
+                    in
+                    { model | getFormulaEEventsStatus = Types.Requests.InFlight }
+                        |> Return.withCmd getFormulaEEvents
 
         Route.ProfilePage ->
             Return.noCmd model
@@ -874,7 +903,20 @@ update message model =
                 |> Route.unparse
                 |> Browser.Navigation.pushUrl model.navigationKey
                 |> Return.withModel model
+        Msg.FormulaEMsg subMessage ->
+            case subMessage of
+                Msg.GetFormulaEEventsResponse result ->
+                    case result of
+                        Err _ ->
+                            Return.noCmd
+                                { model | getFormulaEEventsStatus = Types.Requests.Failed }
 
+                        Ok events ->
+                            Return.noCmd
+                                { model
+                                    | getFormulaEEventsStatus = Types.Requests.Succeeded
+                                    , formulaEEvents = events
+                                }
 
 removeInputSessionPredictions : Types.PredictionResults.Key -> Types.Session.Id -> Model -> Model
 removeInputSessionPredictions key sessionId model =

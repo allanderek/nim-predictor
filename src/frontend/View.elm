@@ -10,6 +10,7 @@ import Components.Username
 import Components.WorkingIndicator
 import Dict
 import Formula1.Route
+import FormulaE.Event
 import FormulaE.Route
 import Helpers.Attributes
 import Helpers.Html
@@ -90,7 +91,24 @@ view model =
                 Route.FormulaE subRoute ->
                     case subRoute of
                         FormulaE.Route.Events ->
-                            [ Html.text "Formula E events" ]
+                            let
+                                viewEventRow : FormulaE.Event.Event -> Html Msg
+                                viewEventRow event =
+                                    Html.tr
+                                        []
+                                        [ Helpers.Table.intCell event.round
+                                        , Helpers.Table.stringCell event.name
+                                        , Helpers.Table.stringCell event.country
+                                        , Helpers.Table.stringCell event.circuit
+                                        , Helpers.Time.showPosix model.zone event.startTime
+                                            |> Helpers.Table.stringCell
+                                        ]
+                            in
+                            [ Helpers.Table.simple
+                                { head = [ Helpers.Table.headerRow [ "Round", "Name", "Country", "Circuit", "Date" ] ]
+                                , body = List.map viewEventRow model.formulaEEvents
+                                }
+                            ]
 
                 Route.ProfilePage ->
                     case model.user of

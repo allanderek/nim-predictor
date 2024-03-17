@@ -8,6 +8,7 @@ module Model exposing
 
 import Browser.Navigation
 import Dict exposing (Dict)
+import FormulaE.Event
 import List.Extra
 import Route exposing (Route)
 import Time
@@ -57,6 +58,8 @@ type alias Model =
     , getSeasonLeaderboardStatus : Types.Requests.Status
     , seasonLeaderboard : Maybe SeasonLeaderboard
     , eventTabs : Dict Types.Event.Id Types.Session.Id
+    , getFormulaEEventsStatus : Types.Requests.Status
+    , formulaEEvents : List FormulaE.Event.Event
     }
 
 
@@ -92,6 +95,8 @@ init config =
     , getSeasonLeaderboardStatus = Types.Requests.Ready
     , seasonLeaderboard = Nothing
     , eventTabs = Dict.empty
+    , getFormulaEEventsStatus = Types.Requests.Ready
+    , formulaEEvents = []
     }
 
 

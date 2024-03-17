@@ -8,6 +8,8 @@ module Update exposing
     , update
     )
 
+import Formula1.Route
+import FormulaE.Route
 import Browser
 import Browser.Navigation
 import Dict exposing (Dict)
@@ -321,11 +323,21 @@ initForRoute model =
         Route.Home ->
             Return.noCmd model
 
-        Route.Leaderboard ->
-            getLeaderboard model
+        Route.Formula1 subRoute ->
+            case subRoute of
+                Formula1.Route.Leaderboard ->
+                    getLeaderboard model
 
-        Route.SeasonLeaderboard ->
-            getSeasonLeaderboard model
+                Formula1.Route.SeasonLeaderboard ->
+                    getSeasonLeaderboard model
+                Formula1.Route.EventPage eventId _ ->
+                    getEntrants eventId model
+                        |> Return.andThen (getSessionPredictions eventId)
+
+        Route.FormulaE subRoute ->
+            case subRoute of
+                FormulaE.Route.Events ->
+                    Return.noCmd model
 
         Route.ProfilePage ->
             Return.noCmd model
@@ -333,9 +345,6 @@ initForRoute model =
         Route.NotFound ->
             Return.noCmd model
 
-        Route.EventPage eventId _ ->
-            getEntrants eventId model
-                |> Return.andThen (getSessionPredictions eventId)
 
 
 logoutUser : Model -> Model
@@ -860,7 +869,8 @@ update message model =
                         }
 
         Msg.OpenEventTab eventId sessionId ->
-            Route.EventPage eventId (Just sessionId)
+            Formula1.Route.EventPage eventId (Just sessionId)
+                |> Route.Formula1
                 |> Route.unparse
                 |> Browser.Navigation.pushUrl model.navigationKey
                 |> Return.withModel model

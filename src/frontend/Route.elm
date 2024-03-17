@@ -4,8 +4,8 @@ module Route exposing
     , unparse
     )
 
-import Types.Event
-import Types.Session
+import Formula1.Route
+import FormulaE.Route
 import Url
 import Url.Builder
 import Url.Parser as Parser exposing ((</>))
@@ -13,10 +13,9 @@ import Url.Parser as Parser exposing ((</>))
 
 type Route
     = Home
-    | Leaderboard
-    | SeasonLeaderboard
-    | EventPage Types.Event.Id (Maybe Types.Session.Id)
     | ProfilePage
+    | Formula1 Formula1.Route.Route
+    | FormulaE FormulaE.Route.Route
     | NotFound
 
 
@@ -26,15 +25,8 @@ parse url =
         routeParser =
             Parser.oneOf
                 [ Parser.top |> Parser.map Home
-                , Parser.s "formulaone" |> Parser.map Home
-                , Parser.map Leaderboard (Parser.s "formulaone" </> Parser.s "leaderboard")
-                , Parser.map SeasonLeaderboard (Parser.s "formulaone" </> Parser.s "seasonleaderboard")
-                , Parser.map
-                    (\eventId sessionId -> EventPage eventId (Just sessionId))
-                    (Parser.s "formulaone" </> Parser.s "event" </> Parser.int </> Parser.int)
-                , Parser.map
-                    (\eventId -> EventPage eventId Nothing)
-                    (Parser.s "formulaone" </> Parser.s "event" </> Parser.int)
+                , Parser.s "formulaone" </> Formula1.Route.parser |> Parser.map Formula1
+                , Parser.s "formulae" </> FormulaE.Route.parser |> Parser.map FormulaE
                 , Parser.map ProfilePage (Parser.s "formulaone" </> Parser.s "profile")
                 ]
     in
@@ -52,25 +44,16 @@ unparse route =
                 Home ->
                     []
 
-                Leaderboard ->
-                    [ "leaderboard" ]
-
-                SeasonLeaderboard ->
-                    [ "seasonleaderboard" ]
-
-                EventPage id mSession ->
-                    List.filter ((/=) "") 
-                        [ "event"
-                        , String.fromInt id 
-                        , mSession
-                            |> Maybe.map String.fromInt
-                            |> Maybe.withDefault ""
-                        ]
+                Formula1 subRoute ->
+                    "formulaone" :: Formula1.Route.unparse subRoute
 
                 ProfilePage ->
                     [ "profile" ]
 
+                FormulaE subRoute ->
+                    "formulae" :: FormulaE.Route.unparse subRoute
+
                 NotFound ->
                     [ "notfound" ]
     in
-    Url.Builder.absolute ("formulaone" :: parts) []
+    Url.Builder.absolute parts []

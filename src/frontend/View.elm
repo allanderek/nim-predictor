@@ -9,6 +9,8 @@ import Components.Symbols
 import Components.Username
 import Components.WorkingIndicator
 import Dict
+import Formula1.Route
+import FormulaE.Route
 import Helpers.Attributes
 import Helpers.Html
 import Helpers.Table
@@ -44,38 +46,27 @@ view model =
     let
         navBar : Html msg
         navBar =
+            let
+                link : Route -> String -> Html msg
+                link route text =
+                    Html.li
+                        []
+                        [ Html.a
+                            [ routeHref route ]
+                            [ Html.text text ]
+                        ]
+            in
             Html.nav
                 []
                 [ Html.ul
                     []
-                    [ Html.li
-                        []
-                        [ Html.a
-                            [ routeHref Route.Home ]
-                            [ Html.text "Events" ]
-                        ]
-                    , Html.li
-                        []
-                        [ Html.a
-                            [ routeHref Route.Leaderboard ]
-                            [ Html.text "Leaderboard" ]
-                        ]
-                    , Html.li
-                        []
-                        [ Html.a
-                            [ routeHref Route.SeasonLeaderboard ]
-                            [ Html.text "Season Leaderboard" ]
-                        ]
-                    , Html.li
-                        []
-                        [ Html.a
-                            [ routeHref Route.ProfilePage ]
-                            [ model.user
-                                |> Maybe.map .fullname
-                                |> Maybe.withDefault "Login"
-                                |> Html.text
-                            ]
-                        ]
+                    [ link Route.Home "Home"
+                    , link (Route.Formula1 Formula1.Route.Leaderboard) "F1 Leaderboard"
+                    , link (Route.FormulaE FormulaE.Route.Events) "FE Events"
+                    , model.user
+                        |> Maybe.map .fullname
+                        |> Maybe.withDefault "Login"
+                        |> link Route.ProfilePage
                     ]
                 ]
 
@@ -85,8 +76,21 @@ view model =
                 Route.Home ->
                     viewHome model
 
-                Route.EventPage eventId mSessionId ->
-                    viewEventPage model eventId mSessionId
+                Route.Formula1 subRoute ->
+                    case subRoute of
+                        Formula1.Route.EventPage eventId mSessionId ->
+                            viewEventPage model eventId mSessionId
+
+                        Formula1.Route.Leaderboard ->
+                            viewLeaderboard model
+
+                        Formula1.Route.SeasonLeaderboard ->
+                            viewSeasonLeaderboard model
+
+                Route.FormulaE subRoute ->
+                    case subRoute of
+                        FormulaE.Route.Events ->
+                            [ Html.text "Formula E events" ]
 
                 Route.ProfilePage ->
                     case model.user of
@@ -139,167 +143,171 @@ view model =
                                 }
                             ]
 
-                Route.Leaderboard ->
-                    case model.leaderboard of
-                        Nothing ->
-                            case model.getLeaderboardStatus of
-                                Types.Requests.InFlight ->
-                                    [ Components.WorkingIndicator.view ]
-
-                                _ ->
-                                    -- A bit of a generic error, I could check if there *should* be a leaderboard.
-                                    [ Html.text "No leaderboard to show." ]
-
-                        Just leaderboard ->
-                            let
-                                includeSprint : Bool
-                                includeSprint =
-                                    List.any (\line -> line.sprintShootout /= 0) leaderboard
-
-                                ifIncludingSprint : Html msg -> Html msg
-                                ifIncludingSprint content =
-                                    case includeSprint of
-                                        False ->
-                                            Helpers.Html.nothing
-
-                                        True ->
-                                            content
-
-                                getMax : (Types.Leaderboard.Line -> Int) -> Int
-                                getMax getNum =
-                                    List.Extra.maximumBy getNum leaderboard
-                                        |> Maybe.map getNum
-                                        |> Maybe.withDefault 0
-
-                                maxSprintShootout : Int
-                                maxSprintShootout =
-                                    getMax .sprintShootout
-
-                                maxSprint : Int
-                                maxSprint =
-                                    getMax .sprint
-
-                                maxQualifying : Int
-                                maxQualifying =
-                                    getMax .qualifying
-
-                                maxRace : Int
-                                maxRace =
-                                    getMax .race
-
-                                showPossibleMax : Int -> Int -> Html msg
-                                showPossibleMax max value =
-                                    case value == max && max > 0 of
-                                        True ->
-                                            value
-                                                |> Helpers.Html.int
-                                                |> Helpers.Html.wrapped Html.u
-                                                |> Helpers.Table.cell
-
-                                        False ->
-                                            Helpers.Table.intCell value
-
-                                showLine : Types.Leaderboard.Line -> Html msg
-                                showLine line =
-                                    Html.tr
-                                        []
-                                        [ Components.Username.view line
-                                            |> Helpers.Table.cell
-                                        , showPossibleMax maxSprintShootout line.sprintShootout
-                                            |> ifIncludingSprint
-                                        , showPossibleMax maxSprint line.sprint
-                                            |> ifIncludingSprint
-                                        , showPossibleMax maxQualifying line.qualifying
-                                        , showPossibleMax maxRace line.race
-                                        , line.total
-                                            |> Helpers.Html.int
-                                            |> Helpers.Html.wrapped Html.b
-                                            |> Helpers.Table.cell
-                                        ]
-                            in
-                            [ Html.table
-                                []
-                                [ Html.thead
-                                    []
-                                    [ Html.tr
-                                        []
-                                        [ Helpers.Table.stringHeaderCell "Predictor"
-                                        , Helpers.Table.stringHeaderCell "Sprint-Shootout"
-                                            |> ifIncludingSprint
-                                        , Helpers.Table.stringHeaderCell "Sprint"
-                                            |> ifIncludingSprint
-                                        , Helpers.Table.stringHeaderCell "Qualifying"
-                                        , Helpers.Table.stringHeaderCell "Race"
-                                        , Helpers.Table.stringHeaderCell "Total"
-                                        ]
-                                    ]
-                                , Html.tbody
-                                    []
-                                    (List.map showLine leaderboard)
-                                ]
-                            ]
-
-                Route.SeasonLeaderboard ->
-                    case model.seasonLeaderboard of
-                        Nothing ->
-                            case model.getSeasonLeaderboardStatus of
-                                Types.Requests.InFlight ->
-                                    [ Components.WorkingIndicator.view ]
-
-                                _ ->
-                                    -- A bit of a generic error, I could check if there *should* be a leaderboard.
-                                    [ Html.text "No leaderboard to show." ]
-
-                        Just leaderboard ->
-                            let
-                                makeGroup : ( Types.SeasonLeaderboard.Line, List Types.SeasonLeaderboard.Line ) -> { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
-                                makeGroup ( principal, lines ) =
-                                    { id = principal.id
-                                    , fullname = principal.fullname
-                                    , total = List.sum (List.map .difference lines)
-                                    , lines = principal :: lines
-                                    }
-
-                                groups : List { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
-                                groups =
-                                    List.Extra.gatherWith (\left right -> left.id == right.id) leaderboard
-                                        |> List.map makeGroup
-                                        |> List.sortBy .total
-
-                                showGroup : { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line } -> Html msg
-                                showGroup group =
-                                    let
-                                        showLine : Types.SeasonLeaderboard.Line -> Html msg
-                                        showLine line =
-                                            Html.tr
-                                                []
-                                                [ Helpers.Table.intCell line.position
-                                                , Helpers.Table.stringCell line.team
-                                                , Helpers.Table.intCell line.difference
-                                                ]
-                                    in
-                                    Html.details
-                                        []
-                                        [ Html.summary
-                                            [ Attributes.class "season-leaderboard-group-title" ]
-                                            [ Components.Username.view group
-                                            , Helpers.Html.int group.total
-                                                |> Helpers.Html.wrapped Html.b
-                                            ]
-                                        , Helpers.Table.simple
-                                            { head = [ Helpers.Table.headerRow [ "Position", "Team", "Difference" ] ]
-                                            , body = List.map showLine group.lines
-                                            }
-                                        ]
-                            in
-                            List.map showGroup groups
-
                 Route.NotFound ->
                     [ Html.text "Sorry, I do not recognise that page." ]
     in
     { title = "Pole prediction"
     , body = navBar :: main
     }
+
+
+viewLeaderboard : Model -> List (Html Msg)
+viewLeaderboard model =
+    case model.leaderboard of
+        Nothing ->
+            case model.getLeaderboardStatus of
+                Types.Requests.InFlight ->
+                    [ Components.WorkingIndicator.view ]
+
+                _ ->
+                    -- A bit of a generic error, I could check if there *should* be a leaderboard.
+                    [ Html.text "No leaderboard to show." ]
+
+        Just leaderboard ->
+            let
+                includeSprint : Bool
+                includeSprint =
+                    List.any (\line -> line.sprintShootout /= 0) leaderboard
+
+                ifIncludingSprint : Html msg -> Html msg
+                ifIncludingSprint content =
+                    case includeSprint of
+                        False ->
+                            Helpers.Html.nothing
+
+                        True ->
+                            content
+
+                getMax : (Types.Leaderboard.Line -> Int) -> Int
+                getMax getNum =
+                    List.Extra.maximumBy getNum leaderboard
+                        |> Maybe.map getNum
+                        |> Maybe.withDefault 0
+
+                maxSprintShootout : Int
+                maxSprintShootout =
+                    getMax .sprintShootout
+
+                maxSprint : Int
+                maxSprint =
+                    getMax .sprint
+
+                maxQualifying : Int
+                maxQualifying =
+                    getMax .qualifying
+
+                maxRace : Int
+                maxRace =
+                    getMax .race
+
+                showPossibleMax : Int -> Int -> Html msg
+                showPossibleMax max value =
+                    case value == max && max > 0 of
+                        True ->
+                            value
+                                |> Helpers.Html.int
+                                |> Helpers.Html.wrapped Html.u
+                                |> Helpers.Table.cell
+
+                        False ->
+                            Helpers.Table.intCell value
+
+                showLine : Types.Leaderboard.Line -> Html msg
+                showLine line =
+                    Html.tr
+                        []
+                        [ Components.Username.view line
+                            |> Helpers.Table.cell
+                        , showPossibleMax maxSprintShootout line.sprintShootout
+                            |> ifIncludingSprint
+                        , showPossibleMax maxSprint line.sprint
+                            |> ifIncludingSprint
+                        , showPossibleMax maxQualifying line.qualifying
+                        , showPossibleMax maxRace line.race
+                        , line.total
+                            |> Helpers.Html.int
+                            |> Helpers.Html.wrapped Html.b
+                            |> Helpers.Table.cell
+                        ]
+            in
+            [ Html.table
+                []
+                [ Html.thead
+                    []
+                    [ Html.tr
+                        []
+                        [ Helpers.Table.stringHeaderCell "Predictor"
+                        , Helpers.Table.stringHeaderCell "Sprint-Shootout"
+                            |> ifIncludingSprint
+                        , Helpers.Table.stringHeaderCell "Sprint"
+                            |> ifIncludingSprint
+                        , Helpers.Table.stringHeaderCell "Qualifying"
+                        , Helpers.Table.stringHeaderCell "Race"
+                        , Helpers.Table.stringHeaderCell "Total"
+                        ]
+                    ]
+                , Html.tbody
+                    []
+                    (List.map showLine leaderboard)
+                ]
+            ]
+
+
+viewSeasonLeaderboard : Model -> List (Html Msg)
+viewSeasonLeaderboard model =
+    case model.seasonLeaderboard of
+        Nothing ->
+            case model.getSeasonLeaderboardStatus of
+                Types.Requests.InFlight ->
+                    [ Components.WorkingIndicator.view ]
+
+                _ ->
+                    -- A bit of a generic error, I could check if there *should* be a leaderboard.
+                    [ Html.text "No leaderboard to show." ]
+
+        Just leaderboard ->
+            let
+                makeGroup : ( Types.SeasonLeaderboard.Line, List Types.SeasonLeaderboard.Line ) -> { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
+                makeGroup ( principal, lines ) =
+                    { id = principal.id
+                    , fullname = principal.fullname
+                    , total = List.sum (List.map .difference lines)
+                    , lines = principal :: lines
+                    }
+
+                groups : List { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
+                groups =
+                    List.Extra.gatherWith (\left right -> left.id == right.id) leaderboard
+                        |> List.map makeGroup
+                        |> List.sortBy .total
+
+                showGroup : { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line } -> Html msg
+                showGroup group =
+                    let
+                        showLine : Types.SeasonLeaderboard.Line -> Html msg
+                        showLine line =
+                            Html.tr
+                                []
+                                [ Helpers.Table.intCell line.position
+                                , Helpers.Table.stringCell line.team
+                                , Helpers.Table.intCell line.difference
+                                ]
+                    in
+                    Html.details
+                        []
+                        [ Html.summary
+                            [ Attributes.class "season-leaderboard-group-title" ]
+                            [ Components.Username.view group
+                            , Helpers.Html.int group.total
+                                |> Helpers.Html.wrapped Html.b
+                            ]
+                        , Helpers.Table.simple
+                            { head = [ Helpers.Table.headerRow [ "Position", "Team", "Difference" ] ]
+                            , body = List.map showLine group.lines
+                            }
+                        ]
+            in
+            List.map showGroup groups
 
 
 viewHome : Model -> List (Html Msg)
@@ -331,7 +339,8 @@ viewHome model =
                 [ Helpers.Table.intCell event.round
                 , Html.td []
                     [ Html.a
-                        [ Route.EventPage event.id Nothing
+                        [ Formula1.Route.EventPage event.id Nothing
+                            |> Route.Formula1
                             |> routeHref
                         ]
                         [ Html.text event.name

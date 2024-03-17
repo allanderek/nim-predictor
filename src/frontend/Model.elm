@@ -18,6 +18,7 @@ import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
 import Types.PredictionResults exposing (PredictionResults)
 import Types.Requests
+import Types.SeasonLeaderboard exposing (SeasonLeaderboard)
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
@@ -53,6 +54,8 @@ type alias Model =
     , predictions : PredictionDict SessionPrediction
     , getLeaderboardStatus : Types.Requests.Status
     , leaderboard : Maybe Leaderboard
+    , getSeasonLeaderboardStatus : Types.Requests.Status
+    , seasonLeaderboard : Maybe SeasonLeaderboard
     , eventTabs : Dict Types.Event.Id Types.Session.Id
     }
 
@@ -86,6 +89,8 @@ init config =
     , predictions = Dict.empty
     , getLeaderboardStatus = Types.Requests.Ready
     , leaderboard = Nothing
+    , getSeasonLeaderboardStatus = Types.Requests.Ready
+    , seasonLeaderboard = Nothing
     , eventTabs = Dict.empty
     }
 

@@ -1,6 +1,8 @@
 module Helpers.Table exposing
     ( cell
+    , headerRow
     , intCell
+    , simple
     , stringCell
     , stringHeaderCell
     )
@@ -35,3 +37,19 @@ stringHeaderCell : String -> Html msg
 stringHeaderCell s =
     Html.text s
         |> headerCell
+
+
+headerRow : List String -> Html msg
+headerRow columnNames =
+    columnNames
+        |> List.map stringHeaderCell
+        |> Html.tr []
+
+
+simple : { head : List (Html msg), body : List (Html msg) } -> Html msg
+simple config =
+    Html.table
+        []
+        [ Html.thead [] config.head
+        , Html.tbody [] config.body
+        ]

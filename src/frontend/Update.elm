@@ -28,6 +28,7 @@ import Types.Prediction exposing (Prediction)
 import Types.PredictionDict exposing (PredictionDict)
 import Types.PredictionResults
 import Types.Requests
+import Types.SeasonLeaderboard exposing (SeasonLeaderboard)
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
@@ -282,6 +283,38 @@ getLeaderboard model =
         |> Return.withCmd command
 
 
+getSeasonLeaderboard : Model -> ( Model, Cmd Msg )
+getSeasonLeaderboard model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult SeasonLeaderboard -> Msg
+                toMessage =
+                    Msg.GetSeasonLeaderboardResponse
+
+                decoder : Decoder SeasonLeaderboard
+                decoder =
+                    Types.SeasonLeaderboard.decoder
+
+                url : String
+                url =
+                    let
+                        seasonParam : String
+                        seasonParam =
+                            String.fromInt 2024
+                    in
+                    String.append "/api/formulaone/season-leaderboard/" seasonParam
+            in
+            Http.get
+                { url = url
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model | getLeaderboardStatus = Types.Requests.InFlight }
+        |> Return.withCmd command
+
+
 initForRoute : Model -> ( Model, Cmd Msg )
 initForRoute model =
     case model.route of
@@ -290,6 +323,9 @@ initForRoute model =
 
         Route.Leaderboard ->
             getLeaderboard model
+
+        Route.SeasonLeaderboard ->
+            getSeasonLeaderboard model
 
         Route.ProfilePage ->
             Return.noCmd model
@@ -808,6 +844,19 @@ update message model =
                         { model
                             | getLeaderboardStatus = Types.Requests.Succeeded
                             , leaderboard = Just newLeaderboard
+                        }
+
+        Msg.GetSeasonLeaderboardResponse result ->
+            case result of
+                Err _ ->
+                    Return.noCmd
+                        { model | getSeasonLeaderboardStatus = Types.Requests.Failed }
+
+                Ok newLeaderboard ->
+                    Return.noCmd
+                        { model
+                            | getSeasonLeaderboardStatus = Types.Requests.Succeeded
+                            , seasonLeaderboard = Just newLeaderboard
                         }
 
         Msg.OpenEventTab eventId sessionId ->

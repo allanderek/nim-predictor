@@ -14,6 +14,7 @@ import Url.Parser as Parser exposing ((</>))
 type Route
     = Home
     | Leaderboard
+    | SeasonLeaderboard
     | EventPage Types.Event.Id (Maybe Types.Session.Id)
     | ProfilePage
     | NotFound
@@ -27,6 +28,7 @@ parse url =
                 [ Parser.top |> Parser.map Home
                 , Parser.s "formulaone" |> Parser.map Home
                 , Parser.map Leaderboard (Parser.s "formulaone" </> Parser.s "leaderboard")
+                , Parser.map SeasonLeaderboard (Parser.s "formulaone" </> Parser.s "seasonleaderboard")
                 , Parser.map
                     (\eventId sessionId -> EventPage eventId (Just sessionId))
                     (Parser.s "formulaone" </> Parser.s "event" </> Parser.int </> Parser.int)
@@ -52,6 +54,9 @@ unparse route =
 
                 Leaderboard ->
                     [ "leaderboard" ]
+
+                SeasonLeaderboard ->
+                    [ "seasonleaderboard" ]
 
                 EventPage id mSession ->
                     List.filter ((/=) "") 

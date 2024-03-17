@@ -62,3 +62,10 @@ plan:
 
 
 * season predictions - the button should be disabled if you haven't changed anything from your stored predictions.
+* When a driver change needs to be made, you need to change the current predictions for those sessions. At least currently, there might be something I can do to avoid that, but at the moment, that also seems like the most sensible thing to do, since if you have Carlos Sainz to be 2nd, it makes sense that Oliver Bearman is 2nd rather than 20th.
+So steps to make a substitution:
+    * Set the subbed out entrant to participating = 0
+    * Create the new entrant
+    * For all prediction lines for that session and the subbed-out entrant, set the entrant to the new entrant.
+    * Do these three steps for all sessions
+

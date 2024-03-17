@@ -12,6 +12,7 @@ import Types.Leaderboard exposing (Leaderboard)
 import Types.Prediction exposing (Prediction)
 import Types.PredictionResults
 import Types.Requests
+import Types.SeasonLeaderboard exposing (SeasonLeaderboard)
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
 import Types.SessionPrediction exposing (SessionPrediction)
@@ -44,6 +45,7 @@ type Msg
     | SubmitPredictions Types.PredictionResults.Key Types.Session.Id
     | SubmitPredictionsResponse Types.PredictionResults.Key Types.Session.Id (Types.Requests.HttpResult (List Prediction))
     | GetLeaderboardResponse (Types.Requests.HttpResult Leaderboard)
+    | GetSeasonLeaderboardResponse (Types.Requests.HttpResult SeasonLeaderboard)
     | OpenEventTab Types.Event.Id Types.Session.Id
 
 

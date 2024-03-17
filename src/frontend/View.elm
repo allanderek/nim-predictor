@@ -26,8 +26,10 @@ import Types.Event exposing (Event)
 import Types.Leaderboard
 import Types.PredictionResults
 import Types.Requests
+import Types.SeasonLeaderboard
 import Types.SeasonPrediction exposing (SeasonPrediction)
 import Types.Session exposing (Session)
+import Types.User
 
 
 routeHref : Route -> Html.Attribute msg
@@ -57,6 +59,12 @@ view model =
                         [ Html.a
                             [ routeHref Route.Leaderboard ]
                             [ Html.text "Leaderboard" ]
+                        ]
+                    , Html.li
+                        []
+                        [ Html.a
+                            [ routeHref Route.SeasonLeaderboard ]
+                            [ Html.text "Season Leaderboard" ]
                         ]
                     , Html.li
                         []
@@ -196,6 +204,7 @@ view model =
                                     Html.tr
                                         []
                                         [ Components.Username.view line
+                                            |> Helpers.Table.cell
                                         , showPossibleMax maxSprintShootout line.sprintShootout
                                             |> ifIncludingSprint
                                         , showPossibleMax maxSprint line.sprint
@@ -229,6 +238,59 @@ view model =
                                     (List.map showLine leaderboard)
                                 ]
                             ]
+
+                Route.SeasonLeaderboard ->
+                    case model.seasonLeaderboard of
+                        Nothing ->
+                            case model.getSeasonLeaderboardStatus of
+                                Types.Requests.InFlight ->
+                                    [ Components.WorkingIndicator.view ]
+
+                                _ ->
+                                    -- A bit of a generic error, I could check if there *should* be a leaderboard.
+                                    [ Html.text "No leaderboard to show." ]
+
+                        Just leaderboard ->
+                            let
+                                makeGroup : (Types.SeasonLeaderboard.Line, List Types.SeasonLeaderboard.Line) -> { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
+                                makeGroup ( principal, lines ) =
+                                    { id = principal.id
+                                    , fullname = principal.fullname
+                                    , total = List.sum (List.map .difference lines)
+                                    , lines = principal :: lines
+                                    }
+
+                                groups : List { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line }
+                                groups =
+                                    List.Extra.gatherWith (\left right -> left.id == right.id) leaderboard
+                                        |> List.map makeGroup
+                                        |> List.sortBy .total
+
+                                showGroup : { id : Types.User.Id, fullname : String, total : Int, lines : List Types.SeasonLeaderboard.Line } -> List (Html msg)
+                                showGroup group =
+                                    let
+                                        showLine : Types.SeasonLeaderboard.Line -> Html msg
+                                        showLine line =
+                                            Html.tr
+                                                []
+                                                [ Helpers.Table.intCell line.position
+                                                , Helpers.Table.stringCell line.team
+                                                , Helpers.Table.intCell line.difference
+                                                ]
+                                    in
+                                    [ Html.h3
+                                        [ Attributes.class "season-leaderboard-group-title" ]
+                                        [ Components.Username.view group
+                                        , Helpers.Html.int group.total
+                                            |> Helpers.Html.wrapped Html.b
+                                        ]
+                                    , Helpers.Table.simple
+                                        { head = [ Helpers.Table.headerRow [ "Position", "Team", "Difference" ] ]
+                                        , body = List.map showLine group.lines
+                                        }
+                                    ]
+                            in
+                            List.concatMap showGroup groups
 
                 Route.NotFound ->
                     [ Html.text "Sorry, I do not recognise that page." ]

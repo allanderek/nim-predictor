@@ -9,3 +9,9 @@ section.input-results-section {
 tr.not-in-top-ten {
     font-weight: lighter;
 }
+
+.season-leaderboard-group-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

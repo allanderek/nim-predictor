@@ -11,6 +11,7 @@ import Components.WorkingIndicator
 import Dict
 import Formula1.Route
 import FormulaE.Event
+import FormulaE.Pages.Event
 import FormulaE.Route
 import Helpers.Attributes
 import Helpers.Html
@@ -94,21 +95,39 @@ view model =
                             let
                                 viewEventRow : FormulaE.Event.Event -> Html Msg
                                 viewEventRow event =
-                                    Html.tr
-                                        []
-                                        [ Helpers.Table.intCell event.round
-                                        , Helpers.Table.stringCell event.name
-                                        , Helpers.Table.stringCell event.country
-                                        , Helpers.Table.stringCell event.circuit
-                                        , Helpers.Time.showPosix model.zone event.startTime
-                                            |> Helpers.Table.stringCell
-                                        ]
+                                    let
+                                        cell : String -> Html Msg
+                                        cell contents =
+                                            Html.td
+                                                []
+                                                [ Html.a
+                                                    [ FormulaE.Route.EventPage event.id 
+                                                        |> Route.FormulaE
+                                                        |> routeHref
+                                                    ]
+                                                    [ Html.text contents ]
+                                                ]
+
+                                        cells : List (Html Msg)
+                                        cells =
+                                            List.map cell
+                                                [ String.fromInt event.round
+                                                , event.name
+                                                , event.country
+                                                , event.circuit
+                                                , Helpers.Time.showPosix model.zone event.startTime
+                                                ]
+                                    in
+                                    Html.tr [] cells
                             in
                             [ Helpers.Table.simple
                                 { head = [ Helpers.Table.headerRow [ "Round", "Name", "Country", "Circuit", "Date" ] ]
                                 , body = List.map viewEventRow model.formulaEEvents
                                 }
                             ]
+
+                        FormulaE.Route.EventPage eventId ->
+                            [ FormulaE.Pages.Event.view model eventId ]
 
                 Route.ProfilePage ->
                     case model.user of

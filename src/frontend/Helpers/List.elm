@@ -1,6 +1,7 @@
 module Helpers.List exposing
     ( moveItemDown
     , moveItemUp
+    , findBy
     )
 
 import List.Extra
@@ -23,3 +24,8 @@ moveItemDown index list =
 moveItemUp : Int -> List a -> List a
 moveItemUp index items =
     moveItemDown (index - 1) items
+
+
+findBy : (a -> b) -> b -> List a -> Maybe a
+findBy toId id items =
+    List.Extra.find (\item -> toId item == id) items

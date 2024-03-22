@@ -1,5 +1,6 @@
 module FormulaE.Event exposing
     ( Event
+    , Id
     , decoder
     )
 

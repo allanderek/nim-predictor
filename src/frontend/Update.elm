@@ -8,12 +8,12 @@ module Update exposing
     , update
     )
 
-import FormulaE.Event
-import Formula1.Route
-import FormulaE.Route
 import Browser
 import Browser.Navigation
 import Dict exposing (Dict)
+import Formula1.Route
+import FormulaE.Event
+import FormulaE.Route
 import Helpers.Dict
 import Helpers.Http
 import Helpers.List
@@ -331,6 +331,7 @@ initForRoute model =
 
                 Formula1.Route.SeasonLeaderboard ->
                     getSeasonLeaderboard model
+
                 Formula1.Route.EventPage eventId _ ->
                     getEntrants eventId model
                         |> Return.andThen (getSessionPredictions eventId)
@@ -340,7 +341,7 @@ initForRoute model =
                 FormulaE.Route.Events ->
                     let
                         getFormulaEEvents : Cmd Msg
-                        getFormulaEEvents = 
+                        getFormulaEEvents =
                             let
                                 toMessage : Types.Requests.HttpResult (List FormulaE.Event.Event) -> Msg
                                 toMessage =
@@ -356,7 +357,7 @@ initForRoute model =
                                     let
                                         seasonParam : String
                                         seasonParam =
-                                            "2023-24" 
+                                            "2023-24"
                                     in
                                     String.append "/api/formulae/events/" seasonParam
                             in
@@ -368,12 +369,14 @@ initForRoute model =
                     { model | getFormulaEEventsStatus = Types.Requests.InFlight }
                         |> Return.withCmd getFormulaEEvents
 
+                FormulaE.Route.EventPage eventId ->
+                    Return.noCmd model
+
         Route.ProfilePage ->
             Return.noCmd model
 
         Route.NotFound ->
             Return.noCmd model
-
 
 
 logoutUser : Model -> Model
@@ -903,6 +906,7 @@ update message model =
                 |> Route.unparse
                 |> Browser.Navigation.pushUrl model.navigationKey
                 |> Return.withModel model
+
         Msg.FormulaEMsg subMessage ->
             case subMessage of
                 Msg.GetFormulaEEventsResponse result ->
@@ -917,6 +921,7 @@ update message model =
                                     | getFormulaEEventsStatus = Types.Requests.Succeeded
                                     , formulaEEvents = events
                                 }
+
 
 removeInputSessionPredictions : Types.PredictionResults.Key -> Types.Session.Id -> Model -> Model
 removeInputSessionPredictions key sessionId model =

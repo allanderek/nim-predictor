@@ -7,6 +7,7 @@ module Msg exposing
 
 import Browser
 import FormulaE.Event
+import FormulaE.Types.RaceInfo
 import Time
 import Types.Entrant exposing (Entrant)
 import Types.Event exposing (Event)
@@ -64,3 +65,4 @@ type UpDown
 
 type FormulaEMsg
     = GetFormulaEEventsResponse (Types.Requests.HttpResult (List FormulaE.Event.Event))
+    | GetFormulaERaceInfoResponse FormulaE.Event.Id (Types.Requests.HttpResult FormulaE.Types.RaceInfo.RaceInfo)

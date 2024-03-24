@@ -9,6 +9,7 @@ module Model exposing
 import Browser.Navigation
 import Dict exposing (Dict)
 import FormulaE.Event
+import FormulaE.Types.RaceInfo
 import List.Extra
 import Route exposing (Route)
 import Time
@@ -60,6 +61,8 @@ type alias Model =
     , eventTabs : Dict Types.Event.Id Types.Session.Id
     , getFormulaEEventsStatus : Types.Requests.Status
     , formulaEEvents : List FormulaE.Event.Event
+    , getRaceInfoStatus : Dict FormulaE.Event.Id Types.Requests.Status
+    , formulaERaceInfos : Dict FormulaE.Event.Id FormulaE.Types.RaceInfo.RaceInfo
     }
 
 
@@ -97,6 +100,8 @@ init config =
     , eventTabs = Dict.empty
     , getFormulaEEventsStatus = Types.Requests.Ready
     , formulaEEvents = []
+    , getRaceInfoStatus = Dict.empty
+    , formulaERaceInfos = Dict.empty
     }
 
 

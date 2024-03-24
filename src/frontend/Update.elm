@@ -14,6 +14,7 @@ import Dict exposing (Dict)
 import Formula1.Route
 import FormulaE.Event
 import FormulaE.Route
+import FormulaE.Types.RaceInfo
 import Helpers.Dict
 import Helpers.Http
 import Helpers.List
@@ -339,44 +340,78 @@ initForRoute model =
         Route.FormulaE subRoute ->
             case subRoute of
                 FormulaE.Route.Events ->
-                    let
-                        getFormulaEEvents : Cmd Msg
-                        getFormulaEEvents =
-                            let
-                                toMessage : Types.Requests.HttpResult (List FormulaE.Event.Event) -> Msg
-                                toMessage =
-                                    Msg.GetFormulaEEventsResponse
-                                        >> Msg.FormulaEMsg
-
-                                decoder : Decoder (List FormulaE.Event.Event)
-                                decoder =
-                                    Json.Decode.list FormulaE.Event.decoder
-
-                                url : String
-                                url =
-                                    let
-                                        seasonParam : String
-                                        seasonParam =
-                                            "2023-24"
-                                    in
-                                    String.append "/api/formulae/events/" seasonParam
-                            in
-                            Http.get
-                                { url = url
-                                , expect = Http.expectJson toMessage decoder
-                                }
-                    in
-                    { model | getFormulaEEventsStatus = Types.Requests.InFlight }
-                        |> Return.withCmd getFormulaEEvents
+                    getFormulaEEvents model
 
                 FormulaE.Route.EventPage eventId ->
-                    Return.noCmd model
+                    case List.any (\event -> event.id == eventId) model.formulaEEvents of
+                        True ->
+                            getRaceInfo eventId model 
+
+                        False ->
+                            getFormulaEEvents model
+                                |> Return.andThen (getRaceInfo eventId)
 
         Route.ProfilePage ->
             Return.noCmd model
 
         Route.NotFound ->
             Return.noCmd model
+
+
+getRaceInfo : FormulaE.Event.Id -> Model -> ( Model, Cmd Msg )
+getRaceInfo eventId model =
+    let
+        command : Cmd Msg
+        command =
+            let
+                toMessage : Types.Requests.HttpResult FormulaE.Types.RaceInfo.RaceInfo -> Msg
+                toMessage =
+                    Msg.GetFormulaERaceInfoResponse eventId
+                        >> Msg.FormulaEMsg
+
+                decoder : Decoder FormulaE.Types.RaceInfo.RaceInfo
+                decoder =
+                    FormulaE.Types.RaceInfo.decoder
+            in
+            Http.get
+                { url = "/api/formulae/race-info/" ++ String.fromInt eventId
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model | getRaceInfoStatus = Dict.insert eventId Types.Requests.InFlight model.getRaceInfoStatus }
+        |> Return.withCmd command
+
+
+getFormulaEEvents : Model -> ( Model, Cmd Msg )
+getFormulaEEvents model =
+    let
+        toMessage : Types.Requests.HttpResult (List FormulaE.Event.Event) -> Msg
+        toMessage =
+            Msg.GetFormulaEEventsResponse
+                >> Msg.FormulaEMsg
+
+        decoder : Decoder (List FormulaE.Event.Event)
+        decoder =
+            Json.Decode.list FormulaE.Event.decoder
+
+        url : String
+        url =
+            let
+                seasonParam : String
+                seasonParam =
+                    "2023-24"
+            in
+            String.append "/api/formulae/events/" seasonParam
+
+        command : Cmd Msg
+        command =
+            Http.get
+                { url = url
+                , expect = Http.expectJson toMessage decoder
+                }
+    in
+    { model | getFormulaEEventsStatus = Types.Requests.InFlight }
+        |> Return.withCmd command
 
 
 logoutUser : Model -> Model
@@ -920,6 +955,19 @@ update message model =
                                 { model
                                     | getFormulaEEventsStatus = Types.Requests.Succeeded
                                     , formulaEEvents = events
+                                }
+
+                Msg.GetFormulaERaceInfoResponse eventId result ->
+                    case result of
+                        Err _ ->
+                            Return.noCmd
+                                { model | getRaceInfoStatus = Dict.insert eventId Types.Requests.Failed model.getRaceInfoStatus }
+
+                        Ok raceInfo ->
+                            Return.noCmd
+                                { model
+                                    | getRaceInfoStatus = Dict.insert eventId Types.Requests.Succeeded model.getRaceInfoStatus
+                                    , formulaERaceInfos = Dict.insert eventId raceInfo model.formulaERaceInfos
                                 }
 
 

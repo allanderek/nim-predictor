@@ -7,7 +7,7 @@ import Html.Attributes
 import Types.User
 
 
-view : { a | id : Types.User.Id, fullname : String } -> Html msg
+view : Types.User.Username a -> Html msg
 view user =
     Html.span
         [ Html.Attributes.class "user-name" ]

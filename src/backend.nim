@@ -412,6 +412,129 @@ with
     resp htmlResponse("<!DOCTYPE html>\n" & $vNode)
   db.close()
 
+proc formulaERaceInfo*(ctx: Context) {.async gcsafe.} =
+  let 
+      db = open(databasePath, "", "", "")
+      user_id = ctx.session.getOrDefault("userId")
+      race_id = ctx.getPathParams("race")
+      race = db.getRow(sql"SELECT id, name, country, circuit, unixepoch() > unixepoch(date) as 'Closed' FROM races WHERE id = ?", race_id)
+  if race.len > 0:
+    let 
+        raceId = race[0]
+        race_name = race[1]
+        entrants = getEntrants(db, race_id)
+        # select e.id, d.name, t.shortname 
+        entryClosed = race[4] == "1"
+    var infoObj = newJObject()
+    var entrantsArray = newJArray()
+    for row in entrants:
+      var entrantObj = newJObject()
+      entrantObj["id"] = %parseInt(row[0])
+      entrantObj["driver"] = %row[1]
+      entrantObj["team"] = %row[2]
+      entrantsArray.add(entrantObj)
+    infoObj["entrants"] = entrantsArray
+    let
+        currentEntry = db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car  from predictions where race = ? and user = ?", raceId, user_id)
+    var entryObj = newJObject() 
+    entryObj["pole"] = %parseInt(currentEntry[0])
+    entryObj["fam"] = %parseInt(currentEntry[1])
+    infoObj["current-prediction"] = entryObj
+    let
+        # TODO: This is non-robust to the case where there are no results set yet for this race
+        # Actually seems to be pretty robust to that.
+        currentResults = db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car  from results where race = ?", raceId)
+    var resultsObj = newJObject()
+    resultsObj["pole"] = %parseInt(currentResults[0])
+    resultsObj["fam"] = %parseInt(currentResults[1])
+    infoObj["results"] = resultsObj
+
+    let 
+        all_predictions_sql = sql"""
+with
+    race_entrants as
+    ( select 
+        entrants.id,
+        drivers.name,
+        teams.shortname
+      from entrants
+      inner join drivers on entrants.driver = drivers.id
+      inner join teams on entrants.team = teams.id
+      where race = ?
+    )
+    select 
+        users.id, 
+        users.fullname, 
+        pole_entrants.id, pole_entrants.name, pole_entrants.shortname, case when predictions.pole = results.pole then 10 else 0 end,
+        fam_entrants.id, fam_entrants.name, fam_entrants.shortname, case when predictions.fam = results.fam then 10 else 0 end,
+        fl_entrants.id, fl_entrants.name, fl_entrants.shortname, case when predictions.fl = results.fl then 10 else 0 end,
+        hgc_entrants.id, hgc_entrants.name, hgc_entrants.shortname, case when predictions.hgc = results.hgc then 10 else 0 end,
+        first_entrants.id, first_entrants.name, first_entrants.shortname, case when predictions.first = results.first then 20 else 0 end,
+        second_entrants.id, second_entrants.name, second_entrants.shortname, case when predictions.second = results.second then 10 else 0 end,
+        third_entrants.id, third_entrants.name, third_entrants.shortname, case when predictions.third = results.third then 10 else 0 end,
+        fdnf_entrants.id, fdnf_entrants.name, fdnf_entrants.shortname, case when predictions.fdnf = results.fdnf then 10 else 0 end,
+        predictions.safety_car, case when predictions.safety_car = results.safety_car then 10 else 0 end,
+        case when predictions.pole = results.pole then 10 else 0 end +
+        case when predictions.fam = results.fam then 10 else 0 end + 
+        case when predictions.fl = results.fl then 10 else 0 end +
+        case when predictions.hgc = results.hgc then 10 else 0 end +
+        case when predictions.first = results.first then 20 else 0 end +
+        case when predictions.second = results.second then 10 else 0 end +
+        case when predictions.third = results.third then 10 else 0 end +
+        case when predictions.fdnf = results.fdnf then 10 else 0 end +
+        case when predictions.safety_car = results.safety_car then 10 else 0 end
+        as total
+    from predictions
+    inner join users on predictions.user = users.id 
+    inner join race_entrants as pole_entrants on pole_entrants.id == predictions.pole
+    inner join race_entrants as fam_entrants on fam_entrants.id == predictions.fam
+    inner join race_entrants as fl_entrants on fl_entrants.id == predictions.fl
+    inner join race_entrants as hgc_entrants on hgc_entrants.id == predictions.hgc
+    inner join race_entrants as first_entrants on first_entrants.id == predictions.first
+    inner join race_entrants as second_entrants on second_entrants.id == predictions.second
+    inner join race_entrants as third_entrants on third_entrants.id == predictions.third
+    inner join race_entrants as fdnf_entrants on fdnf_entrants.id == predictions.fdnf
+    left join results on predictions.race = results.race
+    where predictions.race = ?
+    order by total desc
+    ;
+                  """
+        all_predictions = db.getAllRows(all_predictions_sql, race_id, race_id) 
+    var predictionsArray = newJArray()
+    proc toJsonColumn(prediction: seq[string], start: int): JsonNode =
+      var entrantObj = newJObject()
+      entrantObj["id"] = %parseInt(prediction[start])
+      entrantObj["driver"] = %prediction[start + 1]
+      entrantObj["team" ] = %prediction[start + 2]
+
+      var columnObj = newJObject()
+      columnObj["entrant"] = entrantObj
+      columnObj["score"] = %parseInt(prediction[start + 3])
+
+      return columnObj
+    for prediction in all_predictions:
+      var predictionObj = newJObject()
+      predictionObj["id"] = %parseInt(prediction[0])
+      predictionObj["fullname"] = %prediction[1]
+      predictionObj["pole"] = toJsonColumn(prediction, 2)
+      predictionObj["fam"] = toJsonColumn(prediction, 6)
+      predictionObj["fl"] = toJsonColumn(prediction, 10)
+      predictionObj["hgc"] = toJsonColumn(prediction, 14)
+      predictionObj["first"] = toJsonColumn(prediction, 18)
+      predictionObj["second"] = toJsonColumn(prediction, 22)
+      predictionObj["third"] = toJsonColumn(prediction, 26)
+      predictionObj["fdnf"] = toJsonColumn(prediction, 30)
+      predictionObj["safety-car"] = %(prediction[34] == "yes")
+      predictionObj["safety-car-points"] = %parseInt(prediction[35])
+      predictionObj["total"] = %parseInt(prediction[36])
+      predictionsArray.add(predictionObj)
+    infoObj["scored-predictions"] = predictionsArray
+
+    resp jsonResponse(infoObj)
+  else:
+    resp "Race not found", Http401
+  db.close()
+
 
 proc showLeaderboard*(ctx: Context) {.async gcsafe.} =
   let
@@ -1072,6 +1195,7 @@ let
     pattern("/formulaone/leaderboard", showFormulaOneIndex, @[HttpGet], name = "formula-one-leaderboard" ),
     pattern("/formulaone/seasonleaderboard", showFormulaOneIndex, @[HttpGet], name = "formula-one-season-leaderboard" ),
     pattern("/formulae/events", showFormulaOneIndex, @[HttpGet]),
+    pattern("/formulae/event/{event}", showFormulaOneIndex, @[HttpGet]),
     pattern("/race/{race}", showRace, @[HttpGet, HttpPost], name = "race"),
     pattern("/leaderboard/{season}", showLeaderboard, @[HttpGet], name = "leaderboard"),
     pattern("/profile", showProfile, @[HttpGet, HttpPost], name = "profile"),
@@ -1101,6 +1225,7 @@ let
   ]
   formulaEApiPatterns* = @[
     pattern("/events/{season}", formulaEEvents, @[HttpGet]),
+    pattern("/race-info/{race}", formulaERaceInfo, @[HttpGet]),
   ]
 
 

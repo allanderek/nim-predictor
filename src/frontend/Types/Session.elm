@@ -38,7 +38,7 @@ decoder =
                     False
 
                 "sprint" ->
-                    True
+                    False
 
                 "race" ->
                     True

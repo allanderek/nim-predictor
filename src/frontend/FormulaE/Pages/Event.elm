@@ -3,13 +3,14 @@ module FormulaE.Pages.Event exposing (view)
 import Components.Username
 import Dict
 import FormulaE.Event
-import FormulaE.Types.Entrant
+import FormulaE.Types.Entrant exposing (Entrant)
 import FormulaE.Types.RaceInfo
 import Helpers.Html
 import Helpers.List
 import Helpers.Table
 import Helpers.Time
 import Html exposing (Html)
+import Html.Attributes
 import Model exposing (Model)
 
 
@@ -40,7 +41,7 @@ view model eventId =
 
                     Just raceInfo ->
                         let
-                            viewEntrant : FormulaE.Types.Entrant.Entrant -> List (Html msg)
+                            viewEntrant : Entrant -> List (Html msg)
                             viewEntrant entrant =
                                 [ Helpers.Html.int entrant.id
                                 , Html.text entrant.name
@@ -48,14 +49,44 @@ view model eventId =
                                 , Html.text entrant.team
                                 ]
 
-                            viewEntrantListItem : FormulaE.Types.Entrant.Entrant -> Html msg
-                            viewEntrantListItem entrant =
-                                Html.li [] (viewEntrant entrant)
+                            createColumnInput : Maybe Entrant -> Html msg
+                            createColumnInput mCurrent =
+                                let
+                                    pleaseSelect : Html msg
+                                    pleaseSelect =
+                                        Html.option
+                                            [ Html.Attributes.value "" ]
+                                            [ Html.text "Please select" ]
+
+                                    createOption : Entrant -> Html msg
+                                    createOption entrant =
+                                        Html.option
+                                            [ Html.Attributes.value (String.fromInt entrant.id)
+                                            , mCurrent
+                                                |> Maybe.map .id
+                                                |> Maybe.map ((==) entrant.id)
+                                                |> Maybe.withDefault False
+                                                |> Html.Attributes.selected
+                                            ]
+                                            [ Html.text entrant.name ]
+
+                                    options : List (Html msg)
+                                    options =
+                                        pleaseSelect :: List.map createOption raceInfo.entrants
+                                in
+                                Html.select
+                                    [-- Html.Events.onInput FormulaE.Event.UpdatePrediction
+                                    ]
+                                    options
                         in
                         Html.section
                             []
-                            [ Html.ul [] (List.map viewEntrantListItem raceInfo.entrants)
-                            , Html.h2 [] [ Html.text "Prediction entry" ]
+                            [ Html.h2 [] [ Html.text "Prediction entry" ]
+                            , Html.fieldset
+                                []
+                                [ createColumnInput Nothing
+                                , createColumnInput Nothing
+                                ]
                             , case raceInfo.currentPrediction of
                                 Nothing ->
                                     Html.text "There is no prediction from the current user yet."

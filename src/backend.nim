@@ -436,18 +436,20 @@ proc formulaERaceInfo*(ctx: Context) {.async gcsafe.} =
     infoObj["entrants"] = entrantsArray
     let
         currentEntry = db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car  from predictions where race = ? and user = ?", raceId, user_id)
-    var entryObj = newJObject() 
-    entryObj["pole"] = %parseInt(currentEntry[0])
-    entryObj["fam"] = %parseInt(currentEntry[1])
-    infoObj["current-prediction"] = entryObj
+    if currentEntry.len >= 9:
+      var entryObj = newJObject() 
+      entryObj["pole"] = %parseInt(currentEntry[0])
+      entryObj["fam"] = %parseInt(currentEntry[1])
+      infoObj["current-prediction"] = entryObj
     let
         # TODO: This is non-robust to the case where there are no results set yet for this race
         # Actually seems to be pretty robust to that.
         currentResults = db.getRow(sql"select pole, fam, fl, hgc, first, second, third, fdnf, safety_car  from results where race = ?", raceId)
-    var resultsObj = newJObject()
-    resultsObj["pole"] = %parseInt(currentResults[0])
-    resultsObj["fam"] = %parseInt(currentResults[1])
-    infoObj["results"] = resultsObj
+    if currentResults.len >= 9:
+      var resultsObj = newJObject()
+      resultsObj["pole"] = %parseInt(currentResults[0])
+      resultsObj["fam"] = %parseInt(currentResults[1])
+      infoObj["results"] = resultsObj
 
     let 
         all_predictions_sql = sql"""

@@ -8,7 +8,7 @@ proc sharedNav*(ctx: Context): VNode =
     nav:
       ul:
         li:
-          a(href = "/"):
+          a(href = "/formulae"):
             text "Formula E predictions"
         li:
           a(href = "/leaderboard/2023-24"):

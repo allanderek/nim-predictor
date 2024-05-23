@@ -169,9 +169,15 @@ view model config =
                 Just sessionPrediction ->
                     sessionPrediction.predictions == predictions
 
-        submitDisabled : Bool
-        submitDisabled =
-            requestInFlight || noUnsavedChanges
+
+        submitButton : Html Msg
+        submitButton =
+            Components.RequestButton.view
+                { status = requestStatus
+                , disabled = requestInFlight || noUnsavedChanges
+                , message = Msg.SubmitPredictions config.context config.session.id
+                , face = Html.text "Submit"
+                }
     in
     Html.section
         [ case config.context of
@@ -183,13 +189,10 @@ view model config =
         ]
         [ inputResultsWarning
         , fastestLapWarning
+        , submitButton
         , Html.table
             []
             [ Html.tbody [] (List.indexedMap showPrediction predictions) ]
-        , Components.RequestButton.view
-            { status = requestStatus
-            , disabled = submitDisabled
-            , message = Msg.SubmitPredictions config.context config.session.id
-            , face = Html.text "Submit"
-            }
+        , fastestLapWarning
+        , submitButton
         ]

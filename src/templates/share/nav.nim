@@ -20,6 +20,9 @@ proc sharedNav*(ctx: Context): VNode =
             li:
               a(href = "/leaderboard/2022-23"):
                 text "2022-23"
+        li:
+          a(href = "/"):
+            text "Formula 1"
         if fullname.len == 0:
           li: a(href = "/auth/register"): text "Register"
           li: a(href = "/auth/login"): text "Log In"

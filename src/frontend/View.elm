@@ -64,6 +64,7 @@ view model =
                     []
                     [ link Route.Home "Home"
                     , link (Route.Formula1 Formula1.Route.Leaderboard) "F1 Leaderboard"
+                    , link (Route.Formula1 Formula1.Route.SeasonLeaderboard) "F1 Season Leaderboard"
                     -- , link (Route.FormulaE FormulaE.Route.Events) "FE Events"
                     , model.user
                         |> Maybe.map .fullname

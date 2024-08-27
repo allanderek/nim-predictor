@@ -52,6 +52,7 @@ create table formula_one_entrants (
     number integer not null,
     driver integer not null, 
     team integer not null, 
+    rank integer not null default 0,
     session integer not null,
     participating integer default 1,
     foreign key (driver) references drivers (id), 

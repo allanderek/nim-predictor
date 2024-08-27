@@ -823,6 +823,7 @@ proc formulaOneEntrants*(ctx: Context) {.async gcsafe.} =
                inner join formula_one_sessions as sessions on entrants.session = sessions.id
                inner join formula_one_events as events on sessions.event = events.id
                where events.id = ? and entrants.participating = 1
+               order by entrants.rank
                ;
       """
   let dbRows = db.getAllRows(sql(entrant_sql), event_id)

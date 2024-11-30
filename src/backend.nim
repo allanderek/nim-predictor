@@ -103,7 +103,7 @@ proc index*(ctx: Context) {.async gcsafe.} =
 
     let driver_rows = db.getAllRows(sql("""SELECT * FROM drivers"""))
     let team_rows = db.getAllRows(sql("""SELECT * FROM teams"""))
-    let race_sql = """select id, round, name, country, circuit, date from races where season = '2023-24' and cancelled = 0"""
+    let race_sql = """select id, round, name, country, circuit, date from races where season = '2024-25' and cancelled = 0"""
     let race_rows = db.getAllRows(sql(race_sql))
     let head = sharedHead(ctx, staticPath, "Formula E", false)
     let nav = sharedNav(ctx)

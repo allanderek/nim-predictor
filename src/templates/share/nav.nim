@@ -11,12 +11,15 @@ proc sharedNav*(ctx: Context): VNode =
           a(href = "/formulae"):
             text "Formula E predictions"
         li:
-          a(href = "/leaderboard/2023-24"):
+          a(href = "/leaderboard/2024-25"):
             text "Leaderboard"
           ul:
             li:
-              a(href = "/leaderboard/2023-24"):
+              a(href = "/leaderboard/2024-25"):
                 text "Current"
+            li:
+              a(href = "/leaderboard/2023-24"):
+                text "2023-24"
             li:
               a(href = "/leaderboard/2022-23"):
                 text "2022-23"

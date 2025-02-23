@@ -83,7 +83,7 @@ getTeams model =
                     let
                         seasonParam : String
                         seasonParam =
-                            String.fromInt 2024
+                            String.fromInt 2025
                     in
                     String.append "/api/formulaone/teams/" seasonParam
             in
@@ -205,7 +205,7 @@ getSeasonPredictions model =
                     let
                         seasonParam : String
                         seasonParam =
-                            String.fromInt 2024
+                            String.fromInt 2025
                     in
                     String.append "/api/formulaone/season-predictions/" seasonParam
             in
@@ -274,7 +274,7 @@ getLeaderboard model =
                     let
                         seasonParam : String
                         seasonParam =
-                            String.fromInt 2024
+                            String.fromInt 2025
                     in
                     String.append "/api/formulaone/leaderboard/" seasonParam
             in
@@ -306,7 +306,7 @@ getSeasonLeaderboard model =
                     let
                         seasonParam : String
                         seasonParam =
-                            String.fromInt 2024
+                            String.fromInt 2025
                     in
                     String.append "/api/formulaone/season-leaderboard/" seasonParam
             in
@@ -345,7 +345,7 @@ initForRoute model =
                 FormulaE.Route.EventPage eventId ->
                     case List.any (\event -> event.id == eventId) model.formulaEEvents of
                         True ->
-                            getRaceInfo eventId model 
+                            getRaceInfo eventId model
 
                         False ->
                             getFormulaEEvents model
@@ -702,7 +702,7 @@ update message model =
                             let
                                 seasonParam : String
                                 seasonParam =
-                                    String.fromInt 2024
+                                    String.fromInt 2025
                             in
                             String.concat
                                 [ "/api/formulaone/submit-season-predictions/"

@@ -65,6 +65,7 @@ view model =
                     [ link Route.Home "Home"
                     , link (Route.Formula1 Formula1.Route.Leaderboard) "F1 Leaderboard"
                     , link (Route.Formula1 Formula1.Route.SeasonLeaderboard) "F1 Season Leaderboard"
+
                     -- , link (Route.FormulaE FormulaE.Route.Events) "FE Events"
                     , model.user
                         |> Maybe.map .fullname
@@ -102,7 +103,7 @@ view model =
                                             Html.td
                                                 []
                                                 [ Html.a
-                                                    [ FormulaE.Route.EventPage event.id 
+                                                    [ FormulaE.Route.EventPage event.id
                                                         |> Route.FormulaE
                                                         |> routeHref
                                                     ]
@@ -394,7 +395,7 @@ viewHome model =
 
         seasonStarting : Time.Posix
         seasonStarting =
-            case Iso8601.toTime "2024-03-01T16:00:00Z" of
+            case Iso8601.toTime "2025-03-14T01:30:00Z" of
                 Ok t ->
                     t
 

@@ -770,7 +770,7 @@ proc formulaOneEvents*(ctx: Context) {.async gcsafe.} =
       end as isSprint,
       ( select min(start_time) from formula_one_sessions where event = events.id) as start_time
       from formula_one_events as events
-      where season = "2024"
+      where season = "2025"
       """
   let dbRows = db.getAllRows(sql(event_sql))
   let jsonArray = newJArray()
@@ -792,9 +792,11 @@ proc formulaOneSessions*(ctx: Context) {.async gcsafe.} =
   let db = open(databasePath, "", "", "")
   # TODO: This SQL needs to only get those sessions associated with events in the current season.
   let event_sql = """
-      select id, event, name, start_time, half_points
-      from formula_one_sessions
-      order by start_time
+      select s.id, s.event, s.name, s.start_time, s.half_points, s.fastest_lap
+      from formula_one_sessions s
+      join formula_one_events e on e.id = s.event
+      where e.season = '2025'
+      order by s.start_time
       """
   let dbRows = db.getAllRows(sql(event_sql))
   let jsonArray = newJArray()
@@ -807,13 +809,13 @@ proc formulaOneSessions*(ctx: Context) {.async gcsafe.} =
       jsonObj["name"] = %row[2]
       jsonObj["start_time"] = %row[3] 
       jsonObj["half_points"] = %(row[4] != "0")
+      jsonObj["fastest_lap"] = %(row[5] != "0")
       jsonArray.add(jsonObj)
   resp jsonResponse(jsonArray)
   db.close()
 
 proc formulaOneEntrants*(ctx: Context) {.async gcsafe.} =
   let db = open(databasePath, "", "", "")
-  # TODO: This SQL needs to only get those sessions associated with events in the current season.
   let event_id = ctx.getPathParams("event")
   let entrant_sql = """
   select entrants.id, sessions.id as session_id, entrants.number, drivers.name, formula_one_teams.shortname
@@ -1043,7 +1045,7 @@ with
                         else 1
                         end
                     end +
-                case when sessions.name == "race" and results.fastest_lap = "true" and predictions.fastest_lap = "true" 
+                case when sessions.fastest_lap == true and results.fastest_lap = "true" and predictions.fastest_lap = "true" 
                     then 1
                     else 0
                     end
@@ -1131,7 +1133,7 @@ with
                 end 
         end
         +
-        case when results.fastest_lap = "true" and sessions.name == "race" then 1 else 0 end
+        case when results.fastest_lap = "true" and sessions.fastest_lap == true then 1 else 0 end
             as score,
         teams.shortname as team_name,
         teams.id as team_id

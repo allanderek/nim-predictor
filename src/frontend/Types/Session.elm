@@ -7,8 +7,8 @@ module Types.Session exposing
 import Iso8601
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Pipeline
-import Types.Event
 import Time
+import Types.Event
 
 
 type alias Id =
@@ -27,34 +27,10 @@ type alias Session =
 
 decoder : Decoder Session
 decoder =
-    let
-        nameHasFastestLap : String -> Bool
-        nameHasFastestLap name =
-            case name of
-                "qualifying" ->
-                    False
-
-                "sprint-shootout" ->
-                    False
-
-                "sprint" ->
-                    False
-
-                "race" ->
-                    True
-
-                _ ->
-                    False
-
-        fastestLap : Decoder Bool
-        fastestLap =
-            Decode.string
-                |> Decode.map nameHasFastestLap
-    in
     Decode.succeed Session
         |> Pipeline.required "id" Decode.int
         |> Pipeline.required "event" Decode.int
         |> Pipeline.required "name" Decode.string
-        |> Pipeline.required "name" fastestLap
+        |> Pipeline.required "fastest_lap" Decode.bool
         |> Pipeline.required "start_time" Iso8601.decoder
         |> Pipeline.required "half_points" Decode.bool

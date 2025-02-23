@@ -16,7 +16,7 @@ with
                         else 1
                         end
                     end +
-                case when sessions.name == "race" and results.fastest_lap = "true" and predictions.fastest_lap = "true" 
+                case when sessions.fastest_lap == true and results.fastest_lap = "true" and predictions.fastest_lap = "true" 
                     then 1
                     else 0
                     end

@@ -108,7 +108,7 @@ CREATE TABLE formula_one_teams (
     shortname text,
     constructor text not null,
     season text not null,
-    color text,
+    color text, secondary_color text,
     foreign key (season) references formula_one_seasons (year),
     foreign key (constructor) references constructors 
 );
@@ -126,7 +126,7 @@ CREATE TABLE formula_one_sessions (
     half_points integer default 0,
     start_time text,
     cancelled integer default 0,
-    event integer not null,
+    event integer not null, fastest_lap integer default 0,
     foreign key (event) references formula_one_events (id)
 );
 CREATE TABLE formula_one_entrants ( 
